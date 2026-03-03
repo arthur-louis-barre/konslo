@@ -1,0 +1,6 @@
+﻿[workspace]
+members = [
+    "konslo-core",
+    "konslo-api",
+]
+resolver = "2"
