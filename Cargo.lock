@@ -784,6 +784,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "dotenvy",
+ "serde",
  "sqlx",
  "tokio",
 ]

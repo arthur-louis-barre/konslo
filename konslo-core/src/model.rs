@@ -1,9 +1,10 @@
+use serde::Serialize;
 use sqlx::FromRow;
 
-#[derive(Debug, PartialEq, FromRow)]
+#[derive(Debug, FromRow, PartialEq, Serialize)]
 pub struct Habit {
-    id: i32,
-    name: String,
+    pub id: i32,
+    pub name: String,
 }
 
 impl Habit {
