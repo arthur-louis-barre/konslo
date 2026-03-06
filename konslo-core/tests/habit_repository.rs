@@ -1,19 +1,38 @@
-
-
 #[cfg(test)]
 mod tests {
-    use sqlx::PgPool;
     use konslo_core::db::habits::{HabitRepository, PostgresHabitRepository};
+    use sqlx::PgPool;
+    use std::error::Error;
+    use sqlx::postgres::PgDatabaseError;
+    use konslo_core::errors::PG_UNIQUE_VIOLATION;
 
     #[sqlx::test]
-    async fn test_create_habit(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
+    async fn test_create_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
         let repo = PostgresHabitRepository::new(pool);
 
-        let habit_name = "Walking 10 minutes";
+        let habit_name = "Walk for 25 minutes";
         let habit = repo.create(habit_name).await?;
 
         assert!(habit.id > 0);
-        assert_eq!(habit.name, "Walking 10 minutes");
+        assert_eq!(habit.name, "Walk for 25 minutes");
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_create_habit_already_exists(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // Arrange
+        let repo = PostgresHabitRepository::new(pool);
+        let habit_name = "Write for 10 minutes";
+        repo.create(habit_name).await?;
+
+        // Act
+        let result = repo.create(habit_name).await;
+
+        // Assert
+        let err = result.unwrap_err();
+        let pg_err = err.as_database_error().unwrap().downcast_ref::<PgDatabaseError>();
+        assert_eq!(pg_err.code(), PG_UNIQUE_VIOLATION);
+
         Ok(())
     }
 
@@ -58,8 +77,7 @@ mod tests {
         let fetched = repo.get_by_id(created.id).await?;
 
         // Assert
-        assert!(fetched.is_some());
-        let fetched = fetched.unwrap();
+        let fetched = fetched.expect("Habit should exist after creation");
         assert_eq!(fetched, created);
 
         Ok(())
