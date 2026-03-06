@@ -3,16 +3,18 @@ mod tests {
     use konslo_core::db::habits::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use sqlx::postgres::PgDatabaseError;
-    use konslo_core::errors::PG_UNIQUE_VIOLATION;
+    use konslo_core::errors::AppError;
 
     #[sqlx::test]
-    async fn test_create_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // Arrange
         let repo = PostgresHabitRepository::new(pool);
 
+        // Act
         let habit_name = "Walk for 25 minutes";
         let habit = repo.create(habit_name).await?;
 
+        // Assert
         assert!(habit.id > 0);
         assert_eq!(habit.name, "Walk for 25 minutes");
         Ok(())
@@ -29,10 +31,8 @@ mod tests {
         let result = repo.create(habit_name).await;
 
         // Assert
-        let err = result.expect_err("should fail with duplicate habit");
-        let pg_err = err.as_database_error().unwrap().downcast_ref::<PgDatabaseError>();
-        assert_eq!(pg_err.code(), PG_UNIQUE_VIOLATION);
-
+        let err = result.expect_err("result should be Err");
+        assert!(matches!(err, AppError::Conflict(_)));
         Ok(())
     }
 

@@ -82,7 +82,8 @@ mod test {
     async fn test_get_by_id_returns_none_when_not_found() {
         // Arrange
         let mut repo = MockHabitRepository::new();
-        repo.expect_get_by_id().returning(|| Box::pin(async { Ok(None) }));
+        repo.expect_get_by_id().
+            return_once(|_| Box::pin(async { Ok(None) }));
         let service = HabitService::new(Arc::new(repo));
 
         // Act
