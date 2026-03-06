@@ -1,11 +1,7 @@
 mod error;
 mod handlers;
+mod router;
 
-use crate::handlers::{
-    create_habits_handler, delete_habits_handler, get_habit_handler, get_all_habits_handler,
-};
-
-use axum::{Router, routing::get};
 use dotenvy::dotenv;
 use konslo_core::db::habits::PostgresHabitRepository;
 use konslo_core::service::habit::HabitService;
@@ -16,6 +12,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use crate::router::get_router;
 
 #[tokio::main]
 async fn main() {
@@ -26,7 +23,8 @@ async fn main() {
 
     // 1. Load env. variables
     dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("Database must be defined in the .env file");
+    let database_url = env::var("DATABASE_URL")
+        .expect("Database must be defined in the .env file");
 
     // 1. Initialisation des logs (pour voir ce qui se passe)
     tracing_subscriber::registry()
@@ -46,17 +44,7 @@ async fn main() {
     let habit_service = HabitService::new(habit_repo);
 
     // 4. Config routing
-    let app = Router::new()
-        .route(
-            "/habits",
-            get(get_all_habits_handler).post(create_habits_handler),
-        )
-        .route(
-            "/habits/{id}",
-            get(get_habit_handler).delete(delete_habits_handler),
-        )
-        .layer(cors)
-        .with_state(habit_service);
+    let app = get_router(habit_service).layer(cors);
 
     // 3. Définition de l'adresse (localhost:3000)
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
