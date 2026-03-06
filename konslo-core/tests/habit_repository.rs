@@ -29,7 +29,7 @@ mod tests {
         let result = repo.create(habit_name).await;
 
         // Assert
-        let err = result.unwrap_err();
+        let err = result.expect_err("should fail with duplicate habit");
         let pg_err = err.as_database_error().unwrap().downcast_ref::<PgDatabaseError>();
         assert_eq!(pg_err.code(), PG_UNIQUE_VIOLATION);
 

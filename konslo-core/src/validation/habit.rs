@@ -1,8 +1,8 @@
-use crate::errors::habit::HabitError;
+use crate::errors::AppError;
 
-pub fn validate_habit_name(name: &str) -> Result<(), HabitError> {
+pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
     let name = name.trim();
-    if name.is_empty() { Err(HabitError::InvalidName("habit name is empty".into())) }
-    else if name.chars().count() > 255 { Err(HabitError::InvalidName("habit name is too long".into())) }
+    if name.is_empty() { Err(AppError::Validation("habit name is empty".into())) }
+    else if name.chars().count() > 255 { Err(AppError::Validation("habit name is too long".into())) }
     else { Ok(())}
 }

@@ -1,5 +1,5 @@
-use sqlx::FromRow;
 use serde::Serialize;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, PartialEq, Serialize)]
 pub struct Habit {
@@ -11,7 +11,7 @@ impl Habit {
     pub fn new(id: i32, name: &str) -> Self {
         Self {
             id,
-            name: name.into()
+            name: name.into(),
         }
     }
 }
