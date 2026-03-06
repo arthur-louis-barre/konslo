@@ -1,50 +1,41 @@
-use async_trait::async_trait;
-use sqlx::{query, query_as, Error, PgPool};
 use crate::model::Habit;
+use async_trait::async_trait;
+use sqlx::{Error, PgPool, query, query_as};
 
 #[async_trait]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, name: &str) -> Result<Habit, Error>;
-    async fn delete(&self, id: i32) -> Result<bool, Error>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, Error>;
     async fn get_all(&self) -> Result<Vec<Habit>, Error>;
+    async fn delete(&self, id: i32) -> Result<bool, Error>;
 }
 
 pub struct PostgresHabitRepository {
-    pool: PgPool,
+    pub pool: PgPool,
 }
 
 impl PostgresHabitRepository {
     pub fn new(pool: PgPool) -> Self {
-        PostgresHabitRepository {
-            pool,
-        }
+        PostgresHabitRepository { pool }
     }
 }
 
 #[async_trait]
 impl HabitRepository for PostgresHabitRepository {
     async fn create(&self, name: &str) -> Result<Habit, Error> {
-        let habit: Habit = query_as("INSERT INTO habits (name) VALUES ($1) RETURNING id, name")
-            .bind(name)
-            .fetch_one(&self.pool)
-            .await?;
+        let habit = query_as!(
+            Habit,
+            "INSERT INTO habits (name) VALUES ($1) RETURNING id, name",
+            name
+        )
+        .fetch_one(&self.pool)
+        .await?;
 
         Ok(habit)
     }
 
-    async fn delete(&self, id: i32) -> Result<bool, Error> {
-        let result = query("DELETE FROM habits WHERE id = $1")
-            .bind(id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(result.rows_affected() == 1)
-    }
-
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, Error> {
-        let habit: Option<Habit> = query_as("SELECT id, name FROM habits WHERE id = $1")
-            .bind(id)
+        let habit = query_as!(Habit, "SELECT id, name FROM habits WHERE id = $1", id)
             .fetch_optional(&self.pool)
             .await?;
 
@@ -52,11 +43,19 @@ impl HabitRepository for PostgresHabitRepository {
     }
 
     async fn get_all(&self) -> Result<Vec<Habit>, Error> {
-        let habits: Vec<Habit> = query_as("SELECT id, name FROM habits ORDER BY id")
+        let habits = query_as!(Habit, "SELECT id, name FROM habits ORDER BY id",)
             .fetch_all(&self.pool)
             .await?;
 
         Ok(habits)
+    }
+
+    async fn delete(&self, id: i32) -> Result<bool, Error> {
+        let result = query!("DELETE FROM habits WHERE id = $1", id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(result.rows_affected() == 1)
     }
 }
 
@@ -72,8 +71,8 @@ mod tests {
         let habit_name = "Walking 10 minutes";
         let habit = repo.create(habit_name).await?;
 
-        assert!(habit.id() > 0);
-        assert_eq!(habit.name(), "Walking 10 minutes");
+        assert!(habit.id > 0);
+        assert_eq!(habit.name, "Walking 10 minutes");
         Ok(())
     }
 
@@ -85,11 +84,11 @@ mod tests {
         let habit = repo.create("Meditate").await?;
 
         // Act
-        let deleted = repo.delete(habit.id()).await?;
+        let deleted = repo.delete(habit.id).await?;
 
         // Assert
         assert!(deleted);
-        let found = repo.get_by_id(habit.id()).await?;
+        let found = repo.get_by_id(habit.id).await?;
         assert!(found.is_none());
 
         Ok(())
@@ -118,7 +117,7 @@ mod tests {
         let created = repo.create("Meditate").await?;
 
         // Act
-        let fetched = repo.get_by_id(created.id()).await?;
+        let fetched = repo.get_by_id(created.id).await?;
 
         // Assert
         assert!(fetched.is_some());
@@ -164,8 +163,3 @@ mod tests {
         Ok(())
     }
 }
-
-// TODO: Refactorer pour utiliser l'injection d'exécuteur.
-// Actuellement, le repo possède le pool (couplage fort).
-// Standard pro : Passer &PgPool ou &mut Transaction en argument des méthodes
-// pour permettre l'atomicité des opérations (plusieurs repos dans une seule transaction).
