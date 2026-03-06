@@ -1,5 +1,5 @@
-use serde::Serialize;
 use sqlx::FromRow;
+use serde::Serialize;
 
 #[derive(Debug, FromRow, PartialEq, Serialize)]
 pub struct Habit {
@@ -14,23 +14,4 @@ impl Habit {
             name: name.into()
         }
     }
-
-    pub fn id(&self) -> i32 {
-        self.id
-    }
-
-    pub fn name(&self) -> &str {
-        self.name.as_str()
-    }
-}
-
-
-
-
-
-#[derive(Debug)]
-pub struct Check {
-    pub id: i64,
-    pub habit_id: i64,
-    pub checked_date: chrono::NaiveDate,
 }
