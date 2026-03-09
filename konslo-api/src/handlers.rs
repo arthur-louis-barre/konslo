@@ -3,6 +3,7 @@ use crate::error::AppError;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
+use konslo_core::errors::AppError as CoreError;
 use konslo_core::model::Habit;
 use konslo_core::services::habit::{HabitService};
 use serde::Deserialize;
@@ -78,5 +79,47 @@ mod test {
 
         // assert
         assert_eq!(response.status_code(), StatusCode::CREATED);
+    }
+
+    #[tokio::test]
+    async fn test_create_habits_handler_invalid_input_returns_invalid_input_returns_400() {
+        let mut mock_service = MockHabitService::new();
+        mock_service
+            .expect_create()
+            .return_once(|_| {
+                Box::pin(async move { Err(CoreError::Validation("habit name is empty".to_string())) })
+            });
+        let app = get_router(Arc::new(mock_service));
+        let server = TestServer::new(app);
+
+        // act
+        let response = server
+            .post("/habits")
+            .json(&serde_json::json!({ "name": "" }))
+            .await;
+
+        // assert
+        assert_eq!(response.status_code(), StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn test_create_habits_handler_duplicate_returns_409() {
+        let mut mock_service = MockHabitService::new();
+        mock_service
+            .expect_create()
+            .return_once(|_| {
+                Box::pin(async move { Err(CoreError::Conflict("".to_string())) })
+            });
+        let app = get_router(Arc::new(mock_service));
+        let server = TestServer::new(app);
+
+        // act
+        let response = server
+            .post("/habits")
+            .json(&serde_json::json!({ "name": "" }))
+            .await;
+
+        // assert
+        assert_eq!(response.status_code(), StatusCode::CONFLICT);
     }
 }
