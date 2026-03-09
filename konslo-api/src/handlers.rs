@@ -42,10 +42,9 @@ pub async fn delete_habits_handler(
     State(habit_service): State<HabitService>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, AppError> {
-    let deleted = habit_service.delete(id).await;
+    let deleted = habit_service.delete(id).await?;
     match deleted {
-        Ok(true) => Ok(StatusCode::NO_CONTENT),
-        Ok(false) => Err(AppError::NotFound(format!("no habit with id {id}"))),
-        Err(e) => Err(e)?,
+        true => Ok(StatusCode::NO_CONTENT),
+        false => Err(AppError::NotFound(format!("no habit with id {id}"))),
     }
 }
