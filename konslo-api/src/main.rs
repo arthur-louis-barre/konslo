@@ -41,7 +41,7 @@ async fn main() {
 
     // 3. Instantiate the repository
     let habit_repo = Arc::new(PostgresHabitRepository::new(pool));
-    let habit_service = DefaultHabitService::new(habit_repo);
+    let habit_service = Arc::new(DefaultHabitService::new(habit_repo));
 
     // 4. Config routing
     let app = get_router(habit_service).layer(cors);

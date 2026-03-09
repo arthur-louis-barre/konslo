@@ -1,9 +1,10 @@
+use std::sync::Arc;
 use crate::error::AppError;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use konslo_core::model::Habit;
-use konslo_core::services::habit::{DefaultHabitService, HabitService};
+use konslo_core::services::habit::{HabitService};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -12,7 +13,7 @@ pub struct CreateHabitRequest {
 }
 
 pub async fn create_habits_handler(
-    State(habit_service): State<DefaultHabitService>,
+    State(habit_service): State<Arc<dyn HabitService>>,
     Json(body): Json<CreateHabitRequest>,
 ) -> Result<Json<Habit>, AppError> {
     let habit_name = body.name.as_str();
@@ -21,7 +22,7 @@ pub async fn create_habits_handler(
 }
 
 pub async fn get_habit_handler(
-    State(habit_service): State<DefaultHabitService>,
+    State(habit_service): State<Arc<dyn HabitService>>,
     Path(id): Path<i32>,
 ) -> Result<Json<Habit>, AppError> {
     let habit = habit_service.get_by_id(id).await?;
@@ -32,14 +33,14 @@ pub async fn get_habit_handler(
 }
 
 pub async fn get_all_habits_handler(
-    State(habit_service): State<DefaultHabitService>,
+    State(habit_service): State<Arc<dyn HabitService>>,
 ) -> Result<Json<Vec<Habit>>, AppError> {
     let habits = habit_service.get_all().await?;
     Ok(Json(habits))
 }
 
 pub async fn delete_habits_handler(
-    State(habit_service): State<DefaultHabitService>,
+    State(habit_service): State<Arc<dyn HabitService>>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, AppError> {
     let deleted = habit_service.delete(id).await?;

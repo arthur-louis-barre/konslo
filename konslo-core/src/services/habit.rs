@@ -10,7 +10,7 @@ use mockall::automock;
 
 #[async_trait]
 #[cfg_attr(test, automock)]
-pub trait HabitService {
+pub trait HabitService: Send + Sync {
     async fn create(&self, name: &str) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
