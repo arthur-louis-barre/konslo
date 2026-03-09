@@ -23,15 +23,29 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_habit_name_too_long_returns_validation_error() {
-        let ok_long_name = "X".repeat(255);
-        let too_long_name = "x".repeat(256);
+    fn test_validate_habit_name_whitespace_only_returns_validation_error() {
+        let result = validate_habit_name("      ");
 
-        let result_2= validate_habit_name(ok_long_name.as_ref());
-        let result_3 = validate_habit_name(too_long_name.as_ref());
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+    }
 
-        assert!(result_2.is_ok());
-        assert!(result_3.is_err());
-        assert!(matches!(result_3.unwrap_err(), AppError::Validation(_)));
+    #[test]
+    fn test_validate_habit_name_255_chars_returns_ok() {
+        let name = "X".repeat(255);
+
+        let result= validate_habit_name(name.as_ref());
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_habit_name_256_chars_returns_validation_error() {
+        let name = "X".repeat(256);
+
+        let result = validate_habit_name(name.as_ref());
+
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
     }
 }
