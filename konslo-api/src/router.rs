@@ -1,6 +1,6 @@
 use axum::Router;
 use axum::routing::get;
-use konslo_core::service::habit::DefaultHabitService;
+use konslo_core::services::habit::DefaultHabitService;
 use crate::handlers::{create_habits_handler, delete_habits_handler, get_all_habits_handler, get_habit_handler};
 
 pub fn get_router(service: DefaultHabitService) -> Router {

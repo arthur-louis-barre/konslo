@@ -1,4 +1,4 @@
-use crate::db::habits::HabitRepository;
+use crate::repositories::habits::HabitRepository;
 use crate::model::Habit;
 use std::sync::Arc;
 use async_trait::async_trait;
@@ -54,7 +54,7 @@ impl HabitService for DefaultHabitService {
 
 #[cfg(test)]
 mod test {
-    use crate::db::habits::MockHabitRepository;
+    use crate::repositories::habits::MockHabitRepository;
     use super::*;
 
     #[tokio::test]
@@ -77,7 +77,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_create_invalid_input_return_validation_error() {
+    async fn test_create_invalid_input_returns_validation_error() {
         // arrange
         let repo = MockHabitRepository::new();
         let service = DefaultHabitService::new(Arc::new(repo));

@@ -3,7 +3,7 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use konslo_core::model::Habit;
-use konslo_core::service::habit::{DefaultHabitService, HabitService};
+use konslo_core::services::habit::{DefaultHabitService, HabitService};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

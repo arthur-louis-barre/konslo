@@ -1,7 +1,7 @@
 use crate::model::Habit;
 use async_trait::async_trait;
 use sqlx::{PgPool, query, query_as};
-use crate::db::to_app_error;
+use crate::repositories::to_app_error;
 use crate::errors::AppError;
 
 #[cfg(test)]

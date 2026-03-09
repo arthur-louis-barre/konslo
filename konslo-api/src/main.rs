@@ -3,8 +3,8 @@ mod handlers;
 mod router;
 
 use dotenvy::dotenv;
-use konslo_core::db::habits::PostgresHabitRepository;
-use konslo_core::service::habit::DefaultHabitService;
+use konslo_core::repositories::habits::PostgresHabitRepository;
+use konslo_core::services::habit::DefaultHabitService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;

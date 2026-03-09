@@ -1,5 +1,5 @@
-pub mod db;
+pub mod repositories;
 pub mod errors;
 pub mod model;
-pub mod service;
+pub mod services;
 pub mod validation;

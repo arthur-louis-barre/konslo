@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use konslo_core::db::habits::{HabitRepository, PostgresHabitRepository};
+    use konslo_core::repositories::habits::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
     use konslo_core::errors::AppError;
