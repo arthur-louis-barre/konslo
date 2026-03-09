@@ -11,6 +11,7 @@ pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

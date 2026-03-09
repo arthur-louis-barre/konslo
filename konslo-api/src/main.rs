@@ -4,7 +4,7 @@ mod router;
 
 use dotenvy::dotenv;
 use konslo_core::db::habits::PostgresHabitRepository;
-use konslo_core::service::habit::HabitService;
+use konslo_core::service::habit::DefaultHabitService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;
@@ -41,7 +41,7 @@ async fn main() {
 
     // 3. Instantiate the repository
     let habit_repo = Arc::new(PostgresHabitRepository::new(pool));
-    let habit_service = HabitService::new(habit_repo);
+    let habit_service = DefaultHabitService::new(habit_repo);
 
     // 4. Config routing
     let app = get_router(habit_service).layer(cors);

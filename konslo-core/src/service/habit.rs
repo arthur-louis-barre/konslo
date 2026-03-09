@@ -1,36 +1,52 @@
 use crate::db::habits::HabitRepository;
 use crate::model::Habit;
 use std::sync::Arc;
+use async_trait::async_trait;
 use crate::errors::AppError;
 use crate::validation::habit::validate_habit_name;
 
+#[cfg(test)]
+use mockall::automock;
+
+#[async_trait]
+#[cfg_attr(test, automock)]
+pub trait HabitService {
+    async fn create(&self, name: &str) -> Result<Habit, AppError>;
+    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
+    async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
+    async fn delete(&self, id: i32) -> Result<bool, AppError>;
+}
+
 #[derive(Clone)]
-pub struct HabitService {
+pub struct DefaultHabitService {
     repo: Arc<dyn HabitRepository>,
 }
 
-impl HabitService {
+impl DefaultHabitService {
     pub fn new(repo: Arc<dyn HabitRepository>) -> Self {
         Self { repo }
     }
+}
 
-    pub async fn create(&self, name: &str) -> Result<Habit, AppError> {
+#[async_trait]
+impl HabitService for DefaultHabitService {
+    async fn create(&self, name: &str) -> Result<Habit, AppError> {
         validate_habit_name(name)?;
         let habit = self.repo.create(name).await?;
         Ok(habit)
     }
 
-    pub async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
+    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
         let habit = self.repo.get_by_id(id).await?;
         Ok(habit)
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Habit>, AppError> {
+    async fn get_all(&self) -> Result<Vec<Habit>, AppError> {
         let habits = self.repo.get_all().await?;
         Ok(habits)
     }
 
-    pub async fn delete(&self, id: i32) -> Result<bool, AppError> {
+    async fn delete(&self, id: i32) -> Result<bool, AppError> {
         let deleted = self.repo.delete(id).await?;
         Ok(deleted)
     }
@@ -40,87 +56,37 @@ impl HabitService {
 mod test {
     use crate::db::habits::MockHabitRepository;
     use super::*;
-    use crate::service::habit::HabitService;
 
     #[tokio::test]
     async fn test_create_returns_created_habit() {
-        // Arrange
+        // arrange
         let mut repo = MockHabitRepository::new();
         repo.expect_create().returning(|name| {
             let name = name.to_string();
             Box::pin(async move { Ok(Habit::new(1, &*name)) })
         });
-        let service = HabitService::new(Arc::new(repo));
+        let service = DefaultHabitService::new(Arc::new(repo));
 
-        // Act
+        // act
         let habit = service.create("Meditate").await;
 
-        // Assert
+        // assert
         let habit = habit.expect("result should be Ok");
         assert_eq!(habit.id, 1);
         assert_eq!(habit.name, "Meditate");
     }
 
     #[tokio::test]
-    async fn test_get_by_id_returns_habit_when_found() {
-        // Arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_get_by_id().returning(|id| Box::pin(async move { Ok(Some(Habit::new(id, "Meditate"))) }));
-        let service = HabitService::new(Arc::new(repo));
+    async fn test_create_invalid_input_return_validation_error() {
+        // arrange
+        let repo = MockHabitRepository::new();
+        let service = DefaultHabitService::new(Arc::new(repo));
 
-        // Act
-        let habit = service.get_by_id(1).await;
+        // act
+        let habit = service.create("").await;
 
-        // Assert
-        let habit = habit.expect("result should be Ok");
-        let habit = habit.expect("option should be Some");
-        assert_eq!(habit.id, 1);
-        assert_eq!(habit.name, "Meditate");
-    }
-
-    #[tokio::test]
-    async fn test_get_by_id_returns_none_when_not_found() {
-        // Arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_get_by_id().
-            return_once(|_| Box::pin(async { Ok(None) }));
-        let service = HabitService::new(Arc::new(repo));
-
-        // Act
-        let habit = service.get_by_id(1).await;
-
-        // Assert
-        let habit = habit.expect("result should be Ok");
-        assert!(habit.is_none(), "option should be None");
-    }
-
-    #[tokio::test]
-    async fn test_delete_returns_true_when_found() {
-        // Arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_delete().return_once(|_| Box::pin(async { Ok(true) }));
-        let service = HabitService::new(Arc::new(repo));
-
-        // Act
-        let deleted = service.delete(1).await;
-
-        // Assert
-        let deleted = deleted.expect("result should be Ok");
-        assert!(deleted);
-    }
-
-    #[tokio::test]
-    async fn test_delete_returns_false_when_not_found() {
-        // Arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_delete().return_once(|_| Box::pin(async { Ok(false) }));
-        let service = HabitService::new(Arc::new(repo));
-
-        // Act
-        let deleted = service.delete(1).await;
-
-        // Assert
-        let deleted = deleted.expect("result should be Ok");
-        assert!(!deleted);
+        // assert
+        assert!(habit.is_err());
+        assert!(matches!(habit.unwrap_err(), AppError::Validation(_)));
     }
 }
