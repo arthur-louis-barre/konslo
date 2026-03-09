@@ -5,11 +5,11 @@ use async_trait::async_trait;
 use crate::errors::AppError;
 use crate::validation::habit::validate_habit_name;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
 
 #[async_trait]
-#[cfg_attr(test, automock)]
+#[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait HabitService: Send + Sync {
     async fn create(&self, name: &str) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;

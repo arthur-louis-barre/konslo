@@ -15,10 +15,10 @@ pub struct CreateHabitRequest {
 pub async fn create_habits_handler(
     State(habit_service): State<Arc<dyn HabitService>>,
     Json(body): Json<CreateHabitRequest>,
-) -> Result<Json<Habit>, AppError> {
+) -> Result<(StatusCode, Json<Habit>), AppError> {
     let habit_name = body.name.as_str();
     let habit = habit_service.create(habit_name).await?;
-    Ok(Json(habit))
+    Ok((StatusCode::CREATED, Json(habit)))
 }
 
 pub async fn get_habit_handler(
@@ -47,5 +47,36 @@ pub async fn delete_habits_handler(
     match deleted {
         true => Ok(StatusCode::NO_CONTENT),
         false => Err(AppError::NotFound(format!("no habit with id {id}"))),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use axum_test::TestServer;
+    use konslo_core::services::habit::MockHabitService;
+    use crate::router::get_router;
+    use super::*;
+
+    #[tokio::test]
+    async fn test_create_habits_handler_returns_habit() {
+        // arrange
+        let mut mock_service = MockHabitService::new();
+        mock_service
+            .expect_create()
+            .return_once(|name| {
+                let name = name.to_string();
+                Box::pin(async move { Ok(Habit::new(1, &*name)) })
+            });
+        let app = get_router(Arc::new(mock_service));
+        let server = TestServer::new(app);
+
+        // act
+        let response = server
+            .post("/habits")
+            .json(&serde_json::json!({ "name": "Meditate" }))
+            .await;
+
+        // assert
+        assert_eq!(response.status_code(), StatusCode::CREATED);
     }
 }

@@ -4,11 +4,11 @@ use sqlx::{PgPool, query, query_as};
 use crate::repositories::to_app_error;
 use crate::errors::AppError;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
 
 #[async_trait]
-#[cfg_attr(test, automock)]
+#[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, name: &str) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
