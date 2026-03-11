@@ -4,97 +4,143 @@ mod tests {
     use konslo_core::repositories::habits::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
+    use konslo_core::models::habit::{CreateHabit, GoalPeriod};
 
     #[sqlx::test]
     async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
-        // Arrange
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
+        let new_habit = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
 
-        // Act
-        let habit_name = "Walk for 25 minutes";
-        let habit = repo.create(habit_name).await?;
+        // act
+        let habit = repo.create(&new_habit).await?;
 
-        // Assert
+        // assert
         assert!(habit.id > 0);
-        assert_eq!(habit.name, "Walk for 25 minutes");
+        assert_eq!(habit.name, "Meditate");
+        assert_eq!(habit.goal_value, 10);
+        assert_eq!(habit.goal_unit, "min");
+        assert_eq!(habit.goal_period, GoalPeriod::Day);
+
         Ok(())
     }
 
     #[sqlx::test]
-    async fn test_create_habit_already_exists(pool: PgPool) -> Result<(), Box<dyn Error>> {
-        // Arrange
+    async fn test_create_habit_err_conflict(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let habit_name = "Write for 10 minutes";
-        repo.create(habit_name).await?;
+        let new_habit = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
 
-        // Act
-        let result = repo.create(habit_name).await;
+        // act
+        repo.create(&new_habit).await?;
+        let result = repo.create(&new_habit).await;
 
-        // Assert
+        // assert
         let err = result.expect_err("result should be Err");
         assert!(matches!(err, AppError::Conflict(_)));
+
         Ok(())
     }
 
     #[sqlx::test]
-    async fn test_delete_habit(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
-        // Arrange
+    async fn test_delete_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let habit = repo.create("Meditate").await?;
+        let new_habit = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
+        let habit = repo.create(&new_habit).await?;
 
-        // Act
+        // act
         let deleted = repo.delete(habit.id).await?;
-
-        // Assert
-        assert!(deleted);
         let found = repo.get_by_id(habit.id).await?;
-        assert!(found.is_none());
+
+        // assert
+        assert!(deleted);
+        assert!(found.is_none(), "Habit should not exist after deletion");
 
         Ok(())
     }
 
     #[sqlx::test]
-    async fn test_delete_habit_not_found(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
-        // Arrange
+    async fn test_delete_habit_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
 
-        // Act
+        // act
         let deleted = repo.delete(9999).await?;
 
-        // Assert
+        // assert
         assert!(!deleted);
 
         Ok(())
     }
 
     #[sqlx::test]
-    async fn test_get_by_id(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
-        // Arrange
+    async fn test_get_by_id(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let created = repo.create("Meditate").await?;
+        let new_habit = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
+        let created = repo.create(&new_habit).await?;
 
-        // Act
+        // act
         let fetched = repo.get_by_id(created.id).await?;
 
-        // Assert
-        let fetched = fetched.expect("Habit should exist after creation");
-        assert_eq!(fetched, created);
+        // assert
+        assert!(fetched.is_some(), "habit should exist after creation");
+        assert_eq!(fetched.unwrap(), created);
 
         Ok(())
     }
 
     #[sqlx::test]
-    async fn test_get_all(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
-        // Arrange
+    async fn test_get_all(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let created_1 = repo.create("Mediate").await?;
-        let created_2 = repo.create("Walk for 10 minutes").await?;
-        let created_3 = repo.create("Write for 10 minutes").await?;
+        let new_habit_1 = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
+        let new_habit_2 = CreateHabit {
+            name: "Stretch shoulders".to_string(),
+            goal_value: 20,
+            goal_unit: "reps".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
+        let new_habit_3 = CreateHabit {
+            name: "Cardio Zone 2".to_string(),
+            goal_value: 180,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Week,
+        };
+        let created_1 = repo.create(&new_habit_1).await?;
+        let created_2 = repo.create(&new_habit_2).await?;
+        let created_3 = repo.create(&new_habit_3).await?;
 
-        // Act
+        // act
         let fetched = repo.get_all().await?;
 
-        // Assert
+        // assert
         assert_eq!(fetched.len(), 3);
         assert_eq!(fetched[0], created_1);
         assert_eq!(fetched[1], created_2);
@@ -104,14 +150,14 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_get_all_empty(pool: PgPool) -> Result<(), Box<dyn std::error::Error>> {
-        // Arrange
+    async fn test_get_all_empty(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
         let repo = PostgresHabitRepository::new(pool);
 
-        // Act
+        // act
         let fetched = repo.get_all().await?;
 
-        // Assert
+        // assert
         assert_eq!(fetched.len(), 0);
 
         Ok(())

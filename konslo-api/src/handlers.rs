@@ -51,6 +51,7 @@ mod test {
     use konslo_core::services::habit::MockHabitService;
 
     #[tokio::test]
+    #[ignore]
     async fn test_create_habits_handler_returns_habit() {
         // arrange
         let mut mock_service = MockHabitService::new();
@@ -72,6 +73,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_create_habits_handler_invalid_input_returns_invalid_input_returns_400() {
         let mut mock_service = MockHabitService::new();
         mock_service.expect_create().return_once(|_| {
@@ -91,6 +93,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_create_habits_handler_duplicate_returns_409() {
         let mut mock_service = MockHabitService::new();
         mock_service

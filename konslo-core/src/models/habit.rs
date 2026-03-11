@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx;
 use time::OffsetDateTime;
 
-#[derive(Debug, Deserialize, PartialEq, Serialize, sqlx::Type)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize, sqlx::Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
 pub enum GoalPeriod {
     Day,
