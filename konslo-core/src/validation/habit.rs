@@ -35,7 +35,7 @@ mod tests {
     fn test_validate_habit_name_255_chars_returns_ok() {
         let name = "X".repeat(255);
 
-        let result= validate_habit_name(name.as_ref());
+        let result = validate_habit_name(name.as_ref());
 
         assert!(result.is_ok());
     }

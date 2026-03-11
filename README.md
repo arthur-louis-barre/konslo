@@ -10,11 +10,12 @@ I chose Rust for the backend to push myself beyond typical Node/Python stacks â€
 
 ### Features
 
-1. [ ] Create and manage daily habits 
+1. [X] Create and manage daily habits 
 2. [ ] Mark habits as done for the day 
 3. [ ] View your current streak 
 4. [ ] Stats & progress charts 
 5. [ ] User authentication 
+6. [ ] Make `serde` an optional feature in `konslo-core` to keep the domain layer pure by default
 
 
 ### What I want to Learn

@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use konslo_core::errors::AppError;
     use konslo_core::repositories::habits::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use konslo_core::errors::AppError;
 
     #[sqlx::test]
     async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {

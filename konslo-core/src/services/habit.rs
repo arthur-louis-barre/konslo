@@ -1,17 +1,18 @@
-use crate::repositories::habits::HabitRepository;
-use crate::model::Habit;
-use std::sync::Arc;
-use async_trait::async_trait;
 use crate::errors::AppError;
+use crate::models::habit::{Habit, CreateHabit};
+use crate::repositories::habits::HabitRepository;
 use crate::validation::habit::validate_habit_name;
+use async_trait::async_trait;
+use std::sync::Arc;
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
 
+
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait HabitService: Send + Sync {
-    async fn create(&self, name: &str) -> Result<Habit, AppError>;
+    async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
@@ -30,9 +31,9 @@ impl DefaultHabitService {
 
 #[async_trait]
 impl HabitService for DefaultHabitService {
-    async fn create(&self, name: &str) -> Result<Habit, AppError> {
-        validate_habit_name(name)?;
-        let habit = self.repo.create(name).await?;
+    async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError> {
+        validate_habit_name(&new_habit.name)?;
+        let habit = self.repo.create(new_habit).await?;
         Ok(habit)
     }
 
@@ -54,8 +55,8 @@ impl HabitService for DefaultHabitService {
 
 #[cfg(test)]
 mod test {
-    use crate::repositories::habits::MockHabitRepository;
     use super::*;
+    use crate::repositories::habits::MockHabitRepository;
 
     #[tokio::test]
     async fn test_create_returns_created_habit() {

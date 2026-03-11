@@ -2,6 +2,7 @@ mod error;
 mod handlers;
 mod router;
 
+use crate::router::get_router;
 use dotenvy::dotenv;
 use konslo_core::repositories::habits::PostgresHabitRepository;
 use konslo_core::services::habit::DefaultHabitService;
@@ -12,7 +13,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use crate::router::get_router;
 
 #[tokio::main]
 async fn main() {
@@ -23,8 +23,7 @@ async fn main() {
 
     // 1. Load env. variables
     dotenv().ok();
-    let database_url = env::var("DATABASE_URL")
-        .expect("Database must be defined in the .env file");
+    let database_url = env::var("DATABASE_URL").expect("Database must be defined in the .env file");
 
     // 1. Initialisation des logs (pour voir ce qui se passe)
     tracing_subscriber::registry()
