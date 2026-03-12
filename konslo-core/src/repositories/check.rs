@@ -1,10 +1,14 @@
-use async_trait::async_trait;
-use sqlx::{query, query_as, PgPool};
 use crate::errors::AppError;
 use crate::models::check::{Check, CreateCheck};
 use crate::repositories::to_app_error;
+use async_trait::async_trait;
+use sqlx::{PgPool, query, query_as};
+
+#[cfg(any(test, feature = "mockable"))]
+use mockall::automock;
 
 #[async_trait]
+#[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait CheckRepository: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError>;
@@ -36,9 +40,9 @@ impl CheckRepository for PostgresCheckRepository {
             new_check.value,
             new_check.checked_at,
         )
-            .fetch_one(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .fetch_one(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(check)
     }
@@ -52,9 +56,9 @@ impl CheckRepository for PostgresCheckRepository {
             "#,
             id
         )
-            .fetch_optional(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(check)
     }
@@ -67,9 +71,9 @@ impl CheckRepository for PostgresCheckRepository {
                 FROM checks ORDER BY check_id
             "#
         )
-            .fetch_all(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .fetch_all(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(checks)
     }

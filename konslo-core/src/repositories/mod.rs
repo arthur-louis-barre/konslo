@@ -2,8 +2,8 @@ use crate::errors::AppError;
 use sqlx::Error as SqlxError;
 use sqlx::error::DatabaseError;
 
+pub mod check;
 pub mod habit;
-mod check;
 
 pub const PG_UNIQUE_VIOLATION: &str = "23505";
 
