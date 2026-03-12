@@ -1,6 +1,9 @@
 -- create an enum
 CREATE TYPE goal_period_enum AS ENUM ('day', 'week', 'month');
 
+-- rename id to habit_id in habits table
+ALTER TABLE habits RENAME COLUMN id TO habit_id;
+
 -- add columns to habits table
 ALTER TABLE habits ADD COLUMN goal_value INT NOT NULL;
 ALTER TABLE habits ADD COLUMN goal_unit VARCHAR(20) NOT NULL;
@@ -13,10 +16,11 @@ ALTER TABLE habits ALTER COLUMN created_at SET NOT NULL;
 -- create checks table
 CREATE TABLE checks (
     check_id SERIAL PRIMARY KEY,
-    habit_id INT REFERENCES habits(id) NOT NULL,
+    habit_id INT REFERENCES habits(habit_id) NOT NULL,
     value INT NOT NULL,
-    checked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+    checked_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 -- add constraints to checks
 ALTER TABLE checks ADD CONSTRAINT checks_value_positive CHECK(value > 0);
+ALTER TABLE checks ADD CONSTRAINT checks_checked_at_not_future CHECK(checked_at <= CURRENT_TIMESTAMP + INTERVAL '30 seconds');
