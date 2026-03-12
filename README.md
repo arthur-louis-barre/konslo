@@ -18,11 +18,15 @@ I chose Rust for the backend to push myself beyond typical Node/Python stacks �
 6. [ ] Make `serde` an optional feature in `konslo-core` to keep the domain layer pure by default
 
 On en est là : [ ] Mark habits as done for the day
-    [X] : Mise à jour des schémas de la base de données
-          ... on a ajouté les colonnes goal_value, goal_unit, goal_period (un enum) à la table habits
-          ... on a créé la table checks, avec les colonnes check_id, habit_id, checked_at, value
+    [X] : Nouvelle migration : màj de la table habits, création de la table checks
     [X] : Update du models/habit.rs et des tests associés
-    [ ] :
+    [X] : Check model, repository, service, validation
+    [ ] : Test d'intégration CheckRepository
+    [ ] : Faire de la sérialisation/déserialisation un feature de la crate konslo-core
+    [ ] : Implémenter From<sqlx::Error> pour App::Error
+    [ ] : Endpoint POST /habits/:id/checks
+    [ ] : Conteneurisation complète
+    [ ] : Brancher sur le frontend Angular
 
 ### What I want to Learn
 
