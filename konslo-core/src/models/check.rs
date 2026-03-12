@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use time::OffsetDateTime;
 
@@ -10,13 +10,9 @@ pub struct Check {
     pub checked_at: OffsetDateTime,
 }
 
-impl Check {
-    pub fn new(id: i32, habit_id: i32, value: i32) -> Self {
-        Self {
-            id,
-            habit_id,
-            value,
-            checked_at: OffsetDateTime::now_utc(),
-        }
-    }
+#[derive(Debug, Deserialize)]
+pub struct CreateCheck {
+    pub habit_id: i32,
+    pub value: i32,
+    pub checked_at: OffsetDateTime,
 }
