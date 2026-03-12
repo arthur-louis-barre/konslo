@@ -2,7 +2,9 @@ use crate::errors::AppError;
 use sqlx::Error as SqlxError;
 use sqlx::error::DatabaseError;
 
-pub mod habits;
+pub mod habit;
+mod check;
+
 pub const PG_UNIQUE_VIOLATION: &str = "23505";
 
 pub fn to_app_error(e: SqlxError) -> AppError {

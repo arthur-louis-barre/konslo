@@ -2,7 +2,7 @@
 mod tests {
     use konslo_core::errors::AppError;
     use konslo_core::models::habit::{CreateHabit, GoalPeriod};
-    use konslo_core::repositories::habits::{HabitRepository, PostgresHabitRepository};
+    use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
 
