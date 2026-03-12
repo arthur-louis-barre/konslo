@@ -4,6 +4,7 @@ use time::OffsetDateTime;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize, sqlx::Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum GoalPeriod {
     Day,
     Week,
@@ -18,7 +19,7 @@ pub struct CreateHabit {
     pub goal_period: GoalPeriod,
 }
 
-#[derive(Debug, PartialEq, Serialize, sqlx::FromRow, )]
+#[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow, )]
 pub struct Habit {
     pub id: i32,
     pub name: String,

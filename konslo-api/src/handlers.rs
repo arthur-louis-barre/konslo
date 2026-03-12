@@ -2,9 +2,10 @@ use crate::error::AppError;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http;
+use konslo_core::errors::AppError as CoreError;
+use konslo_core::models::habit::{CreateHabit, Habit};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
-use konslo_core::models::habit::{CreateHabit, Habit};
 
 pub async fn create_habits_handler(
     State(habit_service): State<Arc<dyn HabitService>>,
@@ -48,67 +49,49 @@ mod test {
     use super::*;
     use crate::router::get_router;
     use axum_test::TestServer;
+    use konslo_core::models::habit::GoalPeriod;
     use konslo_core::services::habit::MockHabitService;
+    use time::OffsetDateTime;
 
     #[tokio::test]
-    #[ignore]
     async fn test_create_habits_handler_returns_habit() {
         // arrange
         let mut mock_service = MockHabitService::new();
-        mock_service.expect_create().return_once(|name| {
-            let name = name.to_string();
-            Box::pin(async move { Ok(Habit::new(1, &*name)) })
+        mock_service.expect_create().return_once(|_| {
+            Box::pin(async move {
+                Ok(Habit {
+                    id: 25,
+                    name: "Meditate".to_string(),
+                    goal_value: 10,
+                    goal_unit: "min".to_string(),
+                    goal_period: GoalPeriod::Day,
+                    created_at: OffsetDateTime::UNIX_EPOCH,
+                })
+            })
         });
+
         let app = get_router(Arc::new(mock_service));
         let server = TestServer::new(app);
 
         // act
         let response = server
             .post("/habits")
-            .json(&serde_json::json!({ "name": "Meditate" }))
+            .json(&serde_json::json!({
+                "name": "Meditate",
+                "goal_value": 10,
+                "goal_unit": "min",
+                "goal_period": "day"
+            }))
             .await;
 
         // assert
         assert_eq!(response.status_code(), http::StatusCode::CREATED);
-    }
 
-    #[tokio::test]
-    #[ignore]
-    async fn test_create_habits_handler_invalid_input_returns_invalid_input_returns_400() {
-        let mut mock_service = MockHabitService::new();
-        mock_service.expect_create().return_once(|_| {
-            Box::pin(async move { Err(CoreError::Validation("habit name is empty".to_string())) })
-        });
-        let app = get_router(Arc::new(mock_service));
-        let server = TestServer::new(app);
-
-        // act
-        let response = server
-            .post("/habits")
-            .json(&serde_json::json!({ "name": "" }))
-            .await;
-
-        // assert
-        assert_eq!(response.status_code(), StatusCode::BAD_REQUEST);
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn test_create_habits_handler_duplicate_returns_409() {
-        let mut mock_service = MockHabitService::new();
-        mock_service
-            .expect_create()
-            .return_once(|_| Box::pin(async move { Err(CoreError::Conflict("".to_string())) }));
-        let app = get_router(Arc::new(mock_service));
-        let server = TestServer::new(app);
-
-        // act
-        let response = server
-            .post("/habits")
-            .json(&serde_json::json!({ "name": "" }))
-            .await;
-
-        // assert
-        assert_eq!(response.status_code(), StatusCode::CONFLICT);
+        let body: Habit = response.json();
+        assert_eq!(body.id, 25);
+        assert_eq!(body.name, "Meditate");
+        assert_eq!(body.goal_value, 10);
+        assert_eq!(body.goal_unit, "min");
+        assert_eq!(body.goal_period, GoalPeriod::Day);
     }
 }
