@@ -1,10 +1,11 @@
 #[cfg(test)]
 mod tests {
     use konslo_core::errors::AppError;
+    use konslo_core::models::habit::{CreateHabit, GoalPeriod};
     use konslo_core::repositories::habits::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use konslo_core::models::habit::{CreateHabit, GoalPeriod};
+
 
     #[sqlx::test]
     async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
@@ -46,8 +47,8 @@ mod tests {
         let result = repo.create(&new_habit).await;
 
         // assert
-        let err = result.expect_err("result should be Err");
-        assert!(matches!(err, AppError::Conflict(_)));
+        assert!(result.is_err(), "result should be Err");
+        assert!(matches!(result.unwrap_err(), AppError::Conflict(_)));
 
         Ok(())
     }
@@ -70,7 +71,7 @@ mod tests {
 
         // assert
         assert!(deleted);
-        assert!(found.is_none(), "Habit should not exist after deletion");
+        assert!(found.is_none(), "habit should not exist after deletion");
 
         Ok(())
     }
@@ -158,7 +159,7 @@ mod tests {
         let fetched = repo.get_all().await?;
 
         // assert
-        assert_eq!(fetched.len(), 0);
+        assert!(fetched.is_empty());
 
         Ok(())
     }

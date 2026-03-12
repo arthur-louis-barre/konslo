@@ -55,38 +55,67 @@ impl HabitService for DefaultHabitService {
 
 #[cfg(test)]
 mod test {
+    use time::OffsetDateTime;
+    use crate::models::habit::GoalPeriod;
     use super::*;
     use crate::repositories::habits::MockHabitRepository;
 
     #[tokio::test]
-    #[ignore]
     async fn test_create_returns_created_habit() {
         // arrange
         let mut repo = MockHabitRepository::new();
-        repo.expect_create().returning(|name| {
-            let name = name.to_string();
-            Box::pin(async move { Ok(Habit::new(1, &*name)) })
+        repo.expect_create().returning(|new_habit| {
+            let name = new_habit.name.clone();
+            let goal_value = new_habit.goal_value;
+            let goal_unit = new_habit.goal_unit.clone();
+            let goal_period = new_habit.goal_period;
+            Box::pin(async move {
+                Ok(Habit {
+                    id: 1,
+                    name,
+                    goal_value,
+                    goal_unit,
+                    goal_period,
+                    created_at: OffsetDateTime::UNIX_EPOCH,
+                })
+            })
         });
         let service = DefaultHabitService::new(Arc::new(repo));
+        let new_habit = CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
 
         // act
-        let habit = service.create("Meditate").await;
+        let habit = service.create(new_habit).await;
 
         // assert
         let habit = habit.expect("result should be Ok");
         assert_eq!(habit.id, 1);
         assert_eq!(habit.name, "Meditate");
+        assert_eq!(habit.goal_value, 10);
+        assert_eq!(habit.goal_unit, "min");
+        assert_eq!(habit.goal_period, GoalPeriod::Day);
+        assert_eq!(habit.created_at, OffsetDateTime::UNIX_EPOCH);
     }
 
     #[tokio::test]
-    #[ignore]
     async fn test_create_invalid_input_returns_validation_error() {
         // arrange
-        let repo = MockHabitRepository::new();
+        let mut repo = MockHabitRepository::new();
+        repo.expect_create().times(0);
         let service = DefaultHabitService::new(Arc::new(repo));
+        let new_habit = CreateHabit {
+            name: "".to_string(),
+            goal_value: 10,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        };
 
         // act
-        let habit = service.create("").await;
+        let habit = service.create(new_habit).await;
 
         // assert
         assert!(habit.is_err());

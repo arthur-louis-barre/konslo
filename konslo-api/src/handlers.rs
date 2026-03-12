@@ -2,7 +2,6 @@ use crate::error::AppError;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http;
-use konslo_core::errors::AppError as CoreError;
 use konslo_core::models::habit::{CreateHabit, Habit};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
