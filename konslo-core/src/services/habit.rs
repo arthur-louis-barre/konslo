@@ -1,6 +1,6 @@
 use crate::errors::AppError;
 use crate::models::habit::{Habit, CreateHabit};
-use crate::repositories::habits::HabitRepository;
+use crate::repositories::habit::HabitRepository;
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -58,7 +58,7 @@ mod test {
     use time::OffsetDateTime;
     use crate::models::habit::GoalPeriod;
     use super::*;
-    use crate::repositories::habits::MockHabitRepository;
+    use crate::repositories::habit::MockHabitRepository;
 
     #[tokio::test]
     async fn test_create_returns_created_habit() {
