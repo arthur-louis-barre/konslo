@@ -19,7 +19,7 @@ pub struct CreateHabit {
     pub goal_period: GoalPeriod,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow, )]
+#[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Habit {
     pub id: i32,
     pub name: String,

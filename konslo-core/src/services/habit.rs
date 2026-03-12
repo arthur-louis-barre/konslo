@@ -1,5 +1,5 @@
 use crate::errors::AppError;
-use crate::models::habit::{Habit, CreateHabit};
+use crate::models::habit::{CreateHabit, Habit};
 use crate::repositories::habit::HabitRepository;
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
@@ -7,7 +7,6 @@ use std::sync::Arc;
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
-
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), automock)]
@@ -55,10 +54,10 @@ impl HabitService for DefaultHabitService {
 
 #[cfg(test)]
 mod test {
-    use time::OffsetDateTime;
-    use crate::models::habit::GoalPeriod;
     use super::*;
+    use crate::models::habit::GoalPeriod;
     use crate::repositories::habit::MockHabitRepository;
+    use time::OffsetDateTime;
 
     #[tokio::test]
     async fn test_create_returns_created_habit() {

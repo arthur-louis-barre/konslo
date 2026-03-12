@@ -6,7 +6,6 @@ mod tests {
     use sqlx::PgPool;
     use std::error::Error;
 
-
     #[sqlx::test]
     async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange

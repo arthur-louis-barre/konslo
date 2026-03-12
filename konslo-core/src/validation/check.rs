@@ -5,7 +5,9 @@ use time::{Duration, OffsetDateTime};
 
 pub fn validate_check(new_check: &CreateCheck) -> Result<(), AppError> {
     if new_check.checked_at > OffsetDateTime::now_utc().add(Duration::seconds(30)) {
-        Err(AppError::Validation("checked_at cannot be in the future".into()))
+        Err(AppError::Validation(
+            "checked_at cannot be in the future".into(),
+        ))
     } else if new_check.value <= 0 {
         Err(AppError::Validation("value must be greater than 0".into()))
     } else {
