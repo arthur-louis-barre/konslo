@@ -11,25 +11,28 @@ I chose Rust for the backend to push myself beyond typical Node/Python stacks �
 ### Features
 
 1. [X] Create and manage daily habits 
-2. [ ] Mark habits as done for the day 
+2. [ ] Mark habits as done for the day
 3. [ ] View your current streak 
 4. [ ] Stats & progress charts 
 5. [ ] User authentication 
 6. [ ] Make `serde` an optional feature in `konslo-core` to keep the domain layer pure by default
 
+On en est là : [ ] Mark habits as done for the day
+    [X] : Mise à jour des schémas de la base de données
+          ... on a ajouté les colonnes goal_value, goal_unit, goal_period (un enum) à la table habits
+          ... on a créé la table checks, avec les colonnes check_id, habit_id, checked_at, value
+    [X] : Update du models/habit.rs et des tests associés
+    [ ] :
 
 ### What I want to Learn
 
-Setting up a REST API in Rust with Actix-web — the ownership model forced me to think differently about data flow
-Structuring an Angular app with services, reactive forms, and component communication
-Designing a clean API contract between two completely separate tech stacks
-Managing CORS, async handlers, and error types in a strongly-typed language
+...
 
 ### Version
 
-v1 — CRUD habits + frontend Angular. C'est ton MVP, tu valides que tout fonctionne bout en bout. 
-
-v2 — Completions. Un habit peut être complété chaque jour. Tu ajoutes juste une table completions avec une foreign key vers habits. Pas d'auth, pas de complexité.
+v1:
+- CRUD habits + frontend Angular. 
+- Features : completions
 
 v3 — Statistiques. Streaks, taux de complétion sur 7/30 jours, visualisation dans Angular. Pure lecture, pas de nouveaux domaines.
 
