@@ -23,7 +23,7 @@ On en est là : [ ] Mark habits as done for the day
     [X] : Check model, repository, service, validation
     [X] : Test d'intégration CheckRepository
     [ ] : Faire de la sérialisation/déserialisation un feature de la crate konslo-core
-    [ ] : Implémenter From<sqlx::Error> pour App::Error
+    [X] : Implémenter From<sqlx::Error> pour App::Error
     [ ] : Endpoint POST /habits/:id/checks
     [ ] : Conteneurisation complète
     [ ] : Brancher sur le frontend Angular
