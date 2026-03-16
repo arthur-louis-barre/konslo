@@ -44,7 +44,7 @@ impl CheckService for DefaultCheckService {
 mod tests {
     use super::*;
     use crate::repositories::check::MockCheckRepository;
-    use time::{OffsetDateTime};
+    use time::OffsetDateTime;
 
     #[tokio::test]
     async fn test_create_checks_returns_created_check() {

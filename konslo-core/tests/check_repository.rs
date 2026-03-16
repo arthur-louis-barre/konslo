@@ -1,14 +1,14 @@
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-    use std::ops::Add;
-    use sqlx::PgPool;
-    use time::{Duration, OffsetDateTime};
     use konslo_core::errors::AppError;
     use konslo_core::models::check::{Check, CreateCheck, UpdateCheck};
     use konslo_core::models::habit::{CreateHabit, GoalPeriod, Habit};
     use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
+    use sqlx::PgPool;
+    use std::error::Error;
+    use std::ops::Add;
+    use time::{Duration, OffsetDateTime};
 
     #[sqlx::test]
     async fn test_create_check_returns_created_check(pool: PgPool) -> Result<(), Box<dyn Error>> {
@@ -125,10 +125,7 @@ mod tests {
     async fn test_update_check_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresCheckRepository::new(pool);
-        let update = UpdateCheck {
-            id: 5,
-            value: 5,
-        };
+        let update = UpdateCheck { id: 5, value: 5 };
 
         // act
         let updated = repo.update(&update).await?;
@@ -197,8 +194,12 @@ mod tests {
         let habit = create_test_habit(&pool).await;
         let repo = PostgresCheckRepository::new(pool);
 
-        let checked_at_1 = OffsetDateTime::now_utc().add(Duration::days(-2)).truncate_to_microsecond();
-        let checked_at_2 = OffsetDateTime::now_utc().add(Duration::days(-1)).truncate_to_microsecond();
+        let checked_at_1 = OffsetDateTime::now_utc()
+            .add(Duration::days(-2))
+            .truncate_to_microsecond();
+        let checked_at_2 = OffsetDateTime::now_utc()
+            .add(Duration::days(-1))
+            .truncate_to_microsecond();
         let checked_at_3 = OffsetDateTime::now_utc().truncate_to_microsecond();
 
         let new_check_1 = CreateCheck {
@@ -238,7 +239,6 @@ mod tests {
         Ok(())
     }
 
-
     async fn create_test_habit(pool: &PgPool) -> Habit {
         let repo = PostgresHabitRepository::new(pool.clone());
         repo.create(&CreateHabit {
@@ -246,27 +246,20 @@ mod tests {
             goal_value: 5,
             goal_unit: "min".to_string(),
             goal_period: GoalPeriod::Day,
-        }).await.unwrap()
+        })
+        .await
+        .unwrap()
     }
 
     async fn create_test_check(pool: &PgPool) -> Check {
-        let habit = create_test_habit(&pool).await  ;
+        let habit = create_test_habit(&pool).await;
         let repo = PostgresCheckRepository::new(pool.clone());
         repo.create(&CreateCheck {
             habit_id: habit.id,
             value: 1,
-            checked_at: OffsetDateTime::now_utc()
-        }).await.unwrap()
+            checked_at: OffsetDateTime::now_utc(),
+        })
+        .await
+        .unwrap()
     }
-
-
-
-
-/*
-Almost — think about all the ways update can fail:
-
-value <= 0 — check constraint ✅
-What if the check_id doesn't exist?
- */
-
 }

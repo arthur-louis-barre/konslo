@@ -58,9 +58,9 @@ impl CheckRepository for PostgresCheckRepository {
             "#,
             habit_id
         )
-            .fetch_all(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .fetch_all(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(checks)
     }
@@ -75,9 +75,9 @@ impl CheckRepository for PostgresCheckRepository {
             check.value,
             check.id,
         )
-            .execute(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .execute(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(result.rows_affected() == 1)
     }
@@ -102,9 +102,9 @@ impl PostgresCheckRepository {
             "#,
             id
         )
-            .fetch_optional(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(to_app_error)?;
 
         Ok(check)
     }
