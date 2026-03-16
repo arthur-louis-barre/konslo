@@ -21,7 +21,7 @@ On en est là : [ ] Mark habits as done for the day
     [X] : Nouvelle migration : màj de la table habits, création de la table checks
     [X] : Update du models/habit.rs et des tests associés
     [X] : Check model, repository, service, validation
-    [ ] : Test d'intégration CheckRepository
+    [X] : Test d'intégration CheckRepository
     [ ] : Faire de la sérialisation/déserialisation un feature de la crate konslo-core
     [ ] : Implémenter From<sqlx::Error> pour App::Error
     [ ] : Endpoint POST /habits/:id/checks
