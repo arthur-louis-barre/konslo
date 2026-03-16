@@ -1,5 +1,5 @@
 use crate::errors::AppError;
-use crate::models::check::{Check, CreateCheck};
+use crate::models::check::{Check, CreateCheck, UpdateCheck};
 use crate::repositories::to_app_error;
 use async_trait::async_trait;
 use sqlx::{PgPool, query, query_as};
@@ -12,7 +12,8 @@ use mockall::automock;
 pub trait CheckRepository: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError>;
-    async fn get_all(&self) -> Result<Vec<Check>, AppError>;
+    async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError>;
+    async fn update(&self, check: &UpdateCheck) -> Result<bool, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -63,19 +64,39 @@ impl CheckRepository for PostgresCheckRepository {
         Ok(check)
     }
 
-    async fn get_all(&self) -> Result<Vec<Check>, AppError> {
+    async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError> {
         let checks = query_as!(
             Check,
             r#"
                 SELECT check_id as id, habit_id, value, checked_at
-                FROM checks ORDER BY check_id
-            "#
+                FROM checks
+                WHERE habit_id = $1
+                ORDER BY checked_at
+            "#,
+            habit_id
         )
-        .fetch_all(&self.pool)
-        .await
-        .map_err(to_app_error)?;
+            .fetch_all(&self.pool)
+            .await
+            .map_err(to_app_error)?;
 
         Ok(checks)
+    }
+
+    async fn update(&self, check: &UpdateCheck) -> Result<bool, AppError> {
+        let result = query!(
+            r#"
+                UPDATE checks
+                SET value = $1
+                WHERE check_id = $2;
+            "#,
+            check.value,
+            check.id,
+        )
+            .execute(&self.pool)
+            .await
+            .map_err(to_app_error)?;
+
+        Ok(result.rows_affected() == 1)
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {

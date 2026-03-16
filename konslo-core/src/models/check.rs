@@ -16,3 +16,9 @@ pub struct CreateCheck {
     pub value: i32,
     pub checked_at: OffsetDateTime,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateCheck {
+    pub id: i32,
+    pub value: i32,
+}
