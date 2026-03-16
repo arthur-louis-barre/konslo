@@ -12,7 +12,6 @@ use mockall::automock;
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait CheckService: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
-    async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -32,11 +31,6 @@ impl CheckService for DefaultCheckService {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError> {
         validate_check(new_check)?;
         let check = self.repo.create(&new_check).await?;
-        Ok(check)
-    }
-
-    async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError> {
-        let check = self.repo.get_by_id(id).await?;
         Ok(check)
     }
 

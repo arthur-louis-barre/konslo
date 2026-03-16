@@ -11,7 +11,6 @@ use mockall::automock;
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait CheckRepository: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
-    async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError>;
     async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError>;
     async fn update(&self, check: &UpdateCheck) -> Result<bool, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
@@ -42,22 +41,6 @@ impl CheckRepository for PostgresCheckRepository {
             new_check.checked_at,
         )
         .fetch_one(&self.pool)
-        .await
-        .map_err(to_app_error)?;
-
-        Ok(check)
-    }
-
-    async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError> {
-        let check = query_as!(
-            Check,
-            r#"
-                SELECT check_id as id, habit_id, value, checked_at
-                FROM checks WHERE check_id = $1
-            "#,
-            id
-        )
-        .fetch_optional(&self.pool)
         .await
         .map_err(to_app_error)?;
 
@@ -106,5 +89,23 @@ impl CheckRepository for PostgresCheckRepository {
             .map_err(to_app_error)?;
 
         Ok(result.rows_affected() == 1)
+    }
+}
+
+impl PostgresCheckRepository {
+    pub async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError> {
+        let check = query_as!(
+            Check,
+            r#"
+                SELECT check_id as id, habit_id, value, checked_at
+                FROM checks WHERE check_id = $1
+            "#,
+            id
+        )
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(to_app_error)?;
+
+        Ok(check)
     }
 }
