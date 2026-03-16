@@ -158,6 +158,87 @@ mod tests {
         Ok(())
     }
 
+    #[sqlx::test]
+    async fn test_delete_check_returns_true(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let check = create_test_check(&pool).await;
+        let repo = PostgresCheckRepository::new(pool);
+        let id = check.id;
+
+        // act
+        let deleted = repo.delete(id).await?;
+        let found = repo.get_by_id(id).await?;
+
+        // assert
+        assert!(deleted);
+        assert!(found.is_none());
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_delete_check_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let repo = PostgresCheckRepository::new(pool);
+        let id = 5;
+
+        // act
+        let deleted = repo.delete(id).await?;
+
+        // assert
+        assert!(!deleted);
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_get_by_habit_id_returns_checks(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let habit = create_test_habit(&pool).await;
+        let repo = PostgresCheckRepository::new(pool);
+
+        let checked_at_1 = OffsetDateTime::now_utc().add(Duration::days(-2)).truncate_to_microsecond();
+        let checked_at_2 = OffsetDateTime::now_utc().add(Duration::days(-1)).truncate_to_microsecond();
+        let checked_at_3 = OffsetDateTime::now_utc().truncate_to_microsecond();
+
+        let new_check_1 = CreateCheck {
+            habit_id: habit.id,
+            value: 5,
+            checked_at: checked_at_1,
+        };
+        let new_check_2 = CreateCheck {
+            habit_id: habit.id,
+            value: 2,
+            checked_at: checked_at_2,
+        };
+        let new_check_3 = CreateCheck {
+            habit_id: habit.id,
+            value: 3,
+            checked_at: checked_at_3,
+        };
+
+        repo.create(&new_check_1).await?;
+        repo.create(&new_check_2).await?;
+        repo.create(&new_check_3).await?;
+
+        // act
+        let checks = repo.get_by_habit_id(habit.id).await?;
+
+        // assert
+        assert_eq!(checks[0].value, new_check_1.value);
+        assert_eq!(checks[0].checked_at, checked_at_1);
+        assert_eq!(checks[0].habit_id, habit.id);
+        assert_eq!(checks[1].value, new_check_2.value);
+        assert_eq!(checks[1].checked_at, checked_at_2);
+        assert_eq!(checks[1].habit_id, habit.id);
+        assert_eq!(checks[2].value, new_check_3.value);
+        assert_eq!(checks[2].checked_at, checked_at_3);
+        assert_eq!(checks[2].habit_id, habit.id);
+
+        Ok(())
+    }
+
+
     async fn create_test_habit(pool: &PgPool) -> Habit {
         let repo = PostgresHabitRepository::new(pool.clone());
         repo.create(&CreateHabit {
