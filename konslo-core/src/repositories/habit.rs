@@ -1,6 +1,5 @@
 use crate::errors::AppError;
 use crate::models::habit::{CreateHabit, GoalPeriod, Habit};
-use crate::repositories::to_app_error;
 use async_trait::async_trait;
 use sqlx::{PgPool, query, query_as};
 
@@ -42,8 +41,7 @@ impl HabitRepository for PostgresHabitRepository {
             new_habit.goal_period as GoalPeriod,
         )
             .fetch_one(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+            .await?;
 
         Ok(habit)
     }
@@ -58,8 +56,7 @@ impl HabitRepository for PostgresHabitRepository {
             id
         )
             .fetch_optional(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+            .await?;
 
         Ok(habit)
     }
@@ -73,8 +70,7 @@ impl HabitRepository for PostgresHabitRepository {
             "#
         )
             .fetch_all(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+            .await?;
 
         Ok(habits)
     }
@@ -82,8 +78,7 @@ impl HabitRepository for PostgresHabitRepository {
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
         let result = query!(r#"DELETE FROM habits WHERE habit_id = $1"#, id)
             .execute(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+            .await?;
 
         Ok(result.rows_affected() == 1)
     }

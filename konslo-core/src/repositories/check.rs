@@ -1,6 +1,5 @@
 use crate::errors::AppError;
 use crate::models::check::{Check, CreateCheck, UpdateCheck};
-use crate::repositories::to_app_error;
 use async_trait::async_trait;
 use sqlx::{PgPool, query, query_as};
 
@@ -41,8 +40,7 @@ impl CheckRepository for PostgresCheckRepository {
             new_check.checked_at,
         )
         .fetch_one(&self.pool)
-        .await
-        .map_err(to_app_error)?;
+        .await?;
 
         Ok(check)
     }
@@ -59,8 +57,7 @@ impl CheckRepository for PostgresCheckRepository {
             habit_id
         )
         .fetch_all(&self.pool)
-        .await
-        .map_err(to_app_error)?;
+        .await?;
 
         Ok(checks)
     }
@@ -76,8 +73,7 @@ impl CheckRepository for PostgresCheckRepository {
             check.id,
         )
         .execute(&self.pool)
-        .await
-        .map_err(to_app_error)?;
+        .await?;
 
         Ok(result.rows_affected() == 1)
     }
@@ -85,8 +81,7 @@ impl CheckRepository for PostgresCheckRepository {
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
         let result = query!(r#"DELETE FROM checks WHERE check_id = $1"#, id)
             .execute(&self.pool)
-            .await
-            .map_err(to_app_error)?;
+            .await?;
 
         Ok(result.rows_affected() == 1)
     }
@@ -103,8 +98,7 @@ impl PostgresCheckRepository {
             id
         )
         .fetch_optional(&self.pool)
-        .await
-        .map_err(to_app_error)?;
+        .await?;
 
         Ok(check)
     }

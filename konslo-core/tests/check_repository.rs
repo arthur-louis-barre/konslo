@@ -51,7 +51,7 @@ mod tests {
         // assert
         let err = result.unwrap_err();
         // println!("{:?}", err);
-        assert!(matches!(err, AppError::Database(_)));
+        assert!(matches!(err, AppError::NotFound(_)));
 
         Ok(())
     }
@@ -74,7 +74,7 @@ mod tests {
         // assert
         let err = result.unwrap_err();
         // println!("{:?}", err);
-        assert!(matches!(err, AppError::Database(_)));
+        assert!(matches!(err, AppError::Validation(_)));
 
         Ok(())
     }
@@ -97,7 +97,7 @@ mod tests {
         // assert
         let err = result.unwrap_err();
         // println!("{:?}", err);
-        assert!(matches!(err, AppError::Database(_)));
+        assert!(matches!(err, AppError::Validation(_)));
 
         Ok(())
     }
@@ -150,7 +150,7 @@ mod tests {
         let updated = repo.update(&update).await;
 
         // assert
-        assert!(matches!(updated.unwrap_err(), AppError::Database(_)));
+        assert!(matches!(updated.unwrap_err(), AppError::Validation(_)));
 
         Ok(())
     }
