@@ -5,22 +5,15 @@ mod tests {
     use sqlx::PgPool;
     use time::{Duration, OffsetDateTime};
     use konslo_core::errors::AppError;
-    use konslo_core::models::check::CreateCheck;
-    use konslo_core::models::habit::{CreateHabit, GoalPeriod};
+    use konslo_core::models::check::{Check, CreateCheck, UpdateCheck};
+    use konslo_core::models::habit::{CreateHabit, GoalPeriod, Habit};
     use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
 
     #[sqlx::test]
     async fn test_create_check_returns_created_check(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
-        let repo_habit = PostgresHabitRepository::new(pool.clone());
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 5,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
-        let habit = repo_habit.create(&new_habit).await?;
+        let habit = create_test_habit(&pool).await;
 
         let checked_at = OffsetDateTime::now_utc().truncate_to_microsecond();
         let repo_check = PostgresCheckRepository::new(pool);
@@ -66,14 +59,7 @@ mod tests {
     #[sqlx::test]
     async fn test_create_check_invalid_value(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
-        let repo_habit = PostgresHabitRepository::new(pool.clone());
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 5,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
-        let habit = repo_habit.create(&new_habit).await?;
+        let habit = create_test_habit(&pool).await;
 
         let repo_check = PostgresCheckRepository::new(pool);
         let new_check = CreateCheck {
@@ -96,14 +82,7 @@ mod tests {
     #[sqlx::test]
     async fn test_create_check_invalid_checked_at(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
-        let repo_habit = PostgresHabitRepository::new(pool.clone());
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 5,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
-        let habit = repo_habit.create(&new_habit).await?;
+        let habit = create_test_habit(&pool).await;
 
         let repo_check = PostgresCheckRepository::new(pool);
         let new_check = CreateCheck {
@@ -123,9 +102,90 @@ mod tests {
         Ok(())
     }
 
+    #[sqlx::test]
+    async fn test_update_check_returns_true(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let check = create_test_check(&pool).await;
+        let repo = PostgresCheckRepository::new(pool);
+        let update = UpdateCheck {
+            id: check.id,
+            value: 5,
+        };
+
+        // act
+        let updated = repo.update(&update).await?;
+
+        // assert
+        assert!(updated);
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_update_check_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let repo = PostgresCheckRepository::new(pool);
+        let update = UpdateCheck {
+            id: 5,
+            value: 5,
+        };
+
+        // act
+        let updated = repo.update(&update).await?;
+
+        // assert
+        assert!(!updated);
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_update_invalid_value(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let check = create_test_check(&pool).await;
+        let repo = PostgresCheckRepository::new(pool);
+        let update = UpdateCheck {
+            id: check.id,
+            value: -5,
+        };
+
+        // act
+        let updated = repo.update(&update).await;
+
+        // assert
+        assert!(matches!(updated.unwrap_err(), AppError::Database(_)));
+
+        Ok(())
+    }
+
+    async fn create_test_habit(pool: &PgPool) -> Habit {
+        let repo = PostgresHabitRepository::new(pool.clone());
+        repo.create(&CreateHabit {
+            name: "Meditate".to_string(),
+            goal_value: 5,
+            goal_unit: "min".to_string(),
+            goal_period: GoalPeriod::Day,
+        }).await.unwrap()
+    }
+
+    async fn create_test_check(pool: &PgPool) -> Check {
+        let habit = create_test_habit(&pool).await  ;
+        let repo = PostgresCheckRepository::new(pool.clone());
+        repo.create(&CreateCheck {
+            habit_id: habit.id,
+            value: 1,
+            checked_at: OffsetDateTime::now_utc()
+        }).await.unwrap()
+    }
 
 
 
 
+/*
+Almost — think about all the ways update can fail:
+
+value <= 0 — check constraint ✅
+What if the check_id doesn't exist?
+ */
 
 }
