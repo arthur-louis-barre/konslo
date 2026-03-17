@@ -1,34 +1,35 @@
 use axum::extract::{Path, State};
 use axum::{http, Json};
-use konslo_core::models::check::{Check, CreateCheck};
+use konslo_core::models::check::{CreateCheck};
 use crate::error::AppError;
 use crate::requests::CreateCheckRequest;
+use crate::responses::CheckResponse;
 use crate::router::AppState;
 
 pub async fn create_check_handler(
     State(state): State<AppState>,
     Path(habit_id): Path<i32>,
     Json(request): Json<CreateCheckRequest>,
-) -> Result<(http::StatusCode, Json<Check>), AppError> {
+) -> Result<(http::StatusCode, Json<CheckResponse>), AppError> {
     let new_check = CreateCheck {
         habit_id,
         value: request.value,
         checked_at: request.checked_at
     };
-    let check = state.check_service.create(&new_check).await?;
+    let check: CheckResponse = state.check_service.create(&new_check).await?.into();
     Ok((http::StatusCode::CREATED, Json(check)))
 }
 
 #[cfg(test)]
 mod tests {
     use std::sync::Arc;
-    use axum::http;
     use axum_test::TestServer;
     use time::OffsetDateTime;
-    use konslo_core::models::check::{Check, CreateCheck};
+    use konslo_core::models::check::Check;
     use konslo_core::services::check::MockCheckService;
     use konslo_core::services::habit::MockHabitService;
-    use crate::router::{get_router, AppState};
+    use crate::router::get_router;
+    use super::*;
 
     #[tokio::test]
     async fn test_create_check_handler_ok() {
@@ -68,8 +69,8 @@ mod tests {
 
         // assert
         assert_eq!(response.status_code(), http::StatusCode::CREATED);
-        let body: Check = response.json();
 
+        let body: CheckResponse = response.json();
         assert_eq!(body.id, 5);
         assert_eq!(body.habit_id, 25);
         assert_eq!(body.value, 5);
