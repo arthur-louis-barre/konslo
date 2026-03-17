@@ -2,6 +2,7 @@ mod error;
 mod handlers;
 mod router;
 mod requests;
+mod responses;
 
 use crate::router::{get_router, AppState};
 use dotenvy::dotenv;
