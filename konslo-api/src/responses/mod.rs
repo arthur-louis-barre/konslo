@@ -3,6 +3,7 @@ use time::OffsetDateTime;
 use konslo_core::models::check::Check;
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub struct CheckResponse {
     pub id: i32,
     pub habit_id: i32,
