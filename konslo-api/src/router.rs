@@ -3,7 +3,7 @@ use axum::routing::{get, post};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
 use konslo_core::services::check::CheckService;
-use crate::handlers::check_handlers::create_check_handler;
+use crate::handlers::check_handlers::{create_check_handler, get_checks_by_habit_handler};
 use crate::handlers::habit_handler::{create_habits_handler, delete_habits_handler, get_all_habits_handler, get_habit_handler};
 
 #[derive(Clone)]
@@ -24,7 +24,7 @@ pub fn get_router(state: AppState) -> Router {
         )
         .route(
             "/habits/{id}/checks",
-            post(create_check_handler)
+            post(create_check_handler).get(get_checks_by_habit_handler)
         )
         .with_state(state)
 }

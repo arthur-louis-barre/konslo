@@ -20,6 +20,20 @@ pub async fn create_check_handler(
     Ok((http::StatusCode::CREATED, Json(check)))
 }
 
+pub async fn get_checks_by_habit_handler(
+    State(state): State<AppState>,
+    Path(habit_id): Path<i32>,
+) -> Result<Json<Vec<CheckResponse>>, AppError> {
+    let checks = state.check_service
+        .get_by_habit_id(habit_id)
+        .await?
+        .into_iter()
+        .map(|c| c.into())
+        .collect();
+
+    Ok(Json(checks))
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::Arc;
@@ -42,12 +56,7 @@ mod tests {
             let value = new_check.value;
             let checked_at = new_check.checked_at;
             Box::pin(async move {
-                Ok(Check {
-                    id: 5,
-                    habit_id,
-                    value,
-                    checked_at,
-                })
+                Ok(Check { id: 5, habit_id, value, checked_at, })
             })
         });
 
@@ -66,14 +75,43 @@ mod tests {
                 "checked_at": "1970-01-01T00:00:00Z",
             }))
             .await;
+        let body: CheckResponse = response.json();
 
         // assert
+        let excepted = CheckResponse { id: 5, habit_id: 25, value: 5, checked_at: OffsetDateTime::UNIX_EPOCH };
         assert_eq!(response.status_code(), http::StatusCode::CREATED);
+        assert_eq!(body, excepted);
+    }
 
-        let body: CheckResponse = response.json();
-        assert_eq!(body.id, 5);
-        assert_eq!(body.habit_id, 25);
-        assert_eq!(body.value, 5);
-        assert_eq!(body.checked_at, OffsetDateTime::UNIX_EPOCH)
+    #[tokio::test]
+    async fn test_get_checks_by_habit_handler_ok() {
+        // arrange
+        let mut mock_check_service = MockCheckService::new();
+        let mock_habit_service = MockHabitService::new();
+
+        mock_check_service.expect_get_by_habit_id().return_once(|habit_id| {
+            Box::pin(async move { Ok(vec![
+                Check { id: 1, habit_id, value: 5, checked_at: OffsetDateTime::UNIX_EPOCH },
+                Check { id: 2, habit_id, value: 10, checked_at: OffsetDateTime::UNIX_EPOCH },
+            ])})
+        });
+
+        let app = get_router(AppState {
+            check_service: Arc::new(mock_check_service),
+            habit_service: Arc::new(mock_habit_service),
+        }
+        );
+        let server = TestServer::new(app);
+
+        // act
+        let response = server.get("/habits/25/checks").await;
+        let body: Vec<CheckResponse> = response.json();
+
+        // assert
+        let expected = vec![
+            CheckResponse { id: 1, habit_id: 25, value: 5, checked_at: OffsetDateTime::UNIX_EPOCH },
+            CheckResponse { id: 2, habit_id: 25, value: 10, checked_at: OffsetDateTime::UNIX_EPOCH },
+        ];
+        assert_eq!(body, expected);
     }
 }
