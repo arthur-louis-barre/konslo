@@ -5,20 +5,21 @@ use axum::http;
 use konslo_core::models::habit::{CreateHabit, Habit};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
+use crate::router::AppState;
 
 pub async fn create_habits_handler(
-    State(habit_service): State<Arc<dyn HabitService>>,
+    State(state): State<AppState>,
     Json(new_habit): Json<CreateHabit>,
 ) -> Result<(http::StatusCode, Json<Habit>), AppError> {
-    let habit = habit_service.create(new_habit).await?;
+    let habit = state.habit_service.create(new_habit).await?;
     Ok((http::StatusCode::CREATED, Json(habit)))
 }
 
 pub async fn get_habit_handler(
-    State(habit_service): State<Arc<dyn HabitService>>,
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<Habit>, AppError> {
-    let habit = habit_service.get_by_id(id).await?;
+    let habit = state.habit_service.get_by_id(id).await?;
     match habit {
         Some(habit) => Ok(Json(habit)),
         None => Err(AppError::NotFound(format!("no habit with id {id}"))),
@@ -26,17 +27,17 @@ pub async fn get_habit_handler(
 }
 
 pub async fn get_all_habits_handler(
-    State(habit_service): State<Arc<dyn HabitService>>,
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<Habit>>, AppError> {
-    let habits = habit_service.get_all().await?;
+    let habits = state.habit_service.get_all().await?;
     Ok(Json(habits))
 }
 
 pub async fn delete_habits_handler(
-    State(habit_service): State<Arc<dyn HabitService>>,
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<http::StatusCode, AppError> {
-    let deleted = habit_service.delete(id).await?;
+    let deleted = state.habit_service.delete(id).await?;
     match deleted {
         true => Ok(http::StatusCode::NO_CONTENT),
         false => Err(AppError::NotFound(format!("no habit with id {id}"))),

@@ -2,7 +2,7 @@ mod error;
 mod handlers;
 mod router;
 
-use crate::router::get_router;
+use crate::router::{get_router, AppState};
 use dotenvy::dotenv;
 use konslo_core::repositories::habit::PostgresHabitRepository;
 use konslo_core::services::habit::DefaultHabitService;
@@ -13,6 +13,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use konslo_core::repositories::check::PostgresCheckRepository;
+use konslo_core::services::check::DefaultCheckService;
 
 #[tokio::main]
 async fn main() {
@@ -39,11 +41,14 @@ async fn main() {
         .expect("Failed to connect to database");
 
     // 3. Instantiate the repository
-    let habit_repo = Arc::new(PostgresHabitRepository::new(pool));
-    let habit_service = Arc::new(DefaultHabitService::new(habit_repo));
+    let habit_repo = Arc::new(PostgresHabitRepository::new(pool.clone()));
+    let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone()));
+    let check_repo = Arc::new(PostgresCheckRepository::new(pool));
+    let check_service = Arc::new(DefaultCheckService::new(check_repo, habit_repo));
+    let state = AppState { habit_service, check_service };
 
     // 4. Config routing
-    let app = get_router(habit_service).layer(cors);
+    let app = get_router(state).layer(cors);
 
     // 3. Définition de l'adresse (localhost:3000)
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

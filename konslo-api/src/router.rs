@@ -1,12 +1,18 @@
-use crate::handlers::{
-    create_habits_handler, delete_habits_handler, get_all_habits_handler, get_habit_handler,
-};
 use axum::Router;
-use axum::routing::get;
+use axum::routing::{get, post};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
+use konslo_core::services::check::CheckService;
+use crate::handlers::check_handlers::create_check_handler;
+use crate::handlers::habit_handler::{create_habits_handler, delete_habits_handler, get_all_habits_handler, get_habit_handler};
 
-pub fn get_router(service: Arc<dyn HabitService>) -> Router {
+#[derive(Clone)]
+pub struct AppState {
+    pub habit_service: Arc<dyn HabitService>,
+    pub check_service: Arc<dyn CheckService>,
+}
+
+pub fn get_router(state: AppState) -> Router {
     Router::new()
         .route(
             "/habits",
@@ -16,5 +22,9 @@ pub fn get_router(service: Arc<dyn HabitService>) -> Router {
             "/habits/{id}",
             get(get_habit_handler).delete(delete_habits_handler),
         )
-        .with_state(service)
+        .route(
+            "/habits/{id}/checks",
+            post(create_check_handler)
+        )
+        .with_state(state)
 }

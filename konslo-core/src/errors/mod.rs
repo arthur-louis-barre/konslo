@@ -31,10 +31,10 @@ impl From<SqlxError> for AppError {
         match e {
             SqlxError::Database(db_err) if code_eq(db_err.as_ref(), PG_UNIQUE_VIOLATION) => {
                 AppError::Conflict("unique violation".to_string())
-            },
+            }
             SqlxError::Database(db_err) if code_eq(db_err.as_ref(), PG_FK_VIOLATION) => {
                 AppError::NotFound("fk violation".to_string())
-            },
+            }
             SqlxError::Database(db_err) if code_eq(db_err.as_ref(), PG_CONSTRAINT_VIOLATION) => {
                 AppError::Validation("constraint violation".to_string())
             }
