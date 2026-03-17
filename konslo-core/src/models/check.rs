@@ -4,7 +4,7 @@ use time::OffsetDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, sqlx::FromRow)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Check {
     pub id: i32,
     pub habit_id: i32,
