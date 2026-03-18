@@ -3,7 +3,7 @@ use std::ops::Add;
 use time::{Duration, OffsetDateTime};
 
 pub fn validate_check_value(value: i32, habit_goal_value: i32) -> Result<(), AppError> {
-    if value <= 0 {
+    if value < 0 {
         return Err(AppError::Validation("value must be greater than 0".into()))
     }
     if value > habit_goal_value {
