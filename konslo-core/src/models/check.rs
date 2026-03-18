@@ -1,6 +1,6 @@
 use time::OffsetDateTime;
 
-#[derive(sqlx::FromRow, Debug, PartialEq)]
+#[derive(sqlx::FromRow, Clone, Debug, PartialEq)]
 pub struct Check {
     pub id: i32,
     pub habit_id: i32,
