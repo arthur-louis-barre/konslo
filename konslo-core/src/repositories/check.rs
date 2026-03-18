@@ -12,7 +12,7 @@ pub trait CheckRepository: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError>;
     async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError>;
-    async fn update(&self, check: &UpdateCheck) -> Result<bool, AppError>;
+    async fn update(&self, check: &UpdateCheck) -> Result<Option<Check>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -78,20 +78,20 @@ impl CheckRepository for PostgresCheckRepository {
         Ok(checks)
     }
 
-    async fn update(&self, check: &UpdateCheck) -> Result<bool, AppError> {
-        let result = query!(
+    async fn update(&self, check: &UpdateCheck) -> Result<Option<Check>, AppError> {
+        let check = query_as!(
+            Check,
             r#"
-                UPDATE checks
-                SET value = $1
-                WHERE check_id = $2;
+                UPDATE checks SET value = $1 WHERE check_id = $2
+                RETURNING check_id as id, habit_id, value, checked_at;
             "#,
             check.value,
             check.id,
         )
-        .execute(&self.pool)
+        .fetch_optional(&self.pool)
         .await?;
 
-        Ok(result.rows_affected() == 1)
+        Ok(check)
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {

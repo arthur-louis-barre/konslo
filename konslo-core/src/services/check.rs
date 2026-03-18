@@ -13,7 +13,7 @@ use mockall::automock;
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait CheckService: Send + Sync {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError>;
-    async fn update(&self, check: &UpdateCheck) -> Result<(), AppError>;
+    async fn update(&self, check: &UpdateCheck) -> Result<Option<Check>, AppError>;
     async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError>;
     async fn delete(&self, id: i32) -> Result<(), AppError>;
 }
@@ -53,29 +53,31 @@ impl CheckService for DefaultCheckService {
         Ok(check)
     }
 
-    async fn update(&self, update_check: &UpdateCheck) -> Result<(), AppError> {
+    async fn update(&self, update_check: &UpdateCheck) -> Result<Option<Check>, AppError> {
         let check = self
             .check_repo
             .get_by_id(update_check.id)
             .await?
-            .ok_or(AppError::NotFound(format!(
-                "check {} not found",
-                update_check.id
-            )))?;
+            .ok_or(AppError::NotFound(format!("check {} not found", update_check.id)))?;
+
         let habit = self
             .habit_repo
             .get_by_id(check.habit_id)
             .await?
-            .ok_or(AppError::NotFound(format!(
-                "habit {} not found",
-                check.habit_id
-            )))?;
+            .ok_or(AppError::NotFound(format!("habit {} not found", check.habit_id)))?;
 
         validate_check_value(update_check.value, habit.goal_value)?;
 
-        self.check_repo.update(update_check).await?;
+        if update_check.value == 0 {
+            self.check_repo.delete(update_check.id).await?;
+            return Ok(None);
+        };
 
-        Ok(())
+        self.check_repo
+            .update(update_check)
+            .await?
+            .ok_or(AppError::NotFound(format!("check {} not found", update_check.id)))
+            .map(Some)
     }
 
     async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError> {
