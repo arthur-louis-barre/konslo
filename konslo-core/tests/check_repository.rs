@@ -103,20 +103,25 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_update_check_returns_true(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_update_check_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let check = create_test_check(&pool).await;
         let repo = PostgresCheckRepository::new(pool);
-        let update = UpdateCheck {
-            id: check.id,
-            value: 5,
-        };
+        let update = UpdateCheck { id: check.id, value: 5 };
 
         // act
         let updated = repo.update(&update).await?;
 
         // assert
-        assert!(updated);
+        let expected = Check {
+            id: check.id,
+            habit_id: check.habit_id,
+            value: 5,
+            checked_at: check.checked_at,
+        };
+
+        assert!(updated.is_some());
+        assert_eq!(updated.unwrap(), expected);
 
         Ok(())
     }
@@ -131,7 +136,7 @@ mod tests {
         let updated = repo.update(&update).await?;
 
         // assert
-        assert!(!updated);
+        assert!(updated.is_none());
 
         Ok(())
     }

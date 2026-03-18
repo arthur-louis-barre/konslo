@@ -49,10 +49,7 @@ impl CheckRepository for PostgresCheckRepository {
     async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError> {
         let check = query_as!(
             Check,
-            r#"
-                SELECT check_id as id, habit_id, value, checked_at
-                FROM checks WHERE check_id = $1
-            "#,
+            "SELECT check_id as id, habit_id, value, checked_at FROM checks WHERE check_id = $1",
             id
         )
         .fetch_optional(&self.pool)
@@ -65,10 +62,8 @@ impl CheckRepository for PostgresCheckRepository {
         let checks = query_as!(
             Check,
             r#"
-                SELECT check_id as id, habit_id, value, checked_at
-                FROM checks
-                WHERE habit_id = $1
-                ORDER BY checked_at
+                SELECT check_id as id, habit_id, value, checked_at FROM checks 
+                WHERE habit_id = $1 ORDER BY checked_at
             "#,
             habit_id
         )
@@ -82,7 +77,7 @@ impl CheckRepository for PostgresCheckRepository {
         let check = query_as!(
             Check,
             r#"
-                UPDATE checks SET value = $1 WHERE check_id = $2
+                UPDATE checks SET value = $1 WHERE check_id = $2 
                 RETURNING check_id as id, habit_id, value, checked_at;
             "#,
             check.value,
