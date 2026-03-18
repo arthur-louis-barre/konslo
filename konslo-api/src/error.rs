@@ -28,7 +28,10 @@ impl From<CoreError> for AppError {
     fn from(e: CoreError) -> Self {
         match e {
             CoreError::Validation(msg) => BadRequest(msg),
-            CoreError::Database(_) => InternalServerError,
+            CoreError::Database(_) => {
+                tracing::error!("Database error: {:?}", e);
+                InternalServerError
+            },
             CoreError::Conflict(msg) => Conflict(msg),
             CoreError::NotFound(msg) => NotFound(msg),
         }

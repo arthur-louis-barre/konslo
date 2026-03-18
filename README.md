@@ -14,17 +14,15 @@ I chose Rust for the backend to push myself beyond typical Node/Python stacks �
 2. [ ] Mark habits as done for the day
 3. [ ] View your current streak 
 4. [ ] Stats & progress charts 
-5. [ ] User authentication 
-6. [ ] Make `serde` an optional feature in `konslo-core` to keep the domain layer pure by default
+5. [ ] User authentication
 
 On en est là : [ ] Mark habits as done for the day
     [X] : Nouvelle migration : màj de la table habits, création de la table checks
     [X] : Update du models/habit.rs et des tests associés
     [X] : Check model, repository, service, validation
     [X] : Test d'intégration CheckRepository
-    [ ] : Faire de la sérialisation/déserialisation un feature de la crate konslo-core
     [X] : Implémenter From<sqlx::Error> pour App::Error
-    [ ] : Endpoint POST /habits/:id/checks
+    [X] : Endpoint POST /habits/:id/checks
     [ ] : Conteneurisation complète
     [ ] : Brancher sur le frontend Angular
 

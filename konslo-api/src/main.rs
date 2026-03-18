@@ -53,7 +53,7 @@ async fn main() {
     let app = get_router(state).layer(cors);
 
     // 3. Définition de l'adresse (localhost:3000)
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     tracing::info!("listening on {}", addr);
 
     // 4. Lancement du serveur

@@ -1,0 +1,4 @@
+POST http://localhost:3000/habits
+Content-Type: application/json
+
+{"name": "Meditation", "goal_value": 20, "goal_unit": "minutes", "goal_period": "day"}
