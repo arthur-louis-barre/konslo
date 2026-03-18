@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO habits (name, goal_value, goal_unit, goal_period)\n                VALUES ($1, $2, $3, $4)\n                RETURNING habit_id as id, name, goal_value, goal_unit, goal_period as \"goal_period: GoalPeriod\", created_at;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "goal_value",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "goal_unit",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "goal_period: GoalPeriod",
+        "type_info": {
+          "Custom": {
+            "name": "goal_period_enum",
+            "kind": {
+              "Enum": [
+                "day",
+                "week",
+                "month"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "goal_period_enum",
+            "kind": {
+              "Enum": [
+                "day",
+                "week",
+                "month"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "8c7f75af086afaa640c89c9084ebb986a0bb0040211289d108aa03628b199b8e"
+}

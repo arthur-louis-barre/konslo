@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT habit_id as id, name, goal_value, goal_unit, goal_period as \"goal_period: GoalPeriod\", created_at\n                FROM habits WHERE habit_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "goal_value",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "goal_unit",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "goal_period: GoalPeriod",
+        "type_info": {
+          "Custom": {
+            "name": "goal_period_enum",
+            "kind": {
+              "Enum": [
+                "day",
+                "week",
+                "month"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "7b4029123546c8dadf8e0c64499fab76f34ee61aca1714162dc25843cf6c81cc"
+}
