@@ -14,13 +14,14 @@ pub struct AppState {
 
 pub fn get_router(state: AppState) -> Router {
     Router::new()
+        .route(
+        "/habits/todayy",
+            get(get_all_habits_with_today_checks_handler)
+        )
         .route("/habits",
                get(get_all_habits_handler).post(create_habits_handler),
         )
-        .route(
-            "/habits/today",
-            get(get_all_habits_with_today_checks_handler)
-        )
+
         .route("/habits/{id}",
                get(get_habit_handler).delete(delete_habits_handler),
         )
