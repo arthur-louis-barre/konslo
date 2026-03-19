@@ -4,7 +4,7 @@ use axum::extract::{Path, State};
 use axum::http;
 use konslo_core::models::habit::CreateHabit;
 use crate::requests::CreateHabitRequest;
-use crate::responses::HabitResponse;
+use crate::responses::{HabitResponse, HabitWithCheckResponse};
 use crate::router::AppState;
 
 #[axum::debug_handler]
@@ -44,6 +44,19 @@ pub async fn get_all_habits_handler(
         .collect();
 
     Ok(Json(habits))
+}
+
+pub async fn get_all_habits_with_today_checks_handler(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<HabitWithCheckResponse>>, AppError> {
+    let habits_with_checks = state.habit_service
+        .get_all_with_today_checks()
+        .await?
+        .into_iter()
+        .map(|h| h.into())
+        .collect();
+
+    Ok(Json(habits_with_checks))
 }
 
 pub async fn delete_habits_handler(
