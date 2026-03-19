@@ -1,5 +1,14 @@
 use serde::Deserialize;
 use time::OffsetDateTime;
+use crate::responses::GoalPeriodDto;
+
+#[derive(Deserialize)]
+pub struct CreateHabitRequest {
+    pub name: String,
+    pub goal_value: i32,
+    pub goal_unit: String,
+    pub goal_period: GoalPeriodDto,
+}
 
 #[derive(Deserialize)]
 pub struct CreateCheckRequest {
