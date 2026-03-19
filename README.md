@@ -23,8 +23,12 @@ On en est là : [ ] Mark habits as done for the day
     [X] : Test d'intégration CheckRepository
     [X] : Implémenter From<sqlx::Error> pour App::Error
     [X] : Endpoint POST /habits/:id/checks
-    [ ] : Conteneurisation complète
+    [X] : Conteneurisation complète
     [ ] : Brancher sur le frontend Angular
+
+`GET /habits/today` currently returns only checks from the current day for all habits, regardless of their `goal_period`.
+A weekly habit (e.g. 180min cardio) will show 0 progress if no check was logged today, even if 90min were logged yesterday.
+Proper period-aware filtering (`day` → today, `week` → current week, `month` → current month) is planned for v3.
 
 ### What I want to Learn
 
