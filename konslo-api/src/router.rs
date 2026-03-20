@@ -24,7 +24,7 @@ pub fn get_router(state: AppState) -> Router {
                get(get_habit_handler).delete(delete_habits_handler),
         )
         .route("/habits/{id}/checks",
-            post(create_check_handler).get(get_checks_by_habit_handler)
+               post(create_check_handler).get(get_checks_by_habit_handler)
         )
         .route("/habits/{habit_id}/checks/{check_id}",
                put(update_check_handler)
