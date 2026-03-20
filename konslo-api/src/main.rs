@@ -20,6 +20,11 @@ use konslo_core::services::check::DefaultCheckService;
 
 #[tokio::main]
 async fn main() {
+    // 1. Initialisation des logs (pour voir ce qui se passe)
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
@@ -28,11 +33,6 @@ async fn main() {
     // 1. Load env. variables
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Database must be defined in the .env file");
-
-    // 1. Initialisation des logs (pour voir ce qui se passe)
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .init();
 
     // 2. Create the pool
     let pool = PgPoolOptions::new()
