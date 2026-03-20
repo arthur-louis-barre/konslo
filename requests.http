@@ -1,0 +1,32 @@
+### Create a habit
+POST http://localhost:3000/habits
+Content-Type: application/json
+
+{"name": "Meditation", "goal_value": 20, "goal_unit": "minutes", "goal_period": "day"}
+
+### Get all habits
+GET http://localhost:3000/habits
+
+### Get today's habits with checks
+GET http://localhost:3000/habits/today
+
+### Get a habit by id
+GET http://localhost:3000/habits/1
+
+### Delete a habit
+DELETE http://localhost:3000/habits/1
+
+### Create a check for a habit
+POST http://localhost:3000/habits/1/checks
+Content-Type: application/json
+
+{"value": 20, "checked_at": "2026-03-20T08:00:00+00:00"}
+
+### Get checks for a habit
+GET http://localhost:3000/habits/1/checks
+
+### Update a check
+PUT http://localhost:3000/habits/1/checks/1
+Content-Type: application/json
+
+{"value": 15}
