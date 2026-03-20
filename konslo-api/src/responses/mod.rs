@@ -72,6 +72,7 @@ impl From<HabitWithCheck> for HabitWithCheckResponse {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum GoalPeriodDto {
     Day,
     Week,

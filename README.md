@@ -4,9 +4,7 @@ A minimalist habit tracking app built with a Rust backend and Angular frontend.
 
 ## About
 
-This is a personal project built to practice full-stack development with a modern, performance-oriented stack. 
-The goal is simple: track daily habits, stay consistent, build momentum.
-I chose Rust for the backend to push myself beyond typical Node/Python stacks — and to learn what it really means to write safe, concurrent, and blazing-fast server code.
+This is a personal project built to practice full-stack development with a modern, performance-oriented stack.
 
 ### Features
 
@@ -36,19 +34,19 @@ Proper period-aware filtering (`day` → today, `week` → current week, `month`
 
 ### Version
 
-v1:
-- CRUD habits + frontend Angular. 
+v1: 
+- CRUD habits + frontend Angular
 - Features : completions
 
-v3 — Statistiques. Streaks, taux de complétion sur 7/30 jours, visualisation dans Angular. Pure lecture, pas de nouveaux domaines.
+v2:
+- Statistiques. Streaks, taux de complétion sur 7/30 jours, visualisation dans Angular. 
+- Pure lecture, pas de nouveaux domaines.
 
-v4 — Users + Auth JWT. Tu rattaches habits et completions à un utilisateur. C'est le gros chantier — middleware auth, refresh tokens, etc.
+v4 — 
+- Users + Auth JWT. 
+- Tu rattaches habits et completions à un utilisateur. C'est le gros chantier — middleware auth, refresh tokens, etc.
 
-v5 — Multi-device, notifications, rappels.
-
-## 🤝 Prompt Assistance — Claude (MyFav <3)
-
-This project was built in collaboration with Claude (Anthropic) as a learning exercise.
+## 🤝 Prompt Assistance
 
 ### Our workflow
 
@@ -60,14 +58,3 @@ This project was built in collaboration with Claude (Anthropic) as a learning ex
 - **TDD** — we write the test first, watch it fail (red), then write the code to make it pass (green), then clean up (refactor).
 - **PowerShell first** — on utilise les commandes PowerShell autant que possible (ni, rm, mv, cat, etc.)
 - **IntelliJ tips** — de temps en temps, Claude glisse un tip sur l'utilisation d'IntelliJ pour aller plus vite.
-
-### Flashcard format example
-
-```
-Flashcard 📇
-  syn crate in Rust
-  Parses Rust source code into an AST (Abstract Syntax Tree)
-  Lets you extract fn signatures, structs, traits, impls without manual text parsing
-  Used by the Rust compiler toolchain itself
-  Common pattern: syn::parse_file() → visit items → match on syn::Item variants
-```
