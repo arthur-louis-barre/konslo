@@ -5,8 +5,8 @@ mod tests {
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use std::ops::Add;
     use time::{Duration, OffsetDateTime};
+    use time::macros::datetime;
     use konslo_core::models::check::{Check, CreateCheck};
     use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
 
@@ -168,43 +168,20 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_get_today_habits_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_get_all_with_checks_for_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
-        let (habits, checks) = setup_habits_with_checks(&pool).await?;
+        let (reference, habits, checks) = setup_habits_with_checks(&pool).await?;
         let repo = PostgresHabitRepository::new(pool);
 
         // act
-        let habits_with_checks = repo.get_all_with_today_checks().await?;
+        let habits_with_checks = repo.get_all_with_checks_for(reference).await?;
 
         // assert
         let excepted = vec![
-            HabitWithCheck {
-                id: habits[0].id,
-                name: habits[0].name.clone(),
-                goal_value: habits[0].goal_value,
-                goal_unit: habits[0].goal_unit.clone(),
-                goal_period: habits[0].goal_period,
-                created_at: habits[0].created_at,
-                checks: vec![checks[0].clone()]
-            },
-            HabitWithCheck {
-                id: habits[1].id,
-                name: habits[1].name.clone(),
-                goal_value: habits[1].goal_value,
-                goal_unit: habits[1].goal_unit.clone(),
-                goal_period: habits[1].goal_period,
-                created_at: habits[1].created_at,
-                checks: vec![]
-            },
-            HabitWithCheck {
-                id: habits[2].id,
-                name: habits[2].name.clone(),
-                goal_value: habits[2].goal_value,
-                goal_unit: habits[2].goal_unit.clone(),
-                goal_period: habits[2].goal_period,
-                created_at: habits[2].created_at,
-                checks: vec![checks[2].clone()]
-            }
+            to_habit_with_check(&habits[0], vec![checks[0].clone()]),
+            to_habit_with_check(&habits[1], vec![]),
+            to_habit_with_check(&habits[2], vec![checks[2].clone(), checks[3].clone()]),
+            to_habit_with_check(&habits[3], vec![checks[5].clone(), checks[6].clone()]),
         ];
 
         assert_eq!(habits_with_checks, excepted);
@@ -212,8 +189,9 @@ mod tests {
         Ok(())
     }
 
-    async fn setup_habits_with_checks(pool: &PgPool) -> Result<(Vec<Habit>, Vec<Check>), Box<dyn Error>> {
+    async fn setup_habits_with_checks(pool: &PgPool) -> Result<(OffsetDateTime, Vec<Habit>, Vec<Check>), Box<dyn Error>> {
         let repo = PostgresHabitRepository::new(pool.clone());
+
         let new_habit_1 = CreateHabit {
             name: "Meditate".to_string(),
             goal_value: 10,
@@ -227,47 +205,96 @@ mod tests {
             goal_period: GoalPeriod::Day,
         };
         let new_habit_3 = CreateHabit {
-            name: "Train cardio zone 2".to_string(),
+            name: "Cardio".to_string(),
             goal_value: 180,
             goal_unit: "min".to_string(),
             goal_period: GoalPeriod::Week,
+        };
+        let new_habit_4 = CreateHabit {
+            name: "Read".to_string(),
+            goal_value: 4,
+            goal_unit: "books".to_string(),
+            goal_period: GoalPeriod::Month,
         };
 
         let habit_created_1 = repo.create(&new_habit_1).await?;
         let habit_created_2 = repo.create(&new_habit_2).await?;
         let habit_created_3 = repo.create(&new_habit_3).await?;
+        let habit_created_4 = repo.create(&new_habit_4).await?;
 
         let repo = PostgresCheckRepository::new(pool.clone());
+
+        let reference = datetime!(2026-03-15 12:55:20 UTC);
+        let days_since_monday = reference.weekday().number_days_from_monday();
+        let start_of_week = reference - Duration::days(days_since_monday as i64);
+        let start_of_month = reference.replace_day(1)?;
+
         let new_check_1 = CreateCheck {
             habit_id: habit_created_1.id,
             value: 5,
-            checked_at: OffsetDateTime::now_utc(),
+            checked_at: reference,
         };
         let new_check_2 = CreateCheck {
-            habit_id: habit_created_2.id,
-            value: 10,
-            checked_at: OffsetDateTime::now_utc().add(Duration::days(-1)),
+            habit_id: habit_created_1.id,
+            value: 5,
+            checked_at: reference - Duration::days(1),
         };
         let new_check_3 = CreateCheck {
             habit_id: habit_created_3.id,
             value: 90,
-            checked_at: OffsetDateTime::now_utc(),
+            checked_at: start_of_week,
         };
         let new_check_4 = CreateCheck {
             habit_id: habit_created_3.id,
             value: 20,
-            checked_at: OffsetDateTime::now_utc().add(Duration::weeks(-1)),
+            checked_at: start_of_week + Duration::days(1),
+        };
+        let new_check_5 = CreateCheck {
+            habit_id: habit_created_3.id,
+            value: 20,
+            checked_at: start_of_week - Duration::days(1),
+        };
+        let new_check_6 = CreateCheck {
+            habit_id: habit_created_4.id,
+            value: 1,
+            checked_at: start_of_month,
+        };
+        let new_check_7 = CreateCheck {
+            habit_id: habit_created_4.id,
+            value: 1,
+            checked_at: start_of_month + Duration::weeks(1),
+        };
+        let new_check_8 = CreateCheck {
+            habit_id: habit_created_4.id,
+            value: 1,
+            checked_at: start_of_month - Duration::weeks(1),
         };
 
         let check_created_1 = repo.create(&new_check_1).await?;
         let check_created_2 = repo.create(&new_check_2).await?;
         let check_created_3 = repo.create(&new_check_3).await?;
         let check_created_4 = repo.create(&new_check_4).await?;
+        let check_created_5 = repo.create(&new_check_5).await?;
+        let check_created_6 = repo.create(&new_check_6).await?;
+        let check_created_7 = repo.create(&new_check_7).await?;
+        let check_created_8 = repo.create(&new_check_8).await?;
 
         Ok((
-            vec![habit_created_1, habit_created_2, habit_created_3],
-            vec![check_created_1, check_created_2, check_created_3, check_created_4]
+            reference,
+            vec![habit_created_1, habit_created_2, habit_created_3, habit_created_4],
+            vec![check_created_1, check_created_2, check_created_3, check_created_4, check_created_5, check_created_6, check_created_7, check_created_8]
         ))
     }
 
+    fn to_habit_with_check(habit: &Habit, checks: Vec<Check>) -> HabitWithCheck {
+        HabitWithCheck {
+            id: habit.id,
+            name: habit.name.clone(),
+            goal_value: habit.goal_value,
+            goal_unit: habit.goal_unit.clone(),
+            goal_period: habit.goal_period,
+            created_at: habit.created_at,
+            checks,
+        }
+    }
 }

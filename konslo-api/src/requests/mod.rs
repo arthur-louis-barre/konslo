@@ -21,3 +21,9 @@ pub struct CreateCheckRequest {
 pub struct UpdateCheckRequest {
     pub value: i32,
 }
+
+#[derive(Deserialize)]
+pub struct HabitsQuery {
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub date: Option<OffsetDateTime>,
+}

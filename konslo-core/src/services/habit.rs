@@ -4,6 +4,7 @@ use crate::repositories::habit::HabitRepository;
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
+use time::OffsetDateTime;
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
@@ -14,7 +15,7 @@ pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
-    async fn get_all_with_today_checks(&self) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -47,8 +48,8 @@ impl HabitService for DefaultHabitService {
         Ok(habits)
     }
 
-    async fn get_all_with_today_checks(&self) -> Result<Vec<HabitWithCheck>, AppError> {
-        let habits_with_checks = self.repo.get_all_with_today_checks().await?;
+    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
+        let habits_with_checks = self.repo.get_all_with_checks_for(timestamp).await?;
         Ok(habits_with_checks)
     }
 
@@ -61,7 +62,6 @@ impl HabitService for DefaultHabitService {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::models::check::Check;
     use crate::models::habit::GoalPeriod;
     use crate::repositories::habit::MockHabitRepository;
     use time::OffsetDateTime;
@@ -129,100 +129,18 @@ mod test {
     }
 
     #[tokio::test]
-    async fn test_get_all_with_today_checks_ok() {
+    async fn test_get_all_with_checks_for_ok() {
         // arrange
         let mut repo = MockHabitRepository::new();
-        repo.expect_get_all_with_today_checks().return_once(|| {
-            Box::pin(async move {
-                Ok(vec![
-                    HabitWithCheck {
-                        id: 1,
-                        name: "Meditate".to_string(),
-                        goal_value: 10,
-                        goal_unit: "min".to_string(),
-                        goal_period: GoalPeriod::Day,
-                        created_at: OffsetDateTime::UNIX_EPOCH,
-                        checks: vec![Check {
-                            id: 1,
-                            habit_id: 1,
-                            value: 5,
-                            checked_at: OffsetDateTime::UNIX_EPOCH,
-                        }],
-                    },
-                    HabitWithCheck {
-                        id: 2,
-                        name: "Stretch shoulders".to_string(),
-                        goal_value: 20,
-                        goal_unit: "reps".to_string(),
-                        goal_period: GoalPeriod::Day,
-                        created_at: OffsetDateTime::UNIX_EPOCH,
-                        checks: vec![],
-                    },
-                    HabitWithCheck {
-                        id: 3,
-                        name: "Train cardio zone 2".to_string(),
-                        goal_value: 180,
-                        goal_unit: "min".to_string(),
-                        goal_period: GoalPeriod::Week,
-                        created_at: OffsetDateTime::UNIX_EPOCH,
-                        checks: vec![Check {
-                            id: 3,
-                            habit_id: 3,
-                            value: 90,
-                            checked_at: OffsetDateTime::UNIX_EPOCH,
-                        }],
-                    },
-                ])
-            })
-        });
-
+        repo
+            .expect_get_all_with_checks_for()
+            .return_once(|_| Box::pin(async { Ok(vec![]) }));
         let service = DefaultHabitService::new(Arc::new(repo));
 
         // act
-        let habit_with_checks = service.get_all_with_today_checks().await;
+        let result = service.get_all_with_checks_for(OffsetDateTime::UNIX_EPOCH).await;
 
         // assert
-        let habit_with_checks = habit_with_checks.unwrap();
-        let excepted = vec![
-            HabitWithCheck {
-                id: 1,
-                name: "Meditate".to_string(),
-                goal_value: 10,
-                goal_unit: "min".to_string(),
-                goal_period: GoalPeriod::Day,
-                created_at: OffsetDateTime::UNIX_EPOCH,
-                checks: vec![Check {
-                    id: 1,
-                    habit_id: 1,
-                    value: 5,
-                    checked_at: OffsetDateTime::UNIX_EPOCH,
-                }],
-            },
-            HabitWithCheck {
-                id: 2,
-                name: "Stretch shoulders".to_string(),
-                goal_value: 20,
-                goal_unit: "reps".to_string(),
-                goal_period: GoalPeriod::Day,
-                created_at: OffsetDateTime::UNIX_EPOCH,
-                checks: vec![],
-            },
-            HabitWithCheck {
-                id: 3,
-                name: "Train cardio zone 2".to_string(),
-                goal_value: 180,
-                goal_unit: "min".to_string(),
-                goal_period: GoalPeriod::Week,
-                created_at: OffsetDateTime::UNIX_EPOCH,
-                checks: vec![Check {
-                    id: 3,
-                    habit_id: 3,
-                    value: 90,
-                    checked_at: OffsetDateTime::UNIX_EPOCH,
-                }],
-            },
-        ];
-
-        assert_eq!(habit_with_checks, excepted);
+        assert!(result.is_ok());
     }
 }

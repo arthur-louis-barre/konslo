@@ -6,6 +6,7 @@ use sqlx::{PgPool, query, query_as, Row};
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
+use time::OffsetDateTime;
 use crate::models::check::{Check};
 
 #[async_trait]
@@ -14,7 +15,7 @@ pub trait HabitRepository: Send + Sync {
     async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
-    async fn get_all_with_today_checks(&self) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -78,20 +79,21 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habits)
     }
 
-    async fn get_all_with_today_checks(&self) -> Result<Vec<HabitWithCheck>, AppError> {
+    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
         let rows = query(
-            r#"
-                    SELECT
-                        h.habit_id, h.name, h.goal_value, h.goal_unit, h.goal_period, h.created_at,
-                        c.check_id, c.value, c.checked_at
-                    FROM habits h
-                        LEFT JOIN checks c ON h.habit_id = c.habit_id AND c.checked_at::DATE = CURRENT_DATE
-                    WHERE
-                        c.checked_at::DATE = CURRENT_DATE
-                        OR c.check_id IS NULL
-                    ORDER BY habit_id
-                "#
-            ).fetch_all(&self.pool)
+            r#"SELECT
+h.habit_id, h.name, h.goal_value, h.goal_unit, h.goal_period, h.created_at, c.check_id, c.value, c.checked_at
+FROM habits h
+LEFT JOIN checks c ON h.habit_id = c.habit_id AND (
+    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $1) OR
+    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $1) OR
+    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $1)
+)
+ORDER BY habit_id
+"#
+            )
+            .bind(timestamp)
+            .fetch_all(&self.pool)
             .await?;
 
         let mut map: HashMap<i32, HabitWithCheck> = HashMap::new();
