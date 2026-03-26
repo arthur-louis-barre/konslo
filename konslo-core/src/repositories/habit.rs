@@ -1,26 +1,25 @@
-use std::collections::HashMap;
 use crate::errors::AppError;
+use crate::models::check::Check;
 use crate::models::habit::{CreateHabit, GoalPeriod, Habit, HabitWithCheck};
 use async_trait::async_trait;
-use sqlx::{PgPool, query, query_as, Row};
+use sqlx::{PgPool, query_file_as, query_file};
+use std::collections::HashMap;
+use time::OffsetDateTime;
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
-use time::OffsetDateTime;
-use crate::models::check::{Check};
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
     async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
 pub struct PostgresHabitRepository {
-    pub pool: PgPool,
+    pool: PgPool,
 }
 
 impl PostgresHabitRepository {
@@ -32,96 +31,61 @@ impl PostgresHabitRepository {
 #[async_trait]
 impl HabitRepository for PostgresHabitRepository {
     async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError> {
-        let habit = query_as!(
+        let habit = query_file_as!(
             Habit,
-            r#"
-                INSERT INTO habits (name, goal_value, goal_unit, goal_period)
-                VALUES ($1, $2, $3, $4)
-                RETURNING habit_id as id, name, goal_value, goal_unit, goal_period as "goal_period: GoalPeriod", created_at;
-            "#,
+            "queries/insert_habit.sql",
             new_habit.name,
             new_habit.goal_value,
             new_habit.goal_unit,
             new_habit.goal_period as GoalPeriod,
         )
-            .fetch_one(&self.pool)
-            .await?;
+        .fetch_one(&self.pool)
+        .await?;
 
         Ok(habit)
     }
 
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
-        let habit = query_as!(
+        let habit = query_file_as!(
             Habit,
-            r#"
-                SELECT habit_id as id, name, goal_value, goal_unit, goal_period as "goal_period: GoalPeriod", created_at
-                FROM habits WHERE habit_id = $1
-            "#,
+            "queries/select_habit_by_id.sql",
             id
         )
-            .fetch_optional(&self.pool)
-            .await?;
+        .fetch_optional(&self.pool)
+        .await?;
 
         Ok(habit)
     }
 
-    async fn get_all(&self) -> Result<Vec<Habit>, AppError> {
-        let habits = query_as!(
-            Habit,
-            r#"
-                SELECT habit_id as id, name, goal_value, goal_unit, goal_period as "goal_period: GoalPeriod", created_at
-                FROM habits ORDER BY habit_id;
-            "#
-        )
-            .fetch_all(&self.pool)
-            .await?;
-
-        Ok(habits)
-    }
-
     async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let rows = query(
-            r#"SELECT
-h.habit_id, h.name, h.goal_value, h.goal_unit, h.goal_period, h.created_at, c.check_id, c.value, c.checked_at
-FROM habits h
-LEFT JOIN checks c ON h.habit_id = c.habit_id AND (
-    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $1) OR
-    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $1) OR
-    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $1)
-)
-ORDER BY habit_id
-"#
-            )
-            .bind(timestamp)
+        let rows = query_file!("queries/select_habits_with_checks_for_date.sql", timestamp)
             .fetch_all(&self.pool)
             .await?;
 
         let mut map: HashMap<i32, HabitWithCheck> = HashMap::new();
 
-        for row in rows.iter() {
-            let habit_id: i32 = row.get("habit_id");
-            if !map.contains_key(&habit_id) {
-                map.insert(habit_id.clone(), HabitWithCheck {
-                    id: habit_id.clone(),
-                    name: row.get("name"),
-                    goal_value: row.get("goal_value"),
-                    goal_unit: row.get("goal_unit"),
-                    goal_period: row.get("goal_period"),
-                    created_at: row.get("created_at"),
-                    checks: vec![],
-                });
-            }
+        for row in rows {
+            let id: i32 = row.id;
+            map.entry(id).or_insert_with(|| HabitWithCheck {
+                id,
+                name: row.name,
+                goal_value: row.goal_value,
+                goal_unit: row.goal_unit,
+                goal_period: row.goal_period,
+                created_at: row.created_at,
+                checks: vec![],
+            });
 
-            let check_id: Option<i32> = row.get("check_id");
+            let check_id: Option<i32> = row.check_id;
             if let Some(check_id) = check_id {
-                map.entry(habit_id.clone()).and_modify(|h| h.checks.push(
-                    Check {
-                        id: check_id.clone(),
-                        habit_id: habit_id.clone(),
-                        value: row.get("value"),
-                        checked_at: row.get("checked_at"),
-                    }
-                ));
+                map.entry(id).and_modify(|h| {
+                    h.checks.push(Check {
+                        id: check_id,
+                        habit_id: id,
+                        value: row.value.unwrap(),
+                        checked_at: row.checked_at.unwrap(),
+                    })
+                });
             }
         }
 
@@ -132,7 +96,7 @@ ORDER BY habit_id
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
-        let result = query!(r#"DELETE FROM habits WHERE habit_id = $1"#, id)
+        let result = query_file!("queries/delete_habit.sql", id)
             .execute(&self.pool)
             .await?;
 

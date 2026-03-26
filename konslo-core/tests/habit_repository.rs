@@ -116,58 +116,6 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_get_all(pool: PgPool) -> Result<(), Box<dyn Error>> {
-        // arrange
-        let repo = PostgresHabitRepository::new(pool);
-        let new_habit_1 = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
-        let new_habit_2 = CreateHabit {
-            name: "Stretch shoulders".to_string(),
-            goal_value: 20,
-            goal_unit: "reps".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
-        let new_habit_3 = CreateHabit {
-            name: "Cardio Zone 2".to_string(),
-            goal_value: 180,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Week,
-        };
-        let created_1 = repo.create(&new_habit_1).await?;
-        let created_2 = repo.create(&new_habit_2).await?;
-        let created_3 = repo.create(&new_habit_3).await?;
-
-        // act
-        let fetched = repo.get_all().await?;
-
-        // assert
-        assert_eq!(fetched.len(), 3);
-        assert_eq!(fetched[0], created_1);
-        assert_eq!(fetched[1], created_2);
-        assert_eq!(fetched[2], created_3);
-
-        Ok(())
-    }
-
-    #[sqlx::test]
-    async fn test_get_all_empty(pool: PgPool) -> Result<(), Box<dyn Error>> {
-        // arrange
-        let repo = PostgresHabitRepository::new(pool);
-
-        // act
-        let fetched = repo.get_all().await?;
-
-        // assert
-        assert!(fetched.is_empty());
-
-        Ok(())
-    }
-
-    #[sqlx::test]
     async fn test_get_all_with_checks_for_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let (reference, habits, checks) = setup_habits_with_checks(&pool).await?;

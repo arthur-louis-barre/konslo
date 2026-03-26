@@ -14,7 +14,6 @@ use mockall::automock;
 pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn get_all(&self) -> Result<Vec<Habit>, AppError>;
     async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
@@ -41,11 +40,6 @@ impl HabitService for DefaultHabitService {
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
         let habit = self.repo.get_by_id(id).await?;
         Ok(habit)
-    }
-
-    async fn get_all(&self) -> Result<Vec<Habit>, AppError> {
-        let habits = self.repo.get_all().await?;
-        Ok(habits)
     }
 
     async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
