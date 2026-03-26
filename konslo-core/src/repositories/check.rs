@@ -1,7 +1,7 @@
 use crate::errors::AppError;
 use crate::models::check::{Check, CreateCheck, UpdateCheck};
 use async_trait::async_trait;
-use sqlx::{PgPool, query, query_as};
+use sqlx::{PgPool, query_file, query_file_as};
 
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
@@ -17,7 +17,7 @@ pub trait CheckRepository: Send + Sync {
 }
 
 pub struct PostgresCheckRepository {
-    pub pool: PgPool,
+    pool: PgPool,
 }
 
 impl PostgresCheckRepository {
@@ -29,13 +29,9 @@ impl PostgresCheckRepository {
 #[async_trait]
 impl CheckRepository for PostgresCheckRepository {
     async fn create(&self, new_check: &CreateCheck) -> Result<Check, AppError> {
-        let check = query_as!(
+        let check = query_file_as!(
             Check,
-            r#"
-                INSERT INTO checks(habit_id, value, checked_at)
-                VALUES ($1, $2, $3)
-                RETURNING check_id as id, habit_id, value, checked_at;
-            "#,
+            "queries/insert_check.sql",
             new_check.habit_id,
             new_check.value,
             new_check.checked_at,
@@ -47,52 +43,31 @@ impl CheckRepository for PostgresCheckRepository {
     }
 
     async fn get_by_id(&self, id: i32) -> Result<Option<Check>, AppError> {
-        let check = query_as!(
-            Check,
-            "SELECT check_id as id, habit_id, value, checked_at FROM checks WHERE check_id = $1",
-            id
-        )
-        .fetch_optional(&self.pool)
-        .await?;
+        let check = query_file_as!(Check, "queries/select_check_by_id.sql", id)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(check)
     }
 
     async fn get_by_habit_id(&self, habit_id: i32) -> Result<Vec<Check>, AppError> {
-        let checks = query_as!(
-            Check,
-            r#"
-                SELECT check_id as id, habit_id, value, checked_at FROM checks 
-                WHERE habit_id = $1 ORDER BY checked_at
-            "#,
-            habit_id
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let checks = query_file_as!(Check, "queries/select_checks_by_habit_id.sql", habit_id)
+            .fetch_all(&self.pool)
+            .await?;
 
         Ok(checks)
     }
 
     async fn update(&self, check: &UpdateCheck) -> Result<Option<Check>, AppError> {
-        let check = query_as!(
-            Check,
-            r#"
-                UPDATE checks SET value = $1 WHERE check_id = $2 
-                RETURNING check_id as id, habit_id, value, checked_at;
-            "#,
-            check.value,
-            check.id,
-        )
-        .fetch_optional(&self.pool)
-        .await?;
+        let check = query_file_as!(Check, "queries/update_check.sql", check.value, check.id,)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(check)
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
-        let result = query!(r#"DELETE FROM checks WHERE check_id = $1"#, id)
-            .execute(&self.pool)
-            .await?;
+        let result = query_file!("queries/delete_check.sql", id).execute(&self.pool).await?;
 
         Ok(result.rows_affected() == 1)
     }

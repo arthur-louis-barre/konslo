@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                UPDATE checks SET value = $1 WHERE check_id = $2 \n                RETURNING check_id as id, habit_id, value, checked_at;\n            ",
+  "query": "INSERT INTO checks(habit_id, value, checked_at)\nVALUES ($1, $2, $3)\nRETURNING check_id as id, habit_id, value, checked_at;\n",
   "describe": {
     "columns": [
       {
@@ -27,7 +27,8 @@
     "parameters": {
       "Left": [
         "Int4",
-        "Int4"
+        "Int4",
+        "Timestamptz"
       ]
     },
     "nullable": [
@@ -37,5 +38,5 @@
       false
     ]
   },
-  "hash": "e8bd38728a68e36c3f6c3e36a97be6243f05dda52ac472d288db156ebcc31165"
+  "hash": "0eac61c7c6a1f6c76999b6ea966ea8897beceb4bf26ec884ed6af2734a4928ad"
 }

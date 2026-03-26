@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT check_id as id, habit_id, value, checked_at FROM checks WHERE check_id = $1",
+  "query": "SELECT check_id as id, habit_id, value, checked_at\nFROM checks\nWHERE habit_id = $1\nORDER BY checked_at\n",
   "describe": {
     "columns": [
       {
@@ -36,5 +36,5 @@
       false
     ]
   },
-  "hash": "7d00634a8e20fcc7c7b5e0790f522384459acc7705b83fc5921bbc51e35e9a2b"
+  "hash": "427f932e78d45ab94f7271e265bfa6e7057bb000ec4afa5c6b8664d96964a3ff"
 }
