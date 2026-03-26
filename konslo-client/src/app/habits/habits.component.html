@@ -1,0 +1,31 @@
+<div class="greeting">
+    <h1>Good evening,
+        <br><em>let's keep going.</em>
+    </h1>
+</div>
+
+@for (habitGroup of habitsByPeriod; track habitGroup.period) {
+    <div class="habits-group">
+        <div class="habits-group-header">
+            <span class="habits-group-label">{{ habitGroup.label }}</span>
+            <div class="habits-group-line"></div>
+        </div>
+        @for (habit of habitGroup.habits; track habit.id) {
+            <div>
+                <app-habit-card
+                        [habit]="habit"
+                        [isDropdownOpen]="openDropdownId === habit.id"
+                        (habitUpdated)="loadHabits()"
+                        (habitDeleted)="deleteHabit($event)"
+                        (dropdownToggled)="toggleDropdown($event)"
+                >
+                </app-habit-card>
+            </div>
+        }
+    </div>
+}
+
+<button class="h-new-btn" (click)="goToNewHabit()">
+    <mat-icon>add</mat-icon>
+    <span>New habit</span>
+</button>

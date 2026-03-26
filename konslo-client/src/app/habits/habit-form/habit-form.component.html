@@ -1,0 +1,45 @@
+<header>
+    <button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>New habit</h1>
+</header>
+
+<main>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label class="form-label" for="name">Name</label>
+            <input class="form-input" id="name" formControlName="name" type="text" placeholder="e.g. Meditate" autocomplete="off" >
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+            <div class="form-row">
+                <div>
+                    <label class="form-label" for="goal_value">Goal value</label>
+                    <input class="form-input" id="goal_value" formControlName="goal_value" type="number" placeholder="e.g. 30" autocomplete="off" >
+                </div>
+                <div>
+                    <label class="form-label" for="goal_unit">Goal unit</label>
+                    <input class="form-input" id="goal_unit" formControlName="goal_unit" type="text" placeholder="e.g. minutes" autocomplete="off" >
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Goal frequency</label>
+            <div class="form-grid">
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'day'" (click)="form.controls.goal_period.setValue(`day`)">Daily</div>
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'week'" (click)="form.controls.goal_period.setValue(`week`)">Weekly</div>
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'month'" (click)="form.controls.goal_period.setValue(`month`)">Monthly</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-actions">
+            <button class="btn save" type="submit" [disabled]="form.invalid">Save habit</button>
+        </div>
+
+    </form>
+</main>

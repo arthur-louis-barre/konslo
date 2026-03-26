@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konslo — Navy / Coral v5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-hover: #1c2330;
+            --border: #21262d;
+            --border-light: #2d3748;
+            --accent: #ff6b6b;
+            --text: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #4a5568;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: #0d1117;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+        }
+
+        .k {
+            font-family: 'Inter', sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 32px 60px;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        .k-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 48px;
+        }
+
+        .k-wordmark {
+            font-family: 'Instrument Serif', serif;
+            font-size: 22px;
+            color: var(--text);
+            letter-spacing: -0.01em;
+            display: inline-block;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 2px;
+        }
+
+        .k-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .k-greeting {
+            margin-bottom: 40px;
+        }
+
+        .k-greeting h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .k-greeting h1 em {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .k-group {
+            margin-bottom: 28px;
+        }
+
+        .k-group-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .k-group-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .k-group-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .k-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 5px;
+            position: relative;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .k-card:hover {
+            border-color: var(--border-light);
+            background: var(--surface-hover);
+        }
+
+        .k-card.done {
+            background: #1a1f26;
+            border-color: var(--border);
+        }
+
+        .k-card.done:hover {
+            background: #1e242d;
+        }
+
+        .k-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .k-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .k-card.done .k-name {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            text-decoration-color: var(--border-light);
+        }
+
+        .k-detail {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .k-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+            min-width: 80px;
+        }
+
+        .k-progress-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .k-card.done .k-progress-label {
+            color: var(--accent);
+        }
+
+        .k-bar {
+            width: 80px;
+            height: 2px;
+            background: var(--border);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .k-bar-fill {
+            height: 100%;
+            border-radius: 1px;
+            background: var(--border-light);
+        }
+
+        .k-card.done .k-bar-fill {
+            background: var(--accent);
+        }
+
+        .k-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .k-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            border: 0.5px solid var(--border-light);
+            background: transparent;
+            color: #6b7280;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s
+        }
+
+        .k-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .k-btn:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+
+        .k-btn:disabled:hover {
+            border-color: var(--border-light);
+            color: #6b7280;
+        }
+
+        .k-menu-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            border: 0.5px solid var(--border-light);
+            background: transparent;
+            color: #6b7280;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+            line-height: 1;
+            transition: all 0.15s;
+        }
+
+        .k-menu-btn:hover {
+            border-color: var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .k-dropdown {
+            display: none;
+            position: absolute;
+            right: 12px;
+            top: 46px;
+            background: #1c2330;
+            border: 0.5px solid var(--border-light);
+            border-radius: 8px;
+            z-index: 10;
+            min-width: 120px;
+            padding: 4px;
+        }
+
+        .k-dropdown.open {
+            display: block;
+        }
+
+        .k-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .k-dropdown-item:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        .k-dropdown-item.danger {
+            color: var(--accent);
+        }
+
+        .k-dropdown-item.danger:hover {
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        .k-new-btn {
+            margin-top: 16px;
+            padding: 9px 18px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.15s;
+        }
+
+        .k-new-btn:hover {
+            opacity: 0.88;
+        }
+    </style>
+</head>
+<body>
+<div class="k">
+    <div class="k-header">
+        <div class="k-wordmark">Konslo</div>
+        <div class="k-date">Sunday, Mar 22</div>
+    </div>
+    <div class="k-greeting">
+        <h1>Good evening,<br><em>let's keep going.</em></h1>
+    </div>
+
+    <div class="k-group">
+        <div class="k-group-header"><span class="k-group-label">Daily</span>
+            <div class="k-group-line"></div>
+        </div>
+        <div class="k-card done">
+            <div class="k-body">
+                <div class="k-name">Meditation</div>
+                <div class="k-detail">20 min</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">20 / 20</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:100%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn" disabled>+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+        <div class="k-card done">
+            <div class="k-body">
+                <div class="k-name">Lecture</div>
+                <div class="k-detail">30 min</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">30 / 30</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:100%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn" disabled>+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+        <div class="k-card">
+            <div class="k-body">
+                <div class="k-name">Cold shower</div>
+                <div class="k-detail">1 session</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">0 / 1</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn">+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="k-group">
+        <div class="k-group-header"><span class="k-group-label">Weekly</span>
+            <div class="k-group-line"></div>
+        </div>
+        <div class="k-card done">
+            <div class="k-body">
+                <div class="k-name">Zone 2 cardio</div>
+                <div class="k-detail">180 min</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">180 / 180</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:100%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn" disabled>+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+        <div class="k-card">
+            <div class="k-body">
+                <div class="k-name">Deep work block</div>
+                <div class="k-detail">3 sessions</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">1 / 3</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:33%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn">+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="k-group">
+        <div class="k-group-header"><span class="k-group-label">Monthly</span>
+            <div class="k-group-line"></div>
+        </div>
+        <div class="k-card">
+            <div class="k-body">
+                <div class="k-name">Read a book</div>
+                <div class="k-detail">1 book</div>
+            </div>
+            <div class="k-right"><span class="k-progress-label">0 / 1</span>
+                <div class="k-bar">
+                    <div class="k-bar-fill" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="k-actions">
+                <button class="k-btn">+</button>
+                <button class="k-menu-btn" onclick="toggleMenu(this)">···</button>
+            </div>
+            <div class="k-dropdown">
+                <div class="k-dropdown-item" onclick="closeAll()">✎ Edit</div>
+                <div class="k-dropdown-item" onclick="closeAll()">↺ Reset</div>
+                <div class="k-dropdown-item danger" onclick="closeAll()">✕ Delete</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="k-new-btn">+ New habit</button>
+</div>
+
+<script>
+    function closeAll() {
+        document.querySelectorAll('.k-dropdown').forEach(d => d.classList.remove('open'));
+    }
+
+    function toggleMenu(btn) {
+        const dropdown = btn.closest('.k-card').querySelector('.k-dropdown');
+        const isOpen = dropdown.classList.contains('open');
+        closeAll();
+        if (!isOpen) dropdown.classList.add('open');
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.k-card')) closeAll();
+    });
+</script>
+</body>
+</html>
