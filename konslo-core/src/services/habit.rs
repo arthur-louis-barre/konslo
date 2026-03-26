@@ -77,7 +77,8 @@ mod tests {
         #[tokio::test]
         async fn test_ok() {
             let mut repo = MockHabitRepository::new();
-            repo.expect_create().return_once(|_| Box::pin(async { Ok(make_habit()) }));
+            repo.expect_create()
+                .return_once(|_| Box::pin(async { Ok(make_habit()) }));
 
             let service = DefaultHabitService::new(Arc::new(repo));
             let new_habit = CreateHabit {
@@ -118,7 +119,8 @@ mod tests {
         #[tokio::test]
         async fn test_ok() {
             let mut repo = MockHabitRepository::new();
-            repo.expect_get_by_id().return_once(|_| Box::pin(async { Ok(Some(make_habit())) }));
+            repo.expect_get_by_id()
+                .return_once(|_| Box::pin(async { Ok(Some(make_habit())) }));
 
             let service = DefaultHabitService::new(Arc::new(repo));
 
@@ -146,7 +148,8 @@ mod tests {
         #[tokio::test]
         async fn test_ok() {
             let mut repo = MockHabitRepository::new();
-            repo.expect_get_all_with_checks_for().return_once(|_| Box::pin(async { Ok(vec![]) }));
+            repo.expect_get_all_with_checks_for()
+                .return_once(|_| Box::pin(async { Ok(vec![]) }));
 
             let service = DefaultHabitService::new(Arc::new(repo));
 

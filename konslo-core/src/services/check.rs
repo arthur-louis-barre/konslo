@@ -246,9 +246,7 @@ mod tests {
             habit_repo
                 .expect_get_by_id()
                 .return_once(|_| Box::pin(async { Ok(Some(make_habit(10))) }));
-            check_repo
-                .expect_delete()
-                .return_once(|_| Box::pin(async { Ok(true) }));
+            check_repo.expect_delete().return_once(|_| Box::pin(async { Ok(true) }));
 
             let service = DefaultCheckService::new(Arc::new(check_repo), Arc::new(habit_repo));
             let update = UpdateCheck { id: 1, value: 0 };
