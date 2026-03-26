@@ -1,5 +1,5 @@
-use time::OffsetDateTime;
 use crate::models::check::Check;
+use time::OffsetDateTime;
 
 #[derive(Clone, Copy, Debug, PartialEq, sqlx::Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
