@@ -57,4 +57,3 @@ v4 —
 - **Atomic git commits** — after each meaningful implementation step, we stop and commit with a clear, focused message. One concept = one commit.
 - **TDD** — we write the test first, watch it fail (red), then write the code to make it pass (green), then clean up (refactor).
 - **PowerShell first** — on utilise les commandes PowerShell autant que possible (ni, rm, mv, cat, etc.)
-- **IntelliJ tips** — de temps en temps, Claude glisse un tip sur l'utilisation d'IntelliJ pour aller plus vite.
