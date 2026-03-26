@@ -2,7 +2,7 @@ use crate::errors::AppError;
 use crate::models::check::Check;
 use crate::models::habit::{CreateHabit, GoalPeriod, Habit, HabitWithCheck};
 use async_trait::async_trait;
-use sqlx::{PgPool, query_file_as, query_file};
+use sqlx::{PgPool, query_file, query_file_as};
 use std::collections::HashMap;
 use time::OffsetDateTime;
 
@@ -46,13 +46,9 @@ impl HabitRepository for PostgresHabitRepository {
     }
 
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
-        let habit = query_file_as!(
-            Habit,
-            "queries/select_habit_by_id.sql",
-            id
-        )
-        .fetch_optional(&self.pool)
-        .await?;
+        let habit = query_file_as!(Habit, "queries/select_habit_by_id.sql", id)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(habit)
     }
@@ -65,7 +61,9 @@ impl HabitRepository for PostgresHabitRepository {
         let mut map: HashMap<i32, HabitWithCheck> = HashMap::new();
 
         for row in rows {
-            let id: i32 = row.id;
+            let id = row.id;
+            let check_id = row.check_id;
+
             map.entry(id).or_insert_with(|| HabitWithCheck {
                 id,
                 name: row.name,
@@ -76,7 +74,6 @@ impl HabitRepository for PostgresHabitRepository {
                 checks: vec![],
             });
 
-            let check_id: Option<i32> = row.check_id;
             if let Some(check_id) = check_id {
                 map.entry(id).and_modify(|h| {
                     h.checks.push(Check {
@@ -96,9 +93,7 @@ impl HabitRepository for PostgresHabitRepository {
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
-        let result = query_file!("queries/delete_habit.sql", id)
-            .execute(&self.pool)
-            .await?;
+        let result = query_file!("queries/delete_habit.sql", id).execute(&self.pool).await?;
 
         Ok(result.rows_affected() == 1)
     }

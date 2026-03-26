@@ -1,17 +1,17 @@
 #[cfg(test)]
 mod tests {
     use konslo_core::errors::AppError;
+    use konslo_core::models::check::{Check, CreateCheck};
     use konslo_core::models::habit::{CreateHabit, GoalPeriod, Habit, HabitWithCheck};
+    use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use time::{Duration, OffsetDateTime};
     use time::macros::datetime;
-    use konslo_core::models::check::{Check, CreateCheck};
-    use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
+    use time::{Duration, OffsetDateTime};
 
     #[sqlx::test]
-    async fn test_create_habit_returns_created_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_create_habit_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
         let new_habit = CreateHabit {
@@ -57,7 +57,7 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_delete_habit(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_delete_habit_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
         let new_habit = CreateHabit {
@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_delete_habit_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_delete_habit_err_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
 
@@ -94,7 +94,7 @@ mod tests {
     }
 
     #[sqlx::test]
-    async fn test_get_by_id(pool: PgPool) -> Result<(), Box<dyn Error>> {
+    async fn test_get_by_id_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
         let new_habit = CreateHabit {
@@ -125,19 +125,23 @@ mod tests {
         let habits_with_checks = repo.get_all_with_checks_for(reference).await?;
 
         // assert
-        let excepted = vec![
+        let expected = vec![
             to_habit_with_check(&habits[0], vec![checks[0].clone()]),
             to_habit_with_check(&habits[1], vec![]),
             to_habit_with_check(&habits[2], vec![checks[2].clone(), checks[3].clone()]),
             to_habit_with_check(&habits[3], vec![checks[5].clone(), checks[6].clone()]),
         ];
 
-        assert_eq!(habits_with_checks, excepted);
+        assert_eq!(habits_with_checks, expected);
 
         Ok(())
     }
 
-    async fn setup_habits_with_checks(pool: &PgPool) -> Result<(OffsetDateTime, Vec<Habit>, Vec<Check>), Box<dyn Error>> {
+    // helper functions
+
+    async fn setup_habits_with_checks(
+        pool: &PgPool,
+    ) -> Result<(OffsetDateTime, Vec<Habit>, Vec<Check>), Box<dyn Error>> {
         let repo = PostgresHabitRepository::new(pool.clone());
 
         let new_habit_1 = CreateHabit {
@@ -230,7 +234,16 @@ mod tests {
         Ok((
             reference,
             vec![habit_created_1, habit_created_2, habit_created_3, habit_created_4],
-            vec![check_created_1, check_created_2, check_created_3, check_created_4, check_created_5, check_created_6, check_created_7, check_created_8]
+            vec![
+                check_created_1,
+                check_created_2,
+                check_created_3,
+                check_created_4,
+                check_created_5,
+                check_created_6,
+                check_created_7,
+                check_created_8,
+            ],
         ))
     }
 
