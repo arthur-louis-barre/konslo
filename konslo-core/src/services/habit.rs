@@ -54,87 +54,133 @@ impl HabitService for DefaultHabitService {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::models::habit::GoalPeriod;
     use crate::repositories::habit::MockHabitRepository;
     use time::OffsetDateTime;
 
-    #[tokio::test]
-    async fn test_create_returns_created_habit() {
-        // arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_create().returning(|new_habit| {
-            let name = new_habit.name.clone();
-            let goal_value = new_habit.goal_value;
-            let goal_unit = new_habit.goal_unit.clone();
-            let goal_period = new_habit.goal_period;
-            Box::pin(async move {
-                Ok(Habit {
-                    id: 1,
-                    name,
-                    goal_value,
-                    goal_unit,
-                    goal_period,
-                    created_at: OffsetDateTime::UNIX_EPOCH,
-                })
-            })
-        });
-        let service = DefaultHabitService::new(Arc::new(repo));
-        let new_habit = CreateHabit {
+    fn make_habit() -> Habit {
+        Habit {
+            id: 1,
             name: "Meditate".to_string(),
             goal_value: 10,
             goal_unit: "min".to_string(),
             goal_period: GoalPeriod::Day,
-        };
-
-        // act
-        let habit = service.create(new_habit).await;
-
-        // assert
-        let habit = habit.expect("result should be Ok");
-        assert_eq!(habit.id, 1);
-        assert_eq!(habit.name, "Meditate");
-        assert_eq!(habit.goal_value, 10);
-        assert_eq!(habit.goal_unit, "min");
-        assert_eq!(habit.goal_period, GoalPeriod::Day);
-        assert_eq!(habit.created_at, OffsetDateTime::UNIX_EPOCH);
+            created_at: OffsetDateTime::UNIX_EPOCH,
+        }
     }
 
-    #[tokio::test]
-    async fn test_create_invalid_input_returns_validation_error() {
-        // arrange
-        let mut repo = MockHabitRepository::new();
-        repo.expect_create().times(0);
-        let service = DefaultHabitService::new(Arc::new(repo));
-        let new_habit = CreateHabit {
-            name: "".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
+    mod create {
+        use super::*;
 
-        // act
-        let habit = service.create(new_habit).await;
+        #[tokio::test]
+        async fn test_ok() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_create().return_once(|_| Box::pin(async { Ok(make_habit()) }));
 
-        // assert
-        assert!(habit.is_err());
-        assert!(matches!(habit.unwrap_err(), AppError::Validation(_)));
+            let service = DefaultHabitService::new(Arc::new(repo));
+            let new_habit = CreateHabit {
+                name: "Meditate".to_string(),
+                goal_value: 10,
+                goal_unit: "min".to_string(),
+                goal_period: GoalPeriod::Day,
+            };
+
+            let result = service.create(new_habit).await;
+
+            assert!(result.is_ok());
+            assert_eq!(result.unwrap(), make_habit());
+        }
+
+        #[tokio::test]
+        async fn test_invalid_name_returns_validation_error() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_create().times(0);
+
+            let service = DefaultHabitService::new(Arc::new(repo));
+            let new_habit = CreateHabit {
+                name: "".to_string(),
+                goal_value: 10,
+                goal_unit: "min".to_string(),
+                goal_period: GoalPeriod::Day,
+            };
+
+            let result = service.create(new_habit).await;
+
+            assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+        }
     }
 
-    #[tokio::test]
-    async fn test_get_all_with_checks_for_ok() {
-        // arrange
-        let mut repo = MockHabitRepository::new();
-        repo
-            .expect_get_all_with_checks_for()
-            .return_once(|_| Box::pin(async { Ok(vec![]) }));
-        let service = DefaultHabitService::new(Arc::new(repo));
+    mod get_by_id {
+        use super::*;
 
-        // act
-        let result = service.get_all_with_checks_for(OffsetDateTime::UNIX_EPOCH).await;
+        #[tokio::test]
+        async fn test_ok() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_get_by_id().return_once(|_| Box::pin(async { Ok(Some(make_habit())) }));
 
-        // assert
-        assert!(result.is_ok());
+            let service = DefaultHabitService::new(Arc::new(repo));
+
+            let result = service.get_by_id(1).await;
+
+            assert_eq!(result.unwrap(), Some(make_habit()));
+        }
+
+        #[tokio::test]
+        async fn test_not_found_returns_none() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_get_by_id().return_once(|_| Box::pin(async { Ok(None) }));
+
+            let service = DefaultHabitService::new(Arc::new(repo));
+
+            let result = service.get_by_id(999).await;
+
+            assert_eq!(result.unwrap(), None);
+        }
+    }
+
+    mod get_all_with_checks_for {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_ok() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_get_all_with_checks_for().return_once(|_| Box::pin(async { Ok(vec![]) }));
+
+            let service = DefaultHabitService::new(Arc::new(repo));
+
+            let result = service.get_all_with_checks_for(OffsetDateTime::UNIX_EPOCH).await;
+
+            assert!(result.is_ok());
+        }
+    }
+
+    mod delete {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_ok() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_delete().return_once(|_| Box::pin(async { Ok(true) }));
+
+            let service = DefaultHabitService::new(Arc::new(repo));
+
+            let result = service.delete(1).await;
+
+            assert_eq!(result.unwrap(), true);
+        }
+
+        #[tokio::test]
+        async fn test_not_found_returns_false() {
+            let mut repo = MockHabitRepository::new();
+            repo.expect_delete().return_once(|_| Box::pin(async { Ok(false) }));
+
+            let service = DefaultHabitService::new(Arc::new(repo));
+
+            let result = service.delete(999).await;
+
+            assert_eq!(result.unwrap(), false);
+        }
     }
 }
