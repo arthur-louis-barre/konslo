@@ -35,7 +35,7 @@ mod tests {
     fn test_validate_habit_name_255_chars_returns_ok() {
         let name = "X".repeat(255);
 
-        let result = validate_habit_name(name.as_ref());
+        let result = validate_habit_name(&name);
 
         assert!(result.is_ok());
     }
@@ -44,7 +44,7 @@ mod tests {
     fn test_validate_habit_name_256_chars_returns_validation_error() {
         let name = "X".repeat(256);
 
-        let result = validate_habit_name(name.as_ref());
+        let result = validate_habit_name(&name);
 
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
