@@ -10,16 +10,20 @@ mod tests {
     use time::macros::datetime;
     use time::{Duration, OffsetDateTime};
 
-    #[sqlx::test]
-    async fn test_create_habit_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
-        // arrange
-        let repo = PostgresHabitRepository::new(pool);
-        let new_habit = CreateHabit {
+    fn make_create_habit() -> CreateHabit {
+        CreateHabit {
             name: "Meditate".to_string(),
             goal_value: 10,
             goal_unit: "min".to_string(),
             goal_period: GoalPeriod::Day,
-        };
+        }
+    }
+
+    #[sqlx::test]
+    async fn test_create_habit_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        // arrange
+        let repo = PostgresHabitRepository::new(pool);
+        let new_habit = make_create_habit();
 
         // act
         let habit = repo.create(&new_habit).await?;
@@ -38,12 +42,7 @@ mod tests {
     async fn test_create_habit_err_conflict(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
+        let new_habit = make_create_habit();
 
         // act
         repo.create(&new_habit).await?;
@@ -60,12 +59,7 @@ mod tests {
     async fn test_delete_habit_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
+        let new_habit = make_create_habit();
         let habit = repo.create(&new_habit).await?;
 
         // act
@@ -97,12 +91,8 @@ mod tests {
     async fn test_get_by_id_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
         // arrange
         let repo = PostgresHabitRepository::new(pool);
-        let new_habit = CreateHabit {
-            name: "Meditate".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-        };
+        let new_habit = make_create_habit();
+
         let created = repo.create(&new_habit).await?;
 
         // act
@@ -111,6 +101,17 @@ mod tests {
         // assert
         assert!(fetched.is_some(), "habit should exist after creation");
         assert_eq!(fetched.unwrap(), created);
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_get_by_id_not_found(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        let repo = PostgresHabitRepository::new(pool);
+
+        let result = repo.get_by_id(999).await?;
+
+        assert!(result.is_none());
 
         Ok(())
     }
@@ -133,6 +134,17 @@ mod tests {
         ];
 
         assert_eq!(habits_with_checks, expected);
+
+        Ok(())
+    }
+
+    #[sqlx::test]
+    async fn test_get_all_with_checks_for_empty(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        let repo = PostgresHabitRepository::new(pool);
+
+        let result = repo.get_all_with_checks_for(OffsetDateTime::now_utc()).await?;
+
+        assert!(result.is_empty());
 
         Ok(())
     }
