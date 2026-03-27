@@ -17,12 +17,8 @@ export class HabitsService {
     return this.http.post<Habit>(`${this.apiUrl}/habits`, request);
   }
 
-  getHabits() {
-    return this.http.get<Habit[]>(`${this.apiUrl}/habits`);
-  }
-
   getTodayHabits() {
-    return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits/today`);
+    return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits`);
   }
 
   deleteHabit(id: number) {

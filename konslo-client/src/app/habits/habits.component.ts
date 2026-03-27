@@ -35,7 +35,7 @@ export class HabitsComponent implements OnInit {
     loadHabits() {
         this.habitsService.getTodayHabits().subscribe((habits) => {
             this.habits = habits.map(h => {
-                h.isCompleted = h.checks.length > 0 && (h.goal_value == h.checks[0].value);
+                h.isCompleted = h.checks.length > 0 && (h.goal_value === h.checks.reduce((sum, check) => sum + check.value, 0));
                 return h;
             })
         });
