@@ -1,2 +1,2 @@
-pub mod habit_handler;
-pub mod check_handlers;
+pub mod habit;
+pub mod check;

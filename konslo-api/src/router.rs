@@ -3,8 +3,8 @@ use axum::routing::{get, post, put};
 use konslo_core::services::habit::HabitService;
 use std::sync::Arc;
 use konslo_core::services::check::CheckService;
-use crate::handlers::check_handlers::{create_check_handler, get_checks_by_habit_handler, update_check_handler};
-use crate::handlers::habit_handler::{create_habits_handler, delete_habits_handler, get_all_with_checks_for_handler, get_habit_handler};
+use crate::handlers::check::{create_check_handler, get_checks_by_habit_handler, update_check_handler};
+use crate::handlers::habit::{create_habits_handler, delete_habits_handler, get_all_with_checks_for_handler, get_habit_handler};
 
 #[derive(Clone)]
 pub struct AppState {
