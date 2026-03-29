@@ -3,11 +3,11 @@ use time::{Duration, OffsetDateTime};
 use crate::models::habit::HabitWithCheck;
 
 pub fn validate_check_value(value: i32, habit_goal_value: i32) -> Result<(), AppError> {
-    if value < 0 {
+    if value <= 0 {
         return Err(AppError::Validation("value must be greater than 0".into()));
     } else if value > habit_goal_value {
         return Err(AppError::Validation(
-            "value can't be greater than habit's goal_value".into(),
+            "value must not be greater than habit's goal_value".into(),
         ));
     }
 

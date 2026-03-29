@@ -70,3 +70,14 @@ pub struct CreateHabit {
     pub goal_unit: String,
     pub goal_period: GoalPeriod,
 }
+
+impl CreateHabit {
+    pub fn new(name: &str, goal_value: i32, goal_unit: &str, goal_period: GoalPeriod) -> Self {
+        CreateHabit {
+            name: name.to_string(),
+            goal_value,
+            goal_unit: goal_unit.to_string(),
+            goal_period,
+        }
+    }
+}

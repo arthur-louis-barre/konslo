@@ -6,19 +6,12 @@ use sqlx::{PgPool, query_file, query_file_as};
 use std::collections::HashMap;
 use time::OffsetDateTime;
 
-#[cfg(any(test, feature = "mockable"))]
-use mockall::automock;
-
 #[async_trait]
-#[cfg_attr(any(test, feature = "mockable"), automock)]
+#[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn get_with_period_checks(
-        &self,
-        id: i32,
-        timestamp: OffsetDateTime,
-    ) -> Result<Option<HabitWithCheck>, AppError>;
+    async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
@@ -58,11 +51,7 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_with_period_checks(
-        &self,
-        habit_id: i32,
-        timestamp: OffsetDateTime,
-    ) -> Result<Option<HabitWithCheck>, AppError> {
+    async fn get_with_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError> {
         let rows = query_file!("queries/select_habit_with_period_checks.sql", habit_id, timestamp)
             .fetch_all(&self.pool)
             .await?;
@@ -71,7 +60,7 @@ impl HabitRepository for PostgresHabitRepository {
             return Ok(None);
         }
 
-        let mut habit_with_check = {
+        let mut habit_with_checks = {
             let row = &rows[0];
             HabitWithCheck {
                 id: row.id,
@@ -87,7 +76,7 @@ impl HabitRepository for PostgresHabitRepository {
         for row in rows {
             let check_id = row.check_id;
             if let Some(check_id) = check_id {
-                habit_with_check.checks.push(Check {
+                habit_with_checks.checks.push(Check {
                     id: check_id,
                     habit_id,
                     value: row.value.unwrap(),
@@ -96,7 +85,7 @@ impl HabitRepository for PostgresHabitRepository {
             }
         }
 
-        Ok(Some(habit_with_check))
+        Ok(Some(habit_with_checks))
     }
 
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
@@ -132,10 +121,10 @@ impl HabitRepository for PostgresHabitRepository {
             }
         }
 
-        let mut result: Vec<HabitWithCheck> = map.into_values().collect();
-        result.sort_by_key(|h| h.id);
+        let mut habits_with_checks = map.into_values().collect::<Vec<HabitWithCheck>>();
+        habits_with_checks.sort_by_key(|h| h.id);
 
-        Ok(result)
+        Ok(habits_with_checks)
     }
 
     async fn delete(&self, id: i32) -> Result<bool, AppError> {
