@@ -1,5 +1,5 @@
 use crate::models::check::Check;
-use time::OffsetDateTime;
+use time::{Date, Duration, OffsetDateTime};
 
 #[derive(Clone, Copy, Debug, PartialEq, sqlx::Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
@@ -7,6 +7,39 @@ pub enum GoalPeriod {
     Day,
     Week,
     Month,
+}
+
+impl GoalPeriod {
+    pub(crate) fn get_period_start(&self, timestamp: OffsetDateTime) -> Date {
+        match self {
+            GoalPeriod::Day => timestamp.date(),
+            GoalPeriod::Week => {
+                let num_days = timestamp.weekday().number_days_from_monday() as i64;
+                let first_week_day = timestamp - Duration::days(num_days);
+                first_week_day.date()
+            }
+            GoalPeriod::Month => {
+                let first_month_day = timestamp.replace_day(1).unwrap();
+                first_month_day.date()
+            }
+        }
+    }
+
+    pub(crate) fn get_period_end(&self, timestamp: OffsetDateTime) -> Date {
+        match self {
+            GoalPeriod::Day => timestamp.date(),
+            GoalPeriod::Week => {
+                let num_days = timestamp.weekday().number_days_from_monday() as i64;
+                let last_week_day = timestamp + Duration::days(6 - num_days);
+                last_week_day.date()
+            }
+            GoalPeriod::Month => {
+                let month_length = timestamp.month().length(timestamp.year());
+                let last_month_day = timestamp.replace_day(month_length).unwrap();
+                last_month_day.date()
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, sqlx::FromRow)]

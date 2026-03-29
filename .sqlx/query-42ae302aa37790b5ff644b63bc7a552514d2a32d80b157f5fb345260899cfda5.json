@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n    h.habit_id as id,\n    h.name,\n    h.goal_value,\n    h.goal_unit,\n    h.goal_period as \"goal_period: GoalPeriod\",\n    h.created_at,\n    c.check_id as \"check_id?\",\n    c.value as \"value?\",\n    c.checked_at as \"checked_at?\"\nFROM habits h LEFT JOIN checks c ON h.habit_id = c.habit_id AND (\n    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $2::timestamptz) OR\n    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $2::timestamptz) OR\n    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $2::timestamptz)\n)\nWHERE h.habit_id = $1;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "goal_value",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "goal_unit",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "goal_period: GoalPeriod",
+        "type_info": {
+          "Custom": {
+            "name": "goal_period_enum",
+            "kind": {
+              "Enum": [
+                "day",
+                "week",
+                "month"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "check_id?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "value?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "checked_at?",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "42ae302aa37790b5ff644b63bc7a552514d2a32d80b157f5fb345260899cfda5"
+}

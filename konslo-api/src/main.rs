@@ -8,7 +8,6 @@ use crate::router::{AppState, get_router};
 use dotenvy::dotenv;
 use konslo_core::repositories::check::PostgresCheckRepository;
 use konslo_core::repositories::habit::PostgresHabitRepository;
-use konslo_core::services::check::DefaultCheckService;
 use konslo_core::services::habit::DefaultHabitService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
@@ -46,11 +45,9 @@ async fn main() {
     // 3. Instantiate the repository
     let habit_repo = Arc::new(PostgresHabitRepository::new(pool.clone()));
     let check_repo = Arc::new(PostgresCheckRepository::new(pool.clone()));
-    let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone()));
-    let check_service = Arc::new(DefaultCheckService::new(check_repo.clone(), habit_repo.clone()));
+    let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone(), check_repo.clone()));
     let state = AppState {
         habit_service,
-        check_service,
     };
 
     // 4. Config routing

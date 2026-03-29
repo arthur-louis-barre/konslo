@@ -4,7 +4,9 @@ ENV SQLX_OFFLINE=true
 COPY Cargo.toml Cargo.lock ./
 COPY konslo-core/Cargo.toml ./konslo-core/
 COPY konslo-api/Cargo.toml ./konslo-api/
-COPY .sqlx ./.sqlx
+COPY konslo-core/.sqlx ./konslo-core/.sqlx
+COPY konslo-core/queries ./konslo-core/queries
+COPY konslo-core/migrations ./konslo-core/migrations
 RUN mkdir konslo-core/src && echo "" > konslo-core/src/lib.rs
 RUN mkdir konslo-api/src && echo "fn main() {}" > konslo-api/src/main.rs
 RUN cargo build

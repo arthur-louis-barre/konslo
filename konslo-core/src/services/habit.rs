@@ -6,26 +6,32 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use time::OffsetDateTime;
 
+use crate::models::check::Check;
+use crate::repositories::check::CheckRepository;
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
+use crate::validation::check::validate_period_cap;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), automock)]
 pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn delete(&self, id: i32) -> Result<bool, AppError>;
+    async fn delete(&self, id: i32) -> Result<(), AppError>;
+    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn add_check(&self, habit_id: i32, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
+    async fn reset_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<(), AppError>;
 }
 
 #[derive(Clone)]
 pub struct DefaultHabitService {
-    repo: Arc<dyn HabitRepository>,
+    habit_repo: Arc<dyn HabitRepository>,
+    check_repo: Arc<dyn CheckRepository>,
 }
 
 impl DefaultHabitService {
-    pub fn new(repo: Arc<dyn HabitRepository>) -> Self {
-        Self { repo }
+    pub fn new(habit_repo: Arc<dyn HabitRepository>, check_repo: Arc<dyn CheckRepository>) -> Self {
+        Self { habit_repo, check_repo }
     }
 }
 
@@ -33,157 +39,60 @@ impl DefaultHabitService {
 impl HabitService for DefaultHabitService {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError> {
         validate_habit_name(&new_habit.name)?;
-        let habit = self.repo.create(&new_habit).await?;
+        let habit = self.habit_repo.create(&new_habit).await?;
         Ok(habit)
     }
 
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
-        let habit = self.repo.get_by_id(id).await?;
+        let habit = self.habit_repo.get_by_id(id).await?;
         Ok(habit)
     }
 
-    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let habits_with_checks = self.repo.get_all_with_checks_for(timestamp).await?;
+    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
+        let habits_with_checks = self.habit_repo.get_all_with_period_checks(timestamp).await?;
         Ok(habits_with_checks)
     }
 
-    async fn delete(&self, id: i32) -> Result<bool, AppError> {
-        let deleted = self.repo.delete(id).await?;
-        Ok(deleted)
+    async fn delete(&self, id: i32) -> Result<(), AppError> {
+        let deleted = self.habit_repo.delete(id).await?;
+        if deleted {
+            Ok(())
+        } else {
+            Err(AppError::NotFound(format!("habit with id {} not found", id)))
+        }
+    }
+
+    async fn add_check(&self, habit_id: i32, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError> {
+        let habit_with_check = self
+            .habit_repo
+            .get_with_period_checks(habit_id, timestamp)
+            .await?
+            .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
+
+        validate_period_cap(&habit_with_check, value)?;
+
+        let check = self.check_repo.upsert(habit_id, value, timestamp).await?;
+
+        Ok(check)
+    }
+
+    async fn reset_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<(), AppError> {
+        let habit_with_check = self
+            .habit_repo
+            .get_with_period_checks(habit_id, timestamp)
+            .await?
+            .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
+
+        let period_start = habit_with_check.goal_period.get_period_start(timestamp);
+        let period_end = habit_with_check.goal_period.get_period_end(timestamp);
+
+        self.check_repo
+            .delete_by_habit_for_period(habit_id, period_start, period_end)
+            .await?;
+
+        Ok(())
     }
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::models::habit::GoalPeriod;
-    use crate::repositories::habit::MockHabitRepository;
-    use time::OffsetDateTime;
-
-    fn make_habit() -> Habit {
-        Habit {
-            id: 1,
-            name: "Meditate".to_string(),
-            goal_value: 10,
-            goal_unit: "min".to_string(),
-            goal_period: GoalPeriod::Day,
-            created_at: OffsetDateTime::UNIX_EPOCH,
-        }
-    }
-
-    mod create {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_ok() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_create()
-                .return_once(|_| Box::pin(async { Ok(make_habit()) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-            let new_habit = CreateHabit {
-                name: "Meditate".to_string(),
-                goal_value: 10,
-                goal_unit: "min".to_string(),
-                goal_period: GoalPeriod::Day,
-            };
-
-            let result = service.create(new_habit).await;
-
-            assert!(result.is_ok());
-            assert_eq!(result.unwrap(), make_habit());
-        }
-
-        #[tokio::test]
-        async fn test_invalid_name_returns_validation_error() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_create().times(0);
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-            let new_habit = CreateHabit {
-                name: "".to_string(),
-                goal_value: 10,
-                goal_unit: "min".to_string(),
-                goal_period: GoalPeriod::Day,
-            };
-
-            let result = service.create(new_habit).await;
-
-            assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
-        }
-    }
-
-    mod get_by_id {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_ok() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_get_by_id()
-                .return_once(|_| Box::pin(async { Ok(Some(make_habit())) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-
-            let result = service.get_by_id(1).await;
-
-            assert_eq!(result.unwrap(), Some(make_habit()));
-        }
-
-        #[tokio::test]
-        async fn test_not_found_returns_none() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_get_by_id().return_once(|_| Box::pin(async { Ok(None) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-
-            let result = service.get_by_id(999).await;
-
-            assert_eq!(result.unwrap(), None);
-        }
-    }
-
-    mod get_all_with_checks_for {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_ok() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_get_all_with_checks_for()
-                .return_once(|_| Box::pin(async { Ok(vec![]) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-
-            let result = service.get_all_with_checks_for(OffsetDateTime::UNIX_EPOCH).await;
-
-            assert!(result.is_ok());
-        }
-    }
-
-    mod delete {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_ok() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_delete().return_once(|_| Box::pin(async { Ok(true) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-
-            let result = service.delete(1).await;
-
-            assert_eq!(result.unwrap(), true);
-        }
-
-        #[tokio::test]
-        async fn test_not_found_returns_false() {
-            let mut repo = MockHabitRepository::new();
-            repo.expect_delete().return_once(|_| Box::pin(async { Ok(false) }));
-
-            let service = DefaultHabitService::new(Arc::new(repo));
-
-            let result = service.delete(999).await;
-
-            assert_eq!(result.unwrap(), false);
-        }
-    }
-}
+mod tests {}

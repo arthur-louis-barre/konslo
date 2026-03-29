@@ -1,8 +1,7 @@
-use serde::Deserialize;
-use time::OffsetDateTime;
 use crate::responses::GoalPeriodDto;
+use time::OffsetDateTime;
 
-#[derive(Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct CreateHabitRequest {
     pub name: String,
     pub goal_value: i32,
@@ -10,20 +9,21 @@ pub struct CreateHabitRequest {
     pub goal_period: GoalPeriodDto,
 }
 
-#[derive(Deserialize)]
-pub struct CreateCheckRequest {
+#[derive(serde::Deserialize)]
+pub struct AddCheckRequest {
     pub value: i32,
-    #[serde(with = "time::serde::rfc3339")]
-    pub checked_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub checked_at: Option<OffsetDateTime>,
 }
 
-#[derive(Deserialize)]
-pub struct UpdateCheckRequest {
-    pub value: i32,
-}
-
-#[derive(Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct HabitsQuery {
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub date: Option<OffsetDateTime>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct ResetChecksQuery {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub date: Option<OffsetDateTime>,
 }

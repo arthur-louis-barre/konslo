@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import { HabitsService } from '../habits.service';
-import {GoalPeriod} from "../habits.model";
+import { HabitService } from '../habit.service';
+import {GoalPeriod} from "../habit.model";
 import {Router} from "@angular/router";
 import {MatIcon} from "@angular/material/icon";
 
@@ -13,7 +13,7 @@ import {MatIcon} from "@angular/material/icon";
 })
 export class HabitFormComponent {
   private router = inject(Router);
-  private habitsService = inject(HabitsService);
+  private habitsService = inject(HabitService);
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),

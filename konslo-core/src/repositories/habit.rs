@@ -14,7 +14,12 @@ use mockall::automock;
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn get_with_period_checks(
+        &self,
+        id: i32,
+        timestamp: OffsetDateTime,
+    ) -> Result<Option<HabitWithCheck>, AppError>;
+    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32) -> Result<bool, AppError>;
 }
 
@@ -53,8 +58,49 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_all_with_checks_for(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habits_with_checks_for_date.sql", timestamp)
+    async fn get_with_period_checks(
+        &self,
+        habit_id: i32,
+        timestamp: OffsetDateTime,
+    ) -> Result<Option<HabitWithCheck>, AppError> {
+        let rows = query_file!("queries/select_habit_with_period_checks.sql", habit_id, timestamp)
+            .fetch_all(&self.pool)
+            .await?;
+
+        if rows.is_empty() {
+            return Ok(None);
+        }
+
+        let mut habit_with_check = {
+            let row = &rows[0];
+            HabitWithCheck {
+                id: row.id,
+                name: row.name.clone(),
+                goal_value: row.goal_value,
+                goal_unit: row.goal_unit.clone(),
+                goal_period: row.goal_period,
+                created_at: row.created_at,
+                checks: vec![],
+            }
+        };
+
+        for row in rows {
+            let check_id = row.check_id;
+            if let Some(check_id) = check_id {
+                habit_with_check.checks.push(Check {
+                    id: check_id,
+                    habit_id,
+                    value: row.value.unwrap(),
+                    checked_at: row.checked_at.unwrap(),
+                });
+            }
+        }
+
+        Ok(Some(habit_with_check))
+    }
+
+    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
+        let rows = query_file!("queries/select_habits_with_period_checks.sql", timestamp)
             .fetch_all(&self.pool)
             .await?;
 

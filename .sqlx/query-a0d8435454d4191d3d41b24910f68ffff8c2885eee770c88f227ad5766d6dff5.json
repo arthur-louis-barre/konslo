@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM habits\r\nWHERE habit_id = $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a0d8435454d4191d3d41b24910f68ffff8c2885eee770c88f227ad5766d6dff5"
+}

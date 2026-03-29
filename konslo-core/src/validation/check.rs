@@ -1,5 +1,6 @@
 use crate::errors::AppError;
 use time::{Duration, OffsetDateTime};
+use crate::models::habit::HabitWithCheck;
 
 pub fn validate_check_value(value: i32, habit_goal_value: i32) -> Result<(), AppError> {
     if value < 0 {
@@ -71,5 +72,20 @@ mod tests {
 
         // assert
         assert!(matches!(result.unwrap_err(), AppError::Validation(_)))
+    }
+}
+
+pub fn validate_period_cap(habit_with_checks: &HabitWithCheck, check_val: i32) -> Result<(), AppError> {
+    let goal_val = habit_with_checks.goal_value;
+    let period_total_val = habit_with_checks.checks.iter().map(|c| c.value).sum::<i32>();
+
+    if check_val + period_total_val <= goal_val {
+        Ok(())
+    } else {
+        Err(AppError::Validation(format!(
+            "new period total exceeds goal ({} / {})",
+            period_total_val + check_val,
+            goal_val
+        )))
     }
 }

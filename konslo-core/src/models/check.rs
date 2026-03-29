@@ -15,6 +15,12 @@ pub struct CreateCheck {
     pub checked_at: OffsetDateTime,
 }
 
+impl CreateCheck {
+    pub fn new(habit_id: i32, value: i32, checked_at: OffsetDateTime) -> Self {
+        Self { habit_id, value, checked_at }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct UpdateCheck {
     pub id: i32,

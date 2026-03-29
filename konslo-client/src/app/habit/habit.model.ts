@@ -11,7 +11,6 @@ export interface Habit {
 
 export interface HabitWithCheck extends Habit {
   checks: Check[];
-  isCompleted?: boolean;
 }
 
 export interface CreateHabitRequest {

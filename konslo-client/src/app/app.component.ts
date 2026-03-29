@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import {HabitsComponent} from "./habits/habits.component";
+import {HabitListComponent} from "./habit/habit-list/habit-list.component";
 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatToolbarModule, HabitsComponent],
+  imports: [RouterOutlet, MatToolbarModule, HabitListComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

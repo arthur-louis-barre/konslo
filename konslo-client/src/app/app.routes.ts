@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { HabitsComponent } from './habits/habits.component';
-import {HabitFormComponent} from "./habits/habit-form/habit-form.component";
+import { HabitListComponent } from './habit/habit-list/habit-list.component';
+import {HabitFormComponent} from "./habit/habit-form/habit-form.component";
 
 export const routes: Routes = [
-    { path: 'habits', component: HabitsComponent },
+    { path: 'habits', component: HabitListComponent },
     { path: 'new-habit', component: HabitFormComponent}
 ];
