@@ -1,7 +1,8 @@
 use crate::models::check::Check;
+use sqlx::{FromRow, Type};
 use time::{Date, Duration, OffsetDateTime};
 
-#[derive(Clone, Copy, Debug, PartialEq, sqlx::Type)]
+#[derive(Clone, Copy, Debug, PartialEq, Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
 pub enum GoalPeriod {
     Day,
@@ -42,7 +43,7 @@ impl GoalPeriod {
     }
 }
 
-#[derive(Debug, PartialEq, sqlx::FromRow)]
+#[derive(Debug, PartialEq, FromRow)]
 pub struct Habit {
     pub id: i32,
     pub name: String,

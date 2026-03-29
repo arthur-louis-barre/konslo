@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use konslo_core::errors::AppError;
-    use konslo_core::models::check::{Check, CreateCheck};
+    use konslo_core::models::check::{AddCheck, Check};
     use konslo_core::models::habit::{CreateHabit, GoalPeriod, Habit, HabitWithCheck};
     use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
@@ -15,9 +15,9 @@ mod tests {
         Ok(repo.create(create_habit).await?)
     }
 
-    async fn seed_check(pool: &PgPool, create_check: &CreateCheck) -> Result<Check, Box<dyn Error>> {
+    async fn seed_check(pool: &PgPool, add_check: &AddCheck) -> Result<Check, Box<dyn Error>> {
         let repo = PostgresCheckRepository::new(pool.clone());
-        Ok(repo.create(create_check).await?)
+        Ok(repo.upsert(add_check).await?)
     }
 
     fn to_habit_with_checks(habit: &Habit, checks: Vec<Check>) -> HabitWithCheck {
@@ -103,7 +103,7 @@ mod tests {
             let s_habit = seed_habit(&pool, &CreateHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
 
             let reference = OffsetDateTime::now_utc();
-            let s_check = seed_check(&pool, &CreateCheck::new(s_habit.id, 5, reference)).await?;
+            let s_check = seed_check(&pool, &AddCheck::new(s_habit.id, 5, reference)).await?;
 
             let fetched = repo.get_with_period_checks(s_habit.id, reference).await?;
 
@@ -145,7 +145,8 @@ mod tests {
 
             // 4 habits: daily, daily (no checks), weekly, monthly
             let s_habit_day = seed_habit(&pool, &CreateHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
-            let s_habit_day_empty = seed_habit(&pool, &CreateHabit::new("Stretch neck", 20, "reps", GoalPeriod::Day)).await?;
+            let s_habit_day_empty =
+                seed_habit(&pool, &CreateHabit::new("Stretch neck", 20, "reps", GoalPeriod::Day)).await?;
             let s_habit_week = seed_habit(&pool, &CreateHabit::new("Cardio", 180, "min", GoalPeriod::Week)).await?;
             let s_habit_month = seed_habit(&pool, &CreateHabit::new("Read", 4, "books", GoalPeriod::Month)).await?;
 
@@ -154,18 +155,34 @@ mod tests {
             let start_of_month = reference.replace_day(1)?;
 
             // daily: check today (in), check yesterday (out)
-            let s_check_day = seed_check(&pool, &CreateCheck::new(s_habit_day.id, 5, reference)).await?;
-            seed_check(&pool, &CreateCheck::new(s_habit_day.id, 5, reference - Duration::days(1))).await?;
+            let s_check_day = seed_check(&pool, &AddCheck::new(s_habit_day.id, 5, reference)).await?;
+            seed_check(&pool, &AddCheck::new(s_habit_day.id, 5, reference - Duration::days(1))).await?;
 
             // weekly: 2 checks this week (in), 1 check last week (out)
-            let s_check_week_1 = seed_check(&pool, &CreateCheck::new(s_habit_week.id, 90, start_of_week)).await?;
-            let s_check_week_2 = seed_check(&pool, &CreateCheck::new(s_habit_week.id, 20, start_of_week + Duration::days(1))).await?;
-            seed_check(&pool, &CreateCheck::new(s_habit_week.id, 20, start_of_week - Duration::days(1))).await?;
+            let s_check_week_1 = seed_check(&pool, &AddCheck::new(s_habit_week.id, 90, start_of_week)).await?;
+            let s_check_week_2 = seed_check(
+                &pool,
+                &AddCheck::new(s_habit_week.id, 20, start_of_week + Duration::days(1)),
+            )
+            .await?;
+            seed_check(
+                &pool,
+                &AddCheck::new(s_habit_week.id, 20, start_of_week - Duration::days(1)),
+            )
+            .await?;
 
             // monthly: 2 checks this month (in), 1 check last month (out)
-            let s_check_month_1 = seed_check(&pool, &CreateCheck::new(s_habit_month.id, 1, start_of_month)).await?;
-            let s_check_month_2 = seed_check(&pool, &CreateCheck::new(s_habit_month.id, 1, start_of_month + Duration::weeks(1))).await?;
-            seed_check(&pool, &CreateCheck::new(s_habit_month.id, 1, start_of_month - Duration::weeks(1))).await?;
+            let s_check_month_1 = seed_check(&pool, &AddCheck::new(s_habit_month.id, 1, start_of_month)).await?;
+            let s_check_month_2 = seed_check(
+                &pool,
+                &AddCheck::new(s_habit_month.id, 1, start_of_month + Duration::weeks(1)),
+            )
+            .await?;
+            seed_check(
+                &pool,
+                &AddCheck::new(s_habit_month.id, 1, start_of_month - Duration::weeks(1)),
+            )
+            .await?;
 
             let fetched = repo.get_all_with_period_checks(reference).await?;
 
@@ -182,7 +199,9 @@ mod tests {
         }
 
         #[sqlx::test]
-        async fn test_get_all_with_period_checks_no_habits_returns_empty_vec(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        async fn test_get_all_with_period_checks_no_habits_returns_empty_vec(
+            pool: PgPool,
+        ) -> Result<(), Box<dyn Error>> {
             let repo = PostgresHabitRepository::new(pool);
 
             let fetched = repo.get_all_with_period_checks(OffsetDateTime::now_utc()).await?;

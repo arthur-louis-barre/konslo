@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use time::OffsetDateTime;
 
-use crate::models::check::Check;
+use crate::models::check::{AddCheck, Check};
 use crate::repositories::check::CheckRepository;
 #[cfg(any(test, feature = "mockable"))]
 use mockall::automock;
@@ -71,7 +71,7 @@ impl HabitService for DefaultHabitService {
 
         validate_period_cap(&habit_with_check, value)?;
 
-        let check = self.check_repo.upsert(habit_id, value, timestamp).await?;
+        let check = self.check_repo.upsert(&AddCheck::new(habit_id, value, timestamp)).await?;
 
         Ok(check)
     }

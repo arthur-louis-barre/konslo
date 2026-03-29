@@ -9,7 +9,7 @@ use time::OffsetDateTime;
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitRepository: Send + Sync {
-    async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError>;
+    async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
@@ -28,14 +28,14 @@ impl PostgresHabitRepository {
 
 #[async_trait]
 impl HabitRepository for PostgresHabitRepository {
-    async fn create(&self, new_habit: &CreateHabit) -> Result<Habit, AppError> {
+    async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError> {
         let habit = query_file_as!(
             Habit,
             "queries/insert_habit.sql",
-            new_habit.name,
-            new_habit.goal_value,
-            new_habit.goal_unit,
-            new_habit.goal_period as GoalPeriod,
+            create_habit.name,
+            create_habit.goal_value,
+            create_habit.goal_unit,
+            create_habit.goal_period as GoalPeriod,
         )
         .fetch_one(&self.pool)
         .await?;
