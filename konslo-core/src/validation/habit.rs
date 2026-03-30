@@ -1,4 +1,5 @@
 use crate::errors::AppError;
+
 pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
     let name = name.trim();
     if name.is_empty() {
@@ -13,6 +14,13 @@ pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_validate_habit_name_ok() {
+        let result = validate_habit_name("Meditate");
+
+        assert!(result.is_ok());
+    }
 
     #[test]
     fn test_validate_habit_name_empty_returns_validation_error() {
@@ -31,19 +39,8 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_habit_name_255_chars_returns_ok() {
-        let name = "X".repeat(255);
-
-        let result = validate_habit_name(&name);
-
-        assert!(result.is_ok());
-    }
-
-    #[test]
     fn test_validate_habit_name_256_chars_returns_validation_error() {
-        let name = "X".repeat(256);
-
-        let result = validate_habit_name(&name);
+        let result = validate_habit_name(&"x".repeat(256));
 
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), AppError::Validation(_)));

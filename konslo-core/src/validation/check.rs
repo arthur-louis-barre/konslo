@@ -1,25 +1,32 @@
 use crate::errors::AppError;
 use time::{Duration, OffsetDateTime};
-use crate::models::habit::HabitWithCheck;
 
-pub fn validate_check_value(value: i32, habit_goal_value: i32) -> Result<(), AppError> {
-    if value <= 0 {
-        return Err(AppError::Validation("value must be greater than 0".into()));
-    } else if value > habit_goal_value {
-        return Err(AppError::Validation(
-            "value must not be greater than habit's goal_value".into(),
-        ));
+pub fn validate_check_value(value: i32) -> Result<(), AppError> {
+    if value > 0 {
+        Ok(())
+    } else {
+        Err(AppError::Validation("value must be strictly positive".into()))
     }
-
-    Ok(())
 }
 
-pub fn validate_checked_at(checked_at: &OffsetDateTime) -> Result<(), AppError> {
-    if checked_at > &(OffsetDateTime::now_utc() + Duration::seconds(30)) {
-        return Err(AppError::Validation("checked_at cannot be in the future".into()));
-    };
+pub fn validate_check_checked_at(checked_at: &OffsetDateTime) -> Result<(), AppError> {
+    if checked_at <= &(OffsetDateTime::now_utc() + Duration::seconds(30)) {
+        Ok(())
+    } else {
+        Err(AppError::Validation("checked_at must not be in the future".into()))
+    }
+}
 
-    Ok(())
+pub fn validate_period_cap(check_val: i32, period_total: i32, goal_value: i32) -> Result<(), AppError> {
+    if check_val + period_total <= goal_value {
+        Ok(())
+    } else {
+        Err(AppError::Validation(format!(
+            "period total must not exceed goal ({} / {})",
+            period_total + check_val,
+            goal_value
+        )))
+    }
 }
 
 #[cfg(test)]
@@ -27,65 +34,53 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_validate_check_value_ok() {
-        assert!(validate_check_value(5, 10).is_ok());
+    fn test_validate_check_value_positive_returns_ok() {
+        assert!(validate_check_value(5).is_ok());
+    }
+
+    #[test]
+    fn test_validate_check_value_zero_returns_validation_error() {
+        assert!(matches!(validate_check_value(0), Err(AppError::Validation(_))));
     }
 
     #[test]
     fn test_validate_check_value_negative_returns_validation_error() {
-        let result = validate_check_value(-1, 10);
+        assert!(matches!(validate_check_value(-1), Err(AppError::Validation(_))));
+    }
+
+    #[test]
+    fn test_validate_checked_at_past_returns_ok() {
+        assert!(validate_check_checked_at(&(OffsetDateTime::now_utc() - Duration::hours(1))).is_ok());
+    }
+
+    #[test]
+    fn test_validate_check_checked_at_now_returns_ok() {
+        assert!(validate_check_checked_at(&OffsetDateTime::now_utc()).is_ok());
+    }
+
+    #[test]
+    fn test_validate_check_checked_at_within_grace_window_returns_ok() {
+        assert!(validate_check_checked_at(&(OffsetDateTime::now_utc() + Duration::seconds(15))).is_ok());
+    }
+
+    #[test]
+    fn test_validate_check_checked_at_past_grace_window_returns_validation_error() {
+        let result = validate_check_checked_at(&(OffsetDateTime::now_utc() + Duration::seconds(31)));
         assert!(matches!(result, Err(AppError::Validation(_))));
     }
 
     #[test]
-    fn test_validate_check_value_exceeds_goal_returns_validation_error() {
-        // arrange
-        let value = 15;
-        let habit_goal_value = 10;
-
-        // act
-        let result = validate_check_value(value, habit_goal_value);
-
-        // assert
-        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+    fn test_validate_period_cap_under_cap_returns_ok() {
+        assert!(validate_period_cap(5, 3, 10).is_ok());
     }
 
     #[test]
-    fn test_validate_checked_at_ok() {
-        // arrange
-        let checked_at = OffsetDateTime::now_utc();
-
-        // act
-        let result = validate_checked_at(&checked_at);
-
-        // assert
-        assert!(result.is_ok())
+    fn test_validate_period_cap_exactly_at_cap_returns_ok() {
+        assert!(validate_period_cap(5, 5, 10).is_ok());
     }
 
     #[test]
-    fn test_validate_checked_at_future_returns_validation_error() {
-        // arrange
-        let checked_at = OffsetDateTime::now_utc() + Duration::seconds(60);
-
-        // act
-        let result = validate_checked_at(&checked_at);
-
-        // assert
-        assert!(matches!(result.unwrap_err(), AppError::Validation(_)))
-    }
-}
-
-pub fn validate_period_cap(habit_with_checks: &HabitWithCheck, check_val: i32) -> Result<(), AppError> {
-    let goal_val = habit_with_checks.goal_value;
-    let period_total_val = habit_with_checks.checks.iter().map(|c| c.value).sum::<i32>();
-
-    if check_val + period_total_val <= goal_val {
-        Ok(())
-    } else {
-        Err(AppError::Validation(format!(
-            "new period total exceeds goal ({} / {})",
-            period_total_val + check_val,
-            goal_val
-        )))
+    fn test_validate_period_cap_over_cap_returns_validation_error() {
+        assert!(matches!(validate_period_cap(6, 5, 10), Err(AppError::Validation(_))));
     }
 }
