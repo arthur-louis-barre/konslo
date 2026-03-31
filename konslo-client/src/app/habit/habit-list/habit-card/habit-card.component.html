@@ -1,10 +1,10 @@
 <div class="h-card">
     <div class="h-card__body">
-        <p class="h-card__name">{{ habit.name }}</p>
-        <p class="h-card__detail">{{ habit.goal_value }} {{ habit.goal_unit }}</p>
+        <p class="h-card__name">{{ habit().name }}</p>
+        <p class="h-card__detail">{{ habit().goal_value }} {{ habit().goal_unit }}</p>
     </div>
     <div class="h-card__progress">
-        <span class="h-card__progress-label">{{ progressValue }} / {{ habit.goal_value }}</span>
+        <span class="h-card__progress-label">{{ progressValue }} / {{ habit().goal_value }}</span>
         <div class="h-card__progress-bar">
             <div class="h-card__progress-bar-fill" [style.width.%]="progressPercent"></div>
         </div>
@@ -15,17 +15,17 @@
                 <span class="material-icons">check</span>
             </button>
         } @else {
-            <button class="h-card__btn" [disabled]="isLoading" (click)="checkHabit()">
+            <button class="h-card__btn" [disabled]="isLoading" (click)="addCheck()">
                 <span class="material-icons">add</span>
             </button>
         }
 
-        <button class="h-card__btn" (click)="dropdownToggled.emit(habit.id)">
+        <button class="h-card__btn" (click)="dropdownToggled.emit(habit().id)">
             <span class="material-icons">more_horiz</span>
         </button>
         @if (isDropdownOpen) {
             <div class="h-card__dropdown">
-                <div class="h-card__dropdown-item" (click)="resetCheckValue()">↺ Reset</div>
+                <div class="h-card__dropdown-item" (click)="resetCheck()">↺ Reset</div>
                 <div class="h-card__dropdown-item danger" (click)="deleteHabit()">✕ Delete</div>
             </div>
         }

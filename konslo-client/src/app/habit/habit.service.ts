@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {Check, CreateCheckRequest, CreateHabitRequest, Habit, HabitWithCheck, UpdateCheckRequest} from './habit.model';
+import {Check, CreateHabitRequest, Habit, HabitWithCheck} from './habit.model';
 
 @Injectable({
     providedIn: 'root'
@@ -21,11 +21,13 @@ export class HabitService {
         return this.http.delete<void>(`${this.apiUrl}/habits/${id}`);
     }
 
-    createCheck(habitId: number, request: CreateCheckRequest) {
-        return this.http.post<Check>(`${this.apiUrl}/habits/${habitId}/checks`, request);
+    addCheck(habitId: number, value: number, checked_at?: string) {
+        let body = { value, checked_at: checked_at };
+        return this.http.post<Check>(`${this.apiUrl}/habits/${habitId}/checks`, body);
     }
 
-    updateCheck(habitId: number, checkId: number, request: UpdateCheckRequest) {
-        return this.http.put<Check>(`${this.apiUrl}/habits/${habitId}/checks/${checkId}`, request)
+    resetCheck(habitId: number, date?: string) {
+        const options = date ? { params: { date } } : {};
+        return this.http.delete(`${this.apiUrl}/habits/${habitId}/checks`, options);
     }
 }
