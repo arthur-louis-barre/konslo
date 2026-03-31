@@ -1,12 +1,13 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Check, CreateHabitRequest, Habit, HabitWithCheck} from './habit.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class HabitService {
-    private readonly apiUrl = 'http://127.0.0.1:3000';
+    private readonly apiUrl = environment.apiUrl;
     private http = inject(HttpClient);
 
     createHabit(request: CreateHabitRequest) {
