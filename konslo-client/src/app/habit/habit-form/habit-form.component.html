@@ -29,9 +29,9 @@
         <div class="form-group">
             <label class="form-label">Goal frequency</label>
             <div class="form-grid">
-                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'day'" (click)="form.controls.goal_period.setValue(`day`)">Daily</div>
-                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'week'" (click)="form.controls.goal_period.setValue(`week`)">Weekly</div>
-                <div class="period-btn" [class.selected]="form.controls.goal_period.value == 'month'" (click)="form.controls.goal_period.setValue(`month`)">Monthly</div>
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value === 'day'" (click)="form.controls.goal_period.setValue(`day`)">Daily</div>
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value === 'week'" (click)="form.controls.goal_period.setValue(`week`)">Weekly</div>
+                <div class="period-btn" [class.selected]="form.controls.goal_period.value === 'month'" (click)="form.controls.goal_period.setValue(`month`)">Monthly</div>
             </div>
         </div>
 
