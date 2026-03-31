@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { HabitService } from '../habit.service';
 import {GoalPeriod} from "../habit.model";
@@ -30,7 +30,6 @@ export class HabitFormComponent {
       goal_period: this.form.value.goal_period as GoalPeriod,
     }).subscribe(() => {
       this.router.navigate(['/habits']);
-      this.form.reset();
     });
   }
 
