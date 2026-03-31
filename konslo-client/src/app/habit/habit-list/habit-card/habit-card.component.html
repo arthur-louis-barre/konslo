@@ -23,7 +23,7 @@
         <button class="h-card__btn" (click)="dropdownToggled.emit(habit().id)">
             <span class="material-icons">more_horiz</span>
         </button>
-        @if (isDropdownOpen) {
+        @if (isDropdownOpen()) {
             <div class="h-card__dropdown">
                 <div class="h-card__dropdown-item" (click)="resetCheck()">↺ Reset</div>
                 <div class="h-card__dropdown-item danger" (click)="deleteHabit()">✕ Delete</div>
