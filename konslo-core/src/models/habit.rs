@@ -64,6 +64,28 @@ pub struct HabitWithCheck {
     pub checks: Vec<Check>,
 }
 
+impl HabitWithCheck {
+    pub fn new(
+        id: i32,
+        name: &str,
+        goal_value: i32,
+        goal_unit: &str,
+        goal_period: GoalPeriod,
+        created_at: OffsetDateTime,
+        checks: Vec<Check>,
+    ) -> Self {
+        HabitWithCheck {
+            id,
+            name: name.to_string(),
+            goal_value,
+            goal_unit: goal_unit.to_string(),
+            goal_period,
+            created_at,
+            checks,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct CreateHabit {
     pub name: String,
