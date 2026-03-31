@@ -65,6 +65,14 @@ export class HabitListComponent implements OnInit {
             .filter(hg => hg.habits.length > 0)
     }
 
+    get greeting() {
+        let hour = new Date().getHours();
+        if (hour < 6) return "Good night"
+        else if (hour < 12) return "Good morning"
+        else if (hour < 18) return "Good afternoon"
+        else return "Good evening"
+    }
+
     goToNewHabit() {
         this.router.navigate(['/new-habit']);
     }
