@@ -9,7 +9,7 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-group">
             <label class="form-label" for="name">Name</label>
-            <input class="form-input" id="name" formControlName="name" type="text" placeholder="e.g. Meditate" autocomplete="off" >
+            <input class="form-input" id="name" formControlName="name" type="text" placeholder="e.g. Meditate" autocomplete="off" spellcheck="false">
         </div>
 
         <div class="divider"></div>
@@ -22,7 +22,7 @@
                 </div>
                 <div>
                     <label class="form-label" for="goal_unit">Goal unit</label>
-                    <input class="form-input" id="goal_unit" formControlName="goal_unit" type="text" placeholder="e.g. minutes" autocomplete="off" >
+                    <input class="form-input" id="goal_unit" formControlName="goal_unit" type="text" placeholder="e.g. minutes" autocomplete="off" spellcheck="false">
                 </div>
             </div>
         </div>
