@@ -12,7 +12,7 @@ pub struct CreateHabitRequest {
 #[derive(serde::Deserialize)]
 pub struct AddCheckRequest {
     pub value: i32,
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub checked_at: Option<OffsetDateTime>,
 }
 
