@@ -18,6 +18,10 @@ export class HabitCardComponent {
     habitDeleted = output<number>();
     dropdownToggled = output<number>();
 
+    deleteHabit() {
+        this.habitDeleted.emit(this.habit().id);
+    }
+
     addCheck() {
         if (this.isLoading) return;
         this.isLoading = true;
@@ -26,31 +30,38 @@ export class HabitCardComponent {
 
         this.habitsService
             .addCheck(habit.id, 1)
-            .subscribe(() => {
-                this.habitUpdated.emit();
-                this.isLoading = false;
-            })
+            .subscribe({
+                next: () => {
+                    this.habitUpdated.emit();
+                    this.isLoading = false
+                },
+                error: () => {
+                    this.isLoading = false;
+                }
+            });
     }
 
     resetCheck() {
+        if (this.isLoading) return;
+        this.isLoading = true;
+
         const habit = this.habit();
 
         this.habitsService
             .resetCheck(habit.id)
-            .subscribe(() => {
-                this.habitUpdated.emit();
+            .subscribe({
+                next: () => {
+                    this.habitUpdated.emit();
+                    this.isLoading = false
+                },
+                error: () => {
+                    this.isLoading = false;
+                }
             });
     }
 
-    deleteHabit() {
-        this.habitDeleted.emit(this.habit().id);
-    }
-
-
-
-    get progressValue(): number {
-        if (this.habit().checks.length === 0) return 0;
-        else return this.habit().checks.reduce((sum, check) => sum + check.value, 0);
+    get isCompleted() {
+        return this.progressPercent >= 100;
     }
 
     get progressPercent() {
@@ -60,7 +71,8 @@ export class HabitCardComponent {
         return Math.round((progressValue / goalValue * 100))
     }
 
-    get isCompleted() {
-        return this.progressPercent >= 100;
+    get progressValue() {
+        if (this.habit().checks.length === 0) return 0;
+        else return this.habit().checks.reduce((sum, check) => sum + check.value, 0);
     }
 }
