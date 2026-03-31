@@ -12,21 +12,27 @@
     <div class="h-card__actions">
         @if (isCompleted) {
             <button class="h-card__btn h-card__btn--done" disabled>
-                <span class="material-icons">check</span>
+                <span class="material-symbols-outlined">check</span>
             </button>
         } @else {
             <button class="h-card__btn" [disabled]="isLoading" (click)="addCheck()">
-                <span class="material-icons">add</span>
+                <span class="material-symbols-outlined">add</span>
             </button>
         }
 
         <button class="h-card__btn" (click)="dropdownToggled.emit(habit().id)">
-            <span class="material-icons">more_horiz</span>
+            <span class="material-symbols-outlined">more_horiz</span>
         </button>
         @if (isDropdownOpen()) {
             <div class="h-card__dropdown">
-                <div class="h-card__dropdown-item" (click)="resetCheck()">↺ Reset</div>
-                <div class="h-card__dropdown-item danger" (click)="deleteHabit()">✕ Delete</div>
+                <button class="h-card__dropdown-item" [disabled]="isLoading" (click)="resetCheck()">
+                    <span class="material-symbols-outlined">replay</span>
+                    <span>reset</span>
+                </button>
+                <button class="h-card__dropdown-item danger" [disabled]="isLoading" (click)="deleteHabit()">
+                    <span class="material-symbols-outlined">delete</span>
+                    <span>delete</span>
+                </button>
             </div>
         }
     </div>
