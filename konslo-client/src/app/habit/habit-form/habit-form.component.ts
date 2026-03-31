@@ -35,4 +35,12 @@ export class HabitFormComponent {
   goBack() {
     this.router.navigate(['/habits']);
   }
+
+  get selectedPeriod() {
+    return this.form.controls.goal_period.value;
+  }
+
+  setPeriod(period: string) {
+    this.form.controls.goal_period.setValue(period);
+  }
 }
