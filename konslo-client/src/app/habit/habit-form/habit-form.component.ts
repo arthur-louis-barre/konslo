@@ -3,11 +3,10 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import { HabitService } from '../habit.service';
 import {GoalPeriod} from "../habit.model";
 import {Router} from "@angular/router";
-import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'k-new-habit-form',
-  imports: [ReactiveFormsModule, MatIcon],
+  imports: [ReactiveFormsModule],
   templateUrl: './habit-form.component.html',
   styleUrl: './habit-form.component.css'
 })

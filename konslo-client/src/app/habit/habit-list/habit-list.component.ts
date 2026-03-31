@@ -1,15 +1,12 @@
 import {Component, HostListener, inject, OnInit} from '@angular/core';
 import {HabitService} from '../habit.service';
-import {MatListModule} from '@angular/material/list';
 import {GoalPeriod, HabitWithCheck} from '../habit.model';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
 import {HabitCardComponent} from "./habit-card/habit-card.component";
 import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-habits',
-    imports: [MatListModule, MatIconModule, MatButtonModule, HabitCardComponent],
+    imports: [HabitCardComponent],
     templateUrl: './habit-list.component.html',
     styleUrl: './habit-list.component.css'
 })
