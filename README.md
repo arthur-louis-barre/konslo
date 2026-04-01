@@ -9,51 +9,21 @@ This is a personal project built to practice full-stack development with a moder
 ### Features
 
 1. [X] Create and manage daily habits 
-2. [ ] Mark habits as done for the day
-3. [ ] View your current streak 
-4. [ ] Stats & progress charts 
-5. [ ] User authentication
+2. [X] Mark habits as done for the day
+3. [ ] View streaks 
+4. [ ] View stats 
+5. [ ] User management and authentication
 
-On en est là : [ ] Mark habits as done for the day
-    [X] : Nouvelle migration : màj de la table habits, création de la table checks
-    [X] : Update du models/habit.rs et des tests associés
-    [X] : Check model, repository, service, validation
-    [X] : Test d'intégration CheckRepository
-    [X] : Implémenter From<sqlx::Error> pour App::Error
-    [X] : Endpoint POST /habits/:id/checks
-    [X] : Conteneurisation complète
-    [ ] : Brancher sur le frontend Angular
+### What I Learned so far
 
-`GET /habits/today` currently returns only checks from the current day for all habits, regardless of their `goal_period`.
-A weekly habit (e.g. 180min cardio) will show 0 progress if no check was logged today, even if 90min were logged yesterday.
-Proper period-aware filtering (`day` → today, `week` → current week, `month` → current month) is planned for v3.
+- How to test a repository
 
-### What I want to Learn
-
-...
-
-### Version
-
-v1: 
-- CRUD habits + frontend Angular
-- Features : completions
-
-v2:
-- Statistiques. Streaks, taux de complétion sur 7/30 jours, visualisation dans Angular. 
-- Pure lecture, pas de nouveaux domaines.
-
-v4 — 
-- Users + Auth JWT. 
-- Tu rattaches habits et completions à un utilisateur. C'est le gros chantier — middleware auth, refresh tokens, etc.
-
-## 🤝 Prompt Assistance
+## Prompt Assistance
 
 ### Our workflow
 
-- **Small steps** — we move forward one step at a time. No long "step 1, 2, 3, 4" plans upfront. First a short description of the approach, then one message per step.
-- **Intuition first** — before giving a solution, Claude challenges my intuition: *"what do you think...?"* rather than handing everything over.
-- **RemNote flashcards** — every time a major new concept is introduced, Claude produces a small flashcard in English to integrate into my study notes.
-- **Understanding before copy-pasting** — we always take the time to understand *why* before writing any code.
-- **Atomic git commits** — after each meaningful implementation step, we stop and commit with a clear, focused message. One concept = one commit.
-- **TDD** — we write the test first, watch it fail (red), then write the code to make it pass (green), then clean up (refactor).
-- **PowerShell first** — on utilise les commandes PowerShell autant que possible (ni, rm, mv, cat, etc.)
+- **Small steps** — we move forward one step at a time. No long "step 1, 2, 3, 4" plans upfront. First a short description of the approach, then one message per step
+- **Intuition first** — before giving a solution, Claude challenges my intuition: *"what do you think...?"* rather than handing everything over
+- **RemNote flashcards** — every time a major new concept is introduced, Claude produces a small flashcard in English to integrate into my study notes
+- **Understanding before copy-pasting** — we always take the time to understand *why* before writing any code
+- **Atomic git commits** — after each meaningful implementation step, we stop and commit with a clear, focused message
