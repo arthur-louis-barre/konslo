@@ -3,3 +3,6 @@
 target/
 todo.md
 konslo-client/node_modules/
+/konslo-client/konslo_full_app_mockup.html
+/konslo-client/konslo-ui-mockup-calendar.html
+/konslo-client/desktop.ini
