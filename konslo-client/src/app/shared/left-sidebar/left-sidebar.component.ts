@@ -1,10 +1,11 @@
 import {Component} from '@angular/core';
-import {RouterLink} from "@angular/router";
+import {RouterLink, RouterLinkActive} from "@angular/router";
 
 @Component({
     selector: 'k-left-sidebar',
     imports: [
-        RouterLink
+        RouterLink,
+        RouterLinkActive
     ],
     templateUrl: './left-sidebar.component.html',
     styleUrl: './left-sidebar.component.css',

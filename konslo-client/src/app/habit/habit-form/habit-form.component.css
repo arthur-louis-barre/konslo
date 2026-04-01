@@ -25,7 +25,7 @@ header .material-symbols-outlined {
 
 header h1 {
     font-family: 'Instrument Serif', serif;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xxl);
     font-weight: var(--weight-medium);
     color: var(--text);
 }

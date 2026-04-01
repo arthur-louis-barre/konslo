@@ -1,6 +1,6 @@
 .k-layout {
     display: grid;
-    grid-template-columns: 200px 1fr 280px;
+    grid-template-columns: 170px 1fr 280px;
     grid-template-rows: 50px 1fr;
     grid-template-areas:
             "topbar topbar topbar"

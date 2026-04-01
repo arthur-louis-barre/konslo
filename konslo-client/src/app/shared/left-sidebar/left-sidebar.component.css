@@ -1,3 +1,40 @@
 :host {
     grid-area: left;
+    border-right: 0.5px solid var(--border);
+    padding: var(--space-5) var(--space-3);
+}
+
+.k-left-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.k-left-sidebar__group-label {
+    margin: 12px 0 6px
+}
+
+.k-left-sidebar__group-label:first-child {
+    margin-top: 0;
+}
+
+.k-left-sidebar__item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.k-left-sidebar__item:hover {
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.k-left-sidebar__item--active, .k-left-sidebar__item--active:hover  {
+    background: var(--surface-accent);
+    color: var(--accent);
 }
