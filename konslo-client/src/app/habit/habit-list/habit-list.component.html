@@ -1,31 +1,34 @@
-<div class="greeting">
-    <h1>{{ greeting }},
-        <br><em>let's keep going.</em>
-    </h1>
-</div>
-
-@for (habitGroup of habitsByPeriod; track habitGroup.period) {
-    <div class="habits-group">
-        <div class="habits-group-header">
-            <span class="habits-group-label">{{ habitGroup.label }}</span>
-            <div class="habits-group-line"></div>
-        </div>
-        @for (habit of habitGroup.habits; track habit.id) {
-            <div>
-                <app-habit-card
-                        [habit]="habit"
-                        [isDropdownOpen]="openDropdownId === habit.id"
-                        (habitUpdated)="loadHabits()"
-                        (habitDeleted)="deleteHabit($event)"
-                        (dropdownToggled)="toggleDropdown($event)"
-                >
-                </app-habit-card>
-            </div>
-        }
+<div class="k-habit-list">
+    <div class="greeting">
+        <h1>{{ greeting }},
+            <br><em>let's keep going.</em>
+        </h1>
     </div>
-}
 
-<button class="h-new-btn" (click)="goToNewHabit()">
-    <span class="material-symbols-outlined">add</span>
-    <span>New habit</span>
-</button>
+    @for (habitGroup of habitsByPeriod; track habitGroup.period) {
+        <div class="habits-group">
+            <div class="habits-group-header">
+                <span class="habits-group-label">{{ habitGroup.label }}</span>
+                <div class="habits-group-line"></div>
+            </div>
+            @for (habit of habitGroup.habits; track habit.id) {
+                <div>
+                    <app-habit-card
+                            [habit]="habit"
+                            [isDropdownOpen]="openDropdownId === habit.id"
+                            (habitUpdated)="loadHabits()"
+                            (habitDeleted)="deleteHabit($event)"
+                            (dropdownToggled)="toggleDropdown($event)"
+                    >
+                    </app-habit-card>
+                </div>
+            }
+        </div>
+
+    }
+
+    <button class="h-new-btn" (click)="goToNewHabit()">
+        <span class="material-symbols-outlined">add</span>
+        <span>New habit</span>
+    </button>
+</div>

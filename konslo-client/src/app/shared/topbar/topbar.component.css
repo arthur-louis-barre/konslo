@@ -1,3 +1,7 @@
+:host {
+    grid-area: topbar;
+}
+
 .k-topbar {
     display: flex;
     align-items: center;
