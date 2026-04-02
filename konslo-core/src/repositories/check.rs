@@ -9,6 +9,7 @@ use time::Date;
 pub trait CheckRepository: Send + Sync {
     async fn upsert(&self, add_check: &AddCheck) -> Result<Check, AppError>;
     async fn delete_by_habit_for_period(&self, habit_id: i32, from: Date, to: Date) -> Result<u64, AppError>;
+    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
 }
 
 pub struct PostgresCheckRepository {
@@ -43,5 +44,16 @@ impl CheckRepository for PostgresCheckRepository {
             .await?;
 
         Ok(result.rows_affected())
+    }
+
+    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
+        let dates = query_file!("queries/select_activity_dates.sql", from, to)
+            .fetch_all(&self.pool)
+            .await?
+            .into_iter()
+            .filter_map(|r| r.date)
+            .collect();
+
+        Ok(dates)
     }
 }

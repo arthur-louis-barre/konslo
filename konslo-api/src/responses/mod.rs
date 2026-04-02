@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use time::OffsetDateTime;
+use time::{Date, OffsetDateTime};
 use konslo_core::models::check::Check;
 use konslo_core::models::habit::{GoalPeriod, Habit, HabitWithCheck};
 
@@ -44,7 +44,6 @@ impl From<Habit> for HabitResponse {
         }
     }
 }
-
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct HabitWithCheckResponse {
@@ -95,6 +94,19 @@ impl From<GoalPeriodDto> for GoalPeriod {
             GoalPeriodDto::Day => GoalPeriod::Day,
             GoalPeriodDto::Week => GoalPeriod::Week,
             GoalPeriodDto::Month => GoalPeriod::Month,
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct ActivityResponse {
+    pub dates: Vec<String>,
+}
+
+impl From<Vec<Date>> for ActivityResponse {
+    fn from(dates: Vec<Date>) -> Self {
+        Self {
+            dates: dates.into_iter().map(|d| d.to_string()).collect(),
         }
     }
 }

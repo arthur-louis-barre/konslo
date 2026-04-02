@@ -4,8 +4,8 @@ use axum::extract::{Path, Query, State};
 use axum::http;
 use time::OffsetDateTime;
 use konslo_core::models::habit::CreateHabit;
-use crate::requests::{AddCheckRequest, CreateHabitRequest, HabitsQuery, ResetChecksQuery};
-use crate::responses::{CheckResponse, HabitResponse, HabitWithCheckResponse};
+use crate::requests::{ActivityQuery, AddCheckRequest, CreateHabitRequest, HabitsQuery, ResetChecksQuery};
+use crate::responses::{ActivityResponse, CheckResponse, HabitResponse, HabitWithCheckResponse};
 use crate::router::AppState;
 
 pub async fn create_habit_handler (
@@ -81,6 +81,17 @@ pub async fn reset_period_checks_handler(
         .await?;
 
     Ok(http::StatusCode::NO_CONTENT)
+}
+
+pub async fn get_activity_dates_handler(
+    State(state): State<AppState>,
+    Query(params): Query<ActivityQuery>,
+) -> Result<Json<ActivityResponse>, AppError> {
+    let dates = state.habit_service
+        .get_activity_dates(params.from, params.to)
+        .await?;
+
+    Ok(Json(dates.into()))
 }
 
 #[cfg(test)]
