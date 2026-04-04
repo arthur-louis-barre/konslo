@@ -11,6 +11,7 @@ export class HabitCardComponent {
     private habitsService = inject(HabitService);
     protected isLoading = false;
 
+    selectedDate = input<string>();
     habit = input.required<HabitWithCheck>();
     isDropdownOpen = input<boolean>(false);
 
@@ -26,10 +27,11 @@ export class HabitCardComponent {
         if (this.isLoading) return;
         this.isLoading = true;
 
+        const selectedDate = this.selectedDate();
         const habit = this.habit();
 
         this.habitsService
-            .addCheck(habit.id, 1)
+            .addCheck(habit.id, 1, selectedDate)
             .subscribe({
                 next: () => {
                     this.habitUpdated.emit();
@@ -45,10 +47,11 @@ export class HabitCardComponent {
         if (this.isLoading) return;
         this.isLoading = true;
 
+        const selectedDate = this.selectedDate();
         const habit = this.habit();
 
         this.habitsService
-            .resetCheck(habit.id)
+            .resetCheck(habit.id, selectedDate)
             .subscribe({
                 next: () => {
                     this.habitUpdated.emit();

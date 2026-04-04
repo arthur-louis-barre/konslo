@@ -2,7 +2,7 @@ import {Component, HostListener, inject, OnInit} from '@angular/core';
 import {HabitService} from '../habit.service';
 import {GoalPeriod, HabitWithCheck} from '../habit.model';
 import {HabitCardComponent} from "./habit-card/habit-card.component";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-habits',
@@ -12,9 +12,10 @@ import {Router} from "@angular/router";
 })
 export class HabitListComponent implements OnInit {
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     private habitsService: HabitService = inject(HabitService);
 
-
+    protected selectedDate: string | undefined;
     protected habits: HabitWithCheck[] = [];
     protected openDropdownId: number | null = null;
 
@@ -26,11 +27,15 @@ export class HabitListComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.loadHabits();
+        this.route.queryParamMap.subscribe((params) => {
+            const date = params.get('date') ?? undefined;
+            this.selectedDate = date;
+            this.loadHabits(date);
+        });
     }
 
-    loadHabits() {
-        this.habitsService.getTodayHabits().subscribe((habits) => {
+    loadHabits(date?: string) {
+        this.habitsService.getHabits(date).subscribe((habits) => {
             this.habits = habits
         });
     }

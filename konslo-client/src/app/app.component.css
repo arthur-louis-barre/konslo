@@ -10,4 +10,5 @@
 
 .k-center {
     grid-area: center;
+    padding: 28px 32px;
 }

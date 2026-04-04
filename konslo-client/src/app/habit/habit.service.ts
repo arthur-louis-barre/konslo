@@ -1,6 +1,6 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {Check, CreateHabitRequest, Habit, HabitWithCheck} from './habit.model';
+import {ActivityResponse, Check, CreateHabitRequest, Habit, HabitWithCheck} from './habit.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -14,8 +14,9 @@ export class HabitService {
         return this.http.post<Habit>(`${this.apiUrl}/habits`, request);
     }
 
-    getTodayHabits() {
-        return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits`);
+    getHabits(date?: string) {
+        const options = date ? { params: { date } } : {};
+        return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits`, options);
     }
 
     deleteHabit(id: number) {
@@ -23,12 +24,21 @@ export class HabitService {
     }
 
     addCheck(habitId: number, value: number, checked_at?: string) {
-        let body = { value, checked_at: checked_at };
+        const body = { value, checked_at: checked_at };
         return this.http.post<Check>(`${this.apiUrl}/habits/${habitId}/checks`, body);
     }
 
     resetCheck(habitId: number, date?: string) {
         const options = date ? { params: { date } } : {};
         return this.http.delete(`${this.apiUrl}/habits/${habitId}/checks`, options);
+    }
+
+    /**
+     * @param from - YYYY-MM-DD
+     * @param to - YYYY-MM-DD
+     */
+    getActivity(from: string, to: string) {
+        const params = new HttpParams().set('from', from).set('to', to);
+        return this.http.get<ActivityResponse>(`${this.apiUrl}/checks/activity`, { params });
     }
 }

@@ -1,0 +1,143 @@
+.k-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+
+.k-calendar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-5);
+}
+
+.k-calendar__header-month {
+    font-family: 'Instrument Serif', serif;
+    font-size: var(--text-md);
+}
+
+.k-calendar__header-actions {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.k-calendar__header-actions__nav-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: 0.5px solid var(--border-light);
+    background: transparent;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    user-select: none;
+}
+
+.k-calendar__header-actions__nav-btn:hover {
+    background: var(--surface);
+}
+
+.k-calendar__header-actions__nav-btn:hover .material-symbols-outlined {
+    color: var(--text-secondary);
+}
+
+.k-calendar__header-actions__nav-btn .material-symbols-outlined {
+    color: var(--text-muted);
+}
+
+/* CELL-LABEL */
+
+.k-calendar__grid-label-cell {
+    color: var(--text-muted);
+    font-size: var(--text-xxs);
+    font-weight: var(--weight-medium);
+    text-align: center;
+    letter-spacing: 0.05em;
+    padding-bottom: 5px;
+}
+
+/* CELL-DAY */
+
+.k-calendar__grid-day-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px; /* gap between the date and the dot */
+    background-color: transparent;
+    width: 34px;
+    height: 34px;
+    border-radius: 5px;
+    font-size: var(--text-xxs);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+
+.k-calendar__grid-day-cell--selected {
+    background-color: var(--surface-accent);
+    border: 0.5px solid var(--accent);
+}
+
+/* CELL-DAY-DATE */
+
+.k-calendar__grid-day-cell-date {
+    height: 12px;
+    color: var(--text-secondary);
+    transition: background 0.12s, color 0.12s;
+}
+
+.k-calendar__grid-day-cell-date--muted {
+    color: var(--text-muted);
+    opacity: 0.35;
+}
+
+.k-calendar__grid-day-cell-date--today {
+    color: var(--accent-teal);
+}
+
+.k-calendar__grid-day-cell--selected .k-calendar__grid-day-cell-date {
+    color: var(--accent);
+}
+
+/* CELL-DAY-DOT BELOW THE CELL-DAY-DATE */
+
+.k-calendar__grid-day-cell-dot {
+    background-color: var(--border-light);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    transition: background 0.12s, color 0.12s;
+}
+
+.k-calendar__grid-day-cell-dot--activity {
+    background-color: var(--accent);
+}
+
+.k-calendar__grid-day-cell-dot--today {
+    background-color: var(--accent-teal);
+    width: 6px;
+    height: 1px;
+    border-radius: 1px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
+
+.k-calendar__grid-day-cell--selected .k-calendar__grid-day-cell-dot--today {
+    background-color: var(--accent);
+}
+
+/* PSEUDO-CLASS */
+
+/* change the background when hovering, expect for the selected day-cell */
+.k-calendar__grid-day-cell:not(.k-calendar__grid-day-cell--selected):hover {
+    background: var(--surface-hover);
+}
+
+/* change the color when hovering, expect for the selected day-cell */
+.k-calendar__grid-day-cell:not(.k-calendar__grid-day-cell--selected):hover .k-calendar__grid-day-cell-date {
+    color: var(--text);
+}
+

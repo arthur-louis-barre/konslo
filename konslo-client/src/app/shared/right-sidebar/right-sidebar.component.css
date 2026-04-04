@@ -1,3 +1,5 @@
 :host {
     grid-area: right;
+    border-left: 0.5px solid var(--border);
+    padding: var(--space-5) var(--space-3);
 }

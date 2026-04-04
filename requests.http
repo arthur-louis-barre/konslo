@@ -30,3 +30,6 @@ PUT http://localhost:3000/habits/1/checks/1
 Content-Type: application/json
 
 {"value": 15}
+
+### Get activity dates
+GET http://localhost:3000/checks/activity?from=2026-01-01&to=2026-04-30

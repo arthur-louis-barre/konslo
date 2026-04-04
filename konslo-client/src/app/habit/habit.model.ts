@@ -26,3 +26,7 @@ export interface Check {
     value: number;
     checked_at: string;
 }
+
+export interface ActivityResponse {
+    dates: string[];
+}

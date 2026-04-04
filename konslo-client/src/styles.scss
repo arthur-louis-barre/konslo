@@ -7,6 +7,7 @@
   --border: #21262d;
   --border-light: #2d3748;
   --accent: #ff6b6b;
+  --accent-teal: #6bffff;
   --text: #e6edf3;
   --text-secondary: #8b949e;
   --text-muted: #4a5568;
@@ -431,6 +432,8 @@ button {
   display: none;
 }
 
+//
+
 .k-icon {
   font-size: 20px;
   font-variation-settings: "wght" 300, "opsz" 20;
@@ -443,6 +446,10 @@ button {
   text-transform: uppercase;
   color: var(--text-muted);
 }
+
+
+
+// these are for getting rid of user-agent styles
 
 a {
   text-decoration: none;

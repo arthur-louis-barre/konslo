@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import {CalendarComponent} from "./calendar/calendar.component";
 
 @Component({
   selector: 'k-right-sidebar',
-  imports: [],
+    imports: [
+        CalendarComponent
+    ],
   templateUrl: './right-sidebar.component.html',
   styleUrl: './right-sidebar.component.css',
 })
