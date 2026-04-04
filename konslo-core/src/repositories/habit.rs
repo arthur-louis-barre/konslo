@@ -51,7 +51,7 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_with_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError> {
+    async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
         let rows = query_file!("queries/select_habit_with_period_checks.sql", habit_id, timestamp)
             .fetch_all(&self.pool)
             .await?;
@@ -78,9 +78,9 @@ impl HabitRepository for PostgresHabitRepository {
             if let Some(check_id) = check_id {
                 habit_with_checks.checks.push(Check {
                     id: check_id,
-                    habit_id,
-                    value: row.value.unwrap(),
-                    checked_at: row.checked_at.unwrap(),
+                    habit_id: id,
+                    value: row.value.ok_or_else(|| AppError::Internal("check value was null".to_string()))?,
+                    checked_at: row.checked_at.ok_or_else(|| AppError::Internal("check checked_at was null".to_string()))?,
                 });
             }
         }
