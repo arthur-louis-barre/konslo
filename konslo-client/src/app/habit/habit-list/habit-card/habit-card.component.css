@@ -1,0 +1,193 @@
+.h-card {
+    position: relative; /* anchor for the dropdown */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 5px;
+    background-color: var(--surface);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+/* CARD BODY */
+
+.h-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.h-card__name {
+    margin-bottom: 3px;
+    color: var(--text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-normal);
+    letter-spacing: -0.025em;
+    opacity: 0.8;
+}
+
+.h-card__detail {
+    color: var(--text-muted);
+    font-size: var(--text-xxs);
+}
+
+/* CARD PROGRESS */
+
+.h-card__progress {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.h-card__progress-label {
+    font-size: var(--text-xxs);
+    color: var(--accent);
+}
+
+.h-card__progress-bar {
+    overflow: hidden;
+    width: 80px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--border);
+}
+
+.h-card__progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+    transform-origin: left;
+    animation: barFillIn 0.5s ease forwards;
+}
+
+/* CARD ACTION */
+
+.h-card__actions {
+    flex: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+}
+
+.h-card__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 7.5px;
+    border: 1.5px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    user-select: none
+}
+
+.h-card__btn--done {
+    background: var(--accent);
+    color: var(--text);
+    animation: iconPop 0.15s ease forwards;
+}
+
+.h-card__btn .material-symbols-outlined {
+    font-size: 20px;
+    font-variation-settings: 'wght' 300, 'opsz' 20;
+}
+
+/* CARD DROPDOWN */
+
+.h-card__dropdown {
+    position: absolute;
+    right: 15px;
+    top: 45px;
+    z-index: 10;
+    padding: 4px;
+    border: 0.5px solid var(--border-light);
+    border-radius: 7.5px;
+    background: var(--surface-hover);
+}
+
+.h-card__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border: none;
+    border-radius: 7.5px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+}
+
+.h-card__dropdown-item.danger {
+    color: var(--accent);
+}
+
+/* PSEUDO-CLASS */
+
+.h-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-light);
+}
+
+.h-card__btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.h-card__btn:active {
+    opacity: 0.7;
+}
+
+.h-card__btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.h-card__btn--done:hover {
+    border-color: var(--border-light);
+    color: var(--text);
+}
+
+.h-card__dropdown-item:hover {
+    color: var(--text);
+}
+
+.h-card__dropdown-item:active {
+    opacity: 0.7;
+}
+
+.h-card__dropdown-item.danger:hover {
+    color: var(--accent);
+    background: var(--surface-accent);
+}
+
+/* ANIMATION */
+
+@keyframes barFillIn {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes iconPop {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
