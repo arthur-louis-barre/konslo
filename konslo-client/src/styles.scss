@@ -198,7 +198,7 @@ html, body {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  border: 0.5px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   background: transparent;
   color: #6b7280;
   font-size: 14px;
@@ -206,7 +206,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: border-color 0.15s, color 0.15s;
   user-select: none
 }
 
@@ -220,13 +220,12 @@ html, body {
 }
 
 .h-card__btn:disabled:hover {
-  border: 0.5px solid var(--border-light);
+  border-color: var(--border-light);
   color: #6b7280;
 }
 
 .h-card__btn:hover {
   border-color: var(--accent);
-  border-width: 1.5px;
   color: var(--accent);
 }
 
