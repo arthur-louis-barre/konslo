@@ -12,9 +12,9 @@
   --text-secondary: #8b949e;
   --text-muted: #4a5568;
 
-  // size scale
+  // sizes
   --text-xxs: 0.625rem; // label 10px
-  --text-xs: 0.75rem; // 12px
+  --text-xs: 0.75rem; // body extra-small 12px
   --text-sm: 0.875rem; // body small 14px
   --text-md: 1rem; // body 16px
   --text-lg: 1.375rem; // title 22px
@@ -22,7 +22,7 @@
   --text-xxl: 2rem; // headline 32px
   --text-xxxl: 2.8125rem; // display 45px
 
-  // weight scale
+  // weights
   --weight-light: 300;
   --weight-normal: 400;
   --weight-medium: 500;
@@ -51,21 +51,48 @@ html, body {
   color: var(--text);
 }
 
-// MAIN
-
-
-
-// margin-bottom: 28px;
-
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+/* add texture to the background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
 }
+
+/* GLOBAL */
+
+.k-icon {
+  font-size: 20px;
+  font-variation-settings: "wght" 300, "opsz" 20;
+}
+
+.k-label {
+  font-size: var(--text-xxs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}
+
+/* FONTS */
 
 @font-face {
   font-family: 'Instrument Serif';
@@ -85,61 +112,13 @@ html, body {
   unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 999;
-  opacity: 0.15;
-  mix-blend-mode: overlay;
-}
+/* KEYFRAMES */
 
-
-
-
-
-input {
-  font-family: inherit;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-
-// hide the arrows in <input type="number"> elements
-
-.form-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-.form-input[type="number"]::-webkit-inner-spin-button,
-.form-input[type="number"]::-webkit-outer-spin-button {
-  display: none;
-}
-
-//
-
-.k-icon {
-  font-size: 20px;
-  font-variation-settings: "wght" 300, "opsz" 20;
-}
-
-.k-label {
-  font-size: var(--text-xxs);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-
-// these are for getting rid of user-agent styles
-
-a {
-  text-decoration: none;
-  color: inherit;
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
