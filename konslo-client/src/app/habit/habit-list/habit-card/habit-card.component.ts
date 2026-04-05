@@ -3,12 +3,13 @@ import {HabitService} from "../../habit.service";
 import {HabitWithCheck} from "../../habit.model";
 
 @Component({
-    selector: 'app-habit-card',
+    selector: 'k-habit-card',
     templateUrl: './habit-card.component.html',
     styleUrl: './habit-card.component.css',
 })
 export class HabitCardComponent {
     private habitsService = inject(HabitService);
+
     protected isLoading = false;
 
     selectedDate = input<string>();
@@ -19,19 +20,14 @@ export class HabitCardComponent {
     habitDeleted = output<number>();
     dropdownToggled = output<number>();
 
-    deleteHabit() {
-        this.habitDeleted.emit(this.habit().id);
-    }
+    // CLICK-HANDLERS
 
     addCheck() {
         if (this.isLoading) return;
         this.isLoading = true;
 
-        const selectedDate = this.selectedDate();
-        const habit = this.habit();
-
         this.habitsService
-            .addCheck(habit.id, 1, selectedDate)
+            .addCheck(this.habit().id, 1, this.selectedDate())
             .subscribe({
                 next: () => {
                     this.habitUpdated.emit();
@@ -44,24 +40,22 @@ export class HabitCardComponent {
     }
 
     resetCheck() {
-        if (this.isLoading) return;
-        this.isLoading = true;
-
-        const selectedDate = this.selectedDate();
-        const habit = this.habit();
-
         this.habitsService
-            .resetCheck(habit.id, selectedDate)
-            .subscribe({
-                next: () => {
-                    this.habitUpdated.emit();
-                    this.isLoading = false
-                },
-                error: () => {
-                    this.isLoading = false;
-                }
-            });
+            .resetCheck(this.habit().id, this.selectedDate())
+            .subscribe(() => {
+                this.habitUpdated.emit();
+            })
     }
+
+    deleteHabit() {
+        this.habitDeleted.emit(this.habit().id);
+    }
+
+    toggleDropdown() {
+        this.dropdownToggled.emit(this.habit().id)
+    }
+
+    // GETTERS
 
     get isCompleted() {
         return this.progressPercent >= 100;
@@ -71,11 +65,10 @@ export class HabitCardComponent {
         const progressValue = this.progressValue;
         const goalValue = this.habit().goal_value;
 
-        return Math.round((progressValue / goalValue * 100))
+        return Math.round(progressValue / goalValue * 100)
     }
 
     get progressValue() {
-        if (this.habit().checks.length === 0) return 0;
-        else return this.habit().checks.reduce((sum, check) => sum + check.value, 0);
+        return this.habit().checks.reduce((sum, check) => sum + check.value, 0);
     }
 }

@@ -6,7 +6,9 @@ import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-habits',
-    imports: [HabitCardComponent],
+    imports: [
+        HabitCardComponent
+    ],
     templateUrl: './habit-list.component.html',
     styleUrl: './habit-list.component.css'
 })

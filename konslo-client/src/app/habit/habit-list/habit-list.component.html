@@ -13,7 +13,7 @@
             </div>
             @for (habit of habitGroup.habits; track habit.id) {
                 <div>
-                    <app-habit-card
+                    <k-habit-card
                             [selectedDate]="selectedDate"
                             [habit]="habit"
                             [isDropdownOpen]="openDropdownId === habit.id"
@@ -21,7 +21,7 @@
                             (habitDeleted)="deleteHabit($event)"
                             (dropdownToggled)="toggleDropdown($event)"
                     >
-                    </app-habit-card>
+                    </k-habit-card>
                 </div>
             }
         </div>
