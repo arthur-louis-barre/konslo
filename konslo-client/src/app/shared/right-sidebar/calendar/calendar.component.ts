@@ -1,10 +1,19 @@
 import {Component, inject} from '@angular/core';
 import {HabitService} from "../../../habit/habit.service";
-import {ActivityResponse} from "../../../habit/habit.model";
 import {ActivatedRoute, Router} from "@angular/router";
+import {
+    addMonths,
+    endOfMonth,
+    format,
+    getDaysInMonth, isAfter,
+    isSameDay,
+    isSameMonth,
+    startOfMonth,
+    subMonths
+} from "date-fns";
 
 interface CalendarDay {
-    date: number;
+    date: Date;
     isToday: boolean;
     isSelectedDay: boolean;
     isSelectedMonth: boolean;
@@ -20,165 +29,144 @@ interface CalendarDay {
 export class CalendarComponent {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
-    private initialized = false
-
     private habitService = inject(HabitService);
 
-    private currentDate: Date = new Date();
-    protected selectedYear: number = this.currentDate.getFullYear();
-    private selectedMonth: number = this.currentDate.getMonth();
-    private selectedDate: number = this.currentDate.getDate();
+    private isInit: boolean = false;
+    private today: Date = new Date();
+    private selectedDate: Date = new Date();
+    protected calendarDays: CalendarDay[] = [];
 
-    protected days: CalendarDay[] = [];
+    // LIFE-CYCLE
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.route.queryParamMap.subscribe((params) => {
-            const date = params.get('date') ?? undefined;
+            const dateParam = params.get('date');
 
-            const date_parsed = date === undefined ? new Date() : new Date(date);
+            const prevSelectedDate = this.selectedDate;
+            this.selectedDate = dateParam ? new Date(dateParam) : new Date();
 
-            this.selectedDate = date_parsed.getDate();
+            // the calendar need to be built if the component is being initialized, or if the month has changed
+            const needBuild =
+                !this.isInit ||
+                !isSameMonth(prevSelectedDate, this.selectedDate);
 
-            const date_parsed_month = date_parsed.getMonth();
-            const date_parsed_year = date_parsed.getFullYear();
-            const isSameMonth = date_parsed_month === this.selectedMonth;
-            const isSameYear = date_parsed_year === this.selectedYear;
-            this.selectedMonth = date_parsed_month;
-            this.selectedYear = date_parsed_year;
-
-            if (!this.initialized || !isSameMonth || !isSameYear) {
-                this.initialized = true;
-                const { from, to } = this.getMonthRange();
-                this.loadActivity(from, to);
-            } else {
+            if (needBuild) {
+                this.isInit = true;
                 this.buildCalendar();
+            } else {
+                this.updateSelectedDay();
+            }
+        })
+    }
+
+    buildCalendar(): void {
+        const nbDaysSelectedMonth = getDaysInMonth(this.selectedDate);
+        const firstDaySelectedMonth = (startOfMonth(this.selectedDate).getDay() + 6) % 7;
+        const lastDaySelectedMonth = (endOfMonth(this.selectedDate).getDay() + 6) % 7;
+
+        const nbDaysPreviousMonth = getDaysInMonth(subMonths(this.selectedDate, 1));
+
+        const previousMonthDays: CalendarDay[] = Array.from({length: firstDaySelectedMonth}, (_, i) => {
+            return {
+                date: new Date(
+                    this.selectedDate.getFullYear(),
+                    this.selectedDate.getMonth() - 1,
+                    nbDaysPreviousMonth - firstDaySelectedMonth + i + 1,
+                ),
+                isToday: false,
+                isSelectedMonth: false,
+                isSelectedDay: false,
+                hasActivity: false
             }
         });
-    }
 
-    buildCalendar() {
-        let nbOfDaysLastMonth = this.countNbOfDays(new Date(this.selectedYear, this.selectedMonth - 1));
-        let nbOfDaysSelectedMonth = this.countNbOfDays(new Date(this.selectedYear, this.selectedMonth));
+        const monthDays: CalendarDay[] = Array.from({length: nbDaysSelectedMonth}, (_, i) => {
+            const day = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), i + 1);
+            return {
+                date: day,
+                isToday: isSameDay(day, this.today),
+                isSelectedMonth: true,
+                isSelectedDay: isSameDay(day, this.selectedDate),
+                hasActivity: false
+            };
+        });
 
-        let firstDayOfSelectedMonth = this.firstDay(new Date(this.selectedYear, this.selectedMonth));
-        let lastDayOfSelectedMonth = this.lastDay(new Date(this.selectedYear, this.selectedMonth));
+        const nextMonthDays: CalendarDay[] = Array.from({length: (7 - (lastDaySelectedMonth + 1)) % 7}, (_, i) => {
+            return {
+                date: new Date(
+                    this.selectedDate.getFullYear(),
+                    this.selectedDate.getMonth() + 1,
+                    i + 1,
+                ),
+                isToday: false,
+                isSelectedMonth: false,
+                isSelectedDay: false,
+                hasActivity: false
+            }
+        });
 
-        const isCurrentMonth =
-            this.selectedYear === this.currentDate.getFullYear() &&
-            this.selectedMonth === this.currentDate.getMonth();
-
-        const lastMonthDays: CalendarDay[] = Array.from({length: firstDayOfSelectedMonth}, (_, i) => ({
-            date: nbOfDaysLastMonth - firstDayOfSelectedMonth + i + 1,
-            isToday: false,
-            isSelectedMonth: false,
-            isSelectedDay: false,
-            hasActivity: false
-        }));
-
-        const selectedMonthDays: CalendarDay[] = Array.from({length: nbOfDaysSelectedMonth}, (_, i) => ({
-            date: i + 1,
-            isToday: isCurrentMonth && (i + 1 === this.currentDate.getDate()),
-            isSelectedMonth: true,
-            isSelectedDay: i + 1 === this.selectedDate,
-            hasActivity: false
-        }));
-
-        const nextMonthDays: CalendarDay[] = Array.from({length: (7 - (lastDayOfSelectedMonth + 1)) % 7}, (_, i) => ({
-            date: i + 1,
-            isToday: false,
-            isSelectedMonth: false,
-            isSelectedDay: false,
-            hasActivity: false
-        }));
-
-        this.days = [...lastMonthDays, ...selectedMonthDays, ...nextMonthDays]
-    }
-
-    countNbOfDays(date: Date): number {
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    }
-
-    firstDay(date: Date): number {
-        let day = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-
-        // start of the week should be Monday, not Sunday
-        day = (day + 6) % 7;
-
-        return day
-    }
-
-    lastDay(date: Date): number {
-        let day = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDay();
-
-        // start of the week should be Monday, not Sunday
-        day = (day + 6) % 7;
-
-        return day
-    }
-
-    goToMonth(offset: -1 | 1): void {
-        this.selectedMonth += offset;
-
-        if (this.selectedMonth < 0) {
-            this.selectedMonth = 11;
-            this.selectedYear -= 1;
-        }
-
-        if (this.selectedMonth > 11) {
-            this.selectedMonth = 0;
-            this.selectedYear += 1;
-        }
-
-        const {from, to} = this.getMonthRange();
-        this.loadActivity(from, to);
+        this.calendarDays = [...previousMonthDays, ...monthDays, ...nextMonthDays]
+        this.loadActivity(
+            format(startOfMonth(this.selectedDate), 'yyyy-MM-dd'),
+            format(endOfMonth(this.selectedDate), 'yyyy-MM-dd')
+        )
     }
 
     loadActivity(from: string, to: string): void {
-        this.buildCalendar();
-
         this.habitService
             .getActivity(from, to)
             .subscribe((activity) => {
-                this.patchCalendar(activity)
+                const activitySet = new Set(activity.dates);
+
+                for (let day of this.calendarDays) {
+                    if (!day.isSelectedMonth) continue;
+                    day.hasActivity = activitySet.has(format(day.date, 'yyyy-MM-dd'));
+                }
             })
     }
 
-    patchCalendar(activity: ActivityResponse) {
-        const activitySet = new Set(activity.dates);
-        const month = String(this.selectedMonth + 1).padStart(2, '0');
+    updateSelectedDay(): void {
+        const prev = this.calendarDays.find(d => d.isSelectedDay);
+        if (prev) prev.isSelectedDay = false;
 
-        for (let day of this.days) {
-            if (!day.isSelectedMonth) continue;
-
-            const date = `${this.selectedYear}-${month}-${String(day.date).padStart(2, '0')}`;
-
-            day.hasActivity = activitySet.has(date);
-        }
+        const next = this.calendarDays.find(d => isSameDay(d.date, this.selectedDate));
+        if (next) next.isSelectedDay = true;
     }
 
-    private getMonthRange(): { from: string; to: string } {
-        const month = String(this.selectedMonth + 1).padStart(2, '0');
-        const lastDay = this.countNbOfDays(new Date(this.selectedYear, this.selectedMonth));
-        return {
-            from: `${this.selectedYear}-${month}-01`,
-            to: `${this.selectedYear}-${month}-${String(lastDay).padStart(2, '0')}`
-        };
-    }
+    // GETTERS
 
     get monthLabel(): string {
-        return new Date(this.selectedYear, this.selectedMonth)
-            .toLocaleString('en-US', {month: 'long'});
+        return format(this.selectedDate, 'MMMM');
+    }
+
+    get year(): string {
+        return format(this.selectedDate, 'yyyy');
+    }
+
+    dayNumber(date: Date): string {
+        return format(date, 'd');
+    }
+
+    // CLICK-HANDLERS
+
+    goToMonth(offset: -1 | 1): void {
+        let targetDate = addMonths(this.selectedDate, offset);
+
+        if (isAfter(startOfMonth(targetDate), startOfMonth(this.today))) return;
+
+        if (offset === -1) {
+            targetDate = endOfMonth(targetDate);
+        } else {
+            targetDate = startOfMonth(targetDate);
+        }
+
+        this.router.navigate(["/habits"], {queryParams: {date: format(targetDate, 'yyyy-MM-dd')}});
     }
 
     onDayClick(day: CalendarDay) {
-        if (!day.isSelectedMonth || day.isSelectedDay) return;
+        if (day.isSelectedDay || !day.isSelectedMonth) return;
+        if (day.date > this.today) return;
 
-        const padded_month = String(this.selectedMonth + 1).padStart(2, '0');
-        const padded_date = String(day.date).padStart(2, '0');
-        const date = new Date(`${this.selectedYear}-${padded_month}-${padded_date}`).toISOString()
-
-        this.router.navigate(['/habits'], {queryParams: {date}});
+        this.router.navigate(['/habits'], {queryParams: {date: format(day.date, "yyyy-MM-dd")}});
     }
-
-
 }

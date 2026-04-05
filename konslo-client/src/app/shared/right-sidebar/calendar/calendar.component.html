@@ -1,7 +1,7 @@
 <div class="k-calendar">
 
     <div class="k-calendar__header">
-        <div class="k-calendar__header-month">{{ monthLabel }} {{ selectedYear }}</div>
+        <div class="k-calendar__header-month">{{ monthLabel }} {{ year }}</div>
         <div class="k-calendar__header-actions">
             <button class="k-calendar__header-actions__nav-btn" (click)="goToMonth(-1)"><span
                     class="k-icon material-symbols-outlined">chevron_left</span></button>
@@ -20,7 +20,7 @@
         <div class="k-calendar__grid-label-cell">S</div>
         <div class="k-calendar__grid-label-cell">S</div>
 
-        @for (day of days; track $index) {
+        @for (day of calendarDays; track $index) {
             <div class="k-calendar__grid-day-cell"
                  [class.k-calendar__grid-day-cell--today]="day.isToday"
                  [class.k-calendar__grid-day-cell--selected]="day.isSelectedDay"
@@ -29,7 +29,7 @@
                 @if (day.isSelectedMonth) {
                     <div class="k-calendar__grid-day-cell-date"
                          [class.k-calendar__grid-day-cell-date--today]="day.isToday">
-                        {{ day.date }}
+                        {{ dayNumber(day.date) }}
                     </div>
                     <div class="k-calendar__grid-day-cell-dot"
                          [class.k-calendar__grid-day-cell-dot--activity]="day.hasActivity"
@@ -37,25 +37,10 @@
                     </div>
                 } @else {
                     <div class="k-calendar__grid-day-cell-date k-calendar__grid-day-cell-date--muted">
-                        {{ day.date }}
+                        {{ dayNumber(day.date) }}
                     </div>
                 }
             </div>
         }
     </div>
 </div>
-
-
-<!---->
-<!--style: pad_day-->
-<!--style: this_month other_day noActivity -->
-<!--style: this_month other_day yesActivity -->
-<!--style: this_month selected_day noActivity-->
-<!--style: this_month selected_day yesActivity-->
-
-<!---->
-<!--for each:-->
-<!--:hover-->
-<!--+-->
-<!--:active-->
-<!--and also; we might want a special style for the current day when it's not the one active-->
