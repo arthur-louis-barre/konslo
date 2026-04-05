@@ -17,7 +17,7 @@
                             [selectedDate]="selectedDate"
                             [habit]="habit"
                             [isDropdownOpen]="openDropdownId === habit.id"
-                            (habitUpdated)="loadHabits()"
+                            (habitUpdated)="loadHabits(selectedDate)"
                             (habitDeleted)="deleteHabit($event)"
                             (dropdownToggled)="toggleDropdown($event)"
                     >

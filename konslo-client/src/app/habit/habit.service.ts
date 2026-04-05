@@ -15,7 +15,7 @@ export class HabitService {
     }
 
     getHabits(date?: string) {
-        const options = date ? { params: { date } } : {};
+        const options = date ? { params: { date: new Date(date).toISOString() } } : {};
         return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits`, options);
     }
 
@@ -24,12 +24,16 @@ export class HabitService {
     }
 
     addCheck(habitId: number, value: number, checked_at?: string) {
-        const body = { value, checked_at: checked_at };
+        const body = checked_at
+            ? { value, checked_at: new Date(checked_at).toISOString() }
+            : { value };
         return this.http.post<Check>(`${this.apiUrl}/habits/${habitId}/checks`, body);
     }
 
     resetCheck(habitId: number, date?: string) {
-        const options = date ? { params: { date } } : {};
+        const options = date
+            ? { params: { date: new Date(date).toISOString() }}
+            : {};
         return this.http.delete(`${this.apiUrl}/habits/${habitId}/checks`, options);
     }
 
