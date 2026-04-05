@@ -1,18 +1,24 @@
 <div class="k-habit-list">
-    <div class="greeting">
-        <h1>{{ greeting }},
-            <br><em>let's keep going.</em>
-        </h1>
-    </div>
 
-    @for (habitGroup of habitsByPeriod; track habitGroup.period) {
-        <div class="habits-group">
-            <div class="habits-group-header">
-                <span class="habits-group-label">{{ habitGroup.label }}</span>
-                <div class="habits-group-line"></div>
-            </div>
-            @for (habit of habitGroup.habits; track habit.id) {
-                <div>
+    <header class="h-list__header">
+        <h1 class="h-list__greeting">{{ greeting }},
+            <br><em class="h-list__greeting-sub">let's keep going.</em>
+        </h1>
+
+        <button class="h-list__new-btn" (click)="goToNewHabit()">
+            <span class="k-icon material-symbols-outlined">add</span>
+            <span>New Habit</span>
+        </button>
+    </header>
+
+    <main>
+        @for (habitGroup of habitsByPeriod; track habitGroup.period) {
+            <div class="h-list__group">
+                <div class="h-list__group-header">
+                    <span class="h-list__group-label">{{ habitGroup.label }}</span>
+                    <div class="h-list__group-line"></div>
+                </div>
+                @for (habit of habitGroup.habits; track habit.id) {
                     <k-habit-card
                             [selectedDate]="selectedDate"
                             [habit]="habit"
@@ -22,14 +28,8 @@
                             (dropdownToggled)="toggleDropdown($event)"
                     >
                     </k-habit-card>
-                </div>
-            }
-        </div>
-
-    }
-
-    <button class="h-new-btn" (click)="goToNewHabit()">
-        <span class="material-symbols-outlined">add</span>
-        <span>New habit</span>
-    </button>
+                }
+            </div>
+        }
+    </main>
 </div>
