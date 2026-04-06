@@ -1,35 +1,46 @@
 <div class="k-habit-list">
 
-    <header class="h-list__header">
-        <h1 class="h-list__greeting">{{ greeting }},
-            <br><em class="h-list__greeting-sub">let's keep going.</em>
-        </h1>
+    @if (habitsByPeriod.length > 0) {
 
-        <button class="h-list__new-btn" (click)="goToNewHabit()">
-            <span class="k-icon material-symbols-outlined">add</span>
-            <span>New Habit</span>
-        </button>
-    </header>
+        <header class="h-list__header">
+            <h1 class="h-list__greeting">{{ greeting }},
+                <br><em class="h-list__greeting-sub">let's keep going.</em>
+            </h1>
 
-    <main>
-        @for (habitGroup of habitsByPeriod; track habitGroup.period) {
-            <div class="h-list__group">
-                <div class="h-list__group-header">
-                    <span class="h-list__group-label">{{ habitGroup.label }}</span>
-                    <div class="h-list__group-line"></div>
+            <button class="h-list__new-btn" (click)="goToNewHabit()">
+                <span class="k-icon material-symbols-outlined">add</span>
+                <span>New Habit</span>
+            </button>
+        </header>
+
+        <main>
+            @for (habitGroup of habitsByPeriod; track habitGroup.period) {
+                <div class="h-list__group">
+                    <div class="h-list__group-header">
+                        <span class="h-list__group-label">{{ habitGroup.label }}</span>
+                        <div class="h-list__group-line"></div>
+                    </div>
+                    @for (habit of habitGroup.habits; track habit.id) {
+                        <k-habit-card
+                                [selectedDate]="selectedDate"
+                                [habit]="habit"
+                                [isDropdownOpen]="openDropdownId === habit.id"
+                                (habitUpdated)="loadHabits(selectedDate)"
+                                (habitDeleted)="deleteHabit($event)"
+                                (dropdownToggled)="toggleDropdown($event)"
+                        >
+                        </k-habit-card>
+                    }
                 </div>
-                @for (habit of habitGroup.habits; track habit.id) {
-                    <k-habit-card
-                            [selectedDate]="selectedDate"
-                            [habit]="habit"
-                            [isDropdownOpen]="openDropdownId === habit.id"
-                            (habitUpdated)="loadHabits(selectedDate)"
-                            (habitDeleted)="deleteHabit($event)"
-                            (dropdownToggled)="toggleDropdown($event)"
-                    >
-                    </k-habit-card>
-                }
+            }
+        </main>
+
+    } @else {
+        <main>
+            <div class="h-list__empty">
+                <p>No habits yet.</p>
+                <a routerLink="/new-habit">Create your first one →</a>
             </div>
-        }
-    </main>
+        </main>
+    }
 </div>

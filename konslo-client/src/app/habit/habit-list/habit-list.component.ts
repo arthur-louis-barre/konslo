@@ -2,13 +2,14 @@ import {Component, HostListener, inject} from '@angular/core';
 import {HabitService} from '../habit.service';
 import {GoalPeriod, HabitWithCheck} from '../habit.model';
 import {HabitCardComponent} from "./habit-card/habit-card.component";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'k-habit-list',
     imports: [
-        HabitCardComponent
+        HabitCardComponent,
+        RouterLink
     ],
     templateUrl: './habit-list.component.html',
     styleUrl: './habit-list.component.css'
