@@ -31,6 +31,11 @@
     font-size: var(--text-xxs);
 }
 
+.h-card--done .h-card__name {
+    color: var(--text-muted);
+    text-decoration-line: line-through;
+}
+
 /* CARD PROGRESS */
 
 .h-card__progress {
