@@ -5,10 +5,51 @@
 }
 
 .k-left-sidebar {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
+
+.k-left-sidebar__item[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 20px);
+    right: calc(100% - 100px);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 0.5px solid var(--accent-teal);
+    box-shadow: 0 0 8px rgba(107, 255, 255, 0.15);
+    font-size: var(--text-xxs);
+    white-space: nowrap;
+    animation: tooltipIn 0.2s ease forwards, tooltipGlow 2s ease-in-out infinite;
+}
+
+@keyframes tooltipIn {
+    from { opacity: 0; transform: translateY(-50%) translateX(-4px); }
+    to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+@keyframes tooltipGlow {
+    0%   {
+        border-color: var(--accent-teal);
+        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
+        color: var(--accent-teal);
+    }
+    50%  {
+        border-color: rgba(107, 255, 255, 0.4);
+        text-shadow: 0 0 8px rgba(107, 255, 255, 0.4);
+        color: rgba(107, 255, 255, 0.6);
+    }
+    100% {
+        border-color: var(--accent-teal);
+        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
+        color: var(--accent-teal);
+    }
+}
+
+
+
 
 .k-left-sidebar__group-label {
     margin: 12px 0 6px
