@@ -12,3 +12,23 @@
     grid-area: center;
     padding: 28px 32px;
 }
+
+@media (max-width: 899px) {
+    .k-layout {
+        grid-template-rows: 50px 1fr;
+        grid-template-columns: 170px 1fr;
+        grid-template-areas:
+              "topbar topbar"
+              "left center";
+    }
+}
+
+@media (max-width: 599px) {
+    .k-layout {
+        grid-template-rows: 50px 1fr;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+              "topbar"
+              "center";
+    }
+}

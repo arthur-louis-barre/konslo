@@ -1,7 +1,7 @@
 :host {
     grid-area: left;
     border-right: 0.5px solid var(--border);
-    padding: var(--space-5) var(--space-3);
+    padding: 20px 12px;
 }
 
 .k-left-sidebar {
@@ -37,4 +37,10 @@
 .k-left-sidebar__item--active, .k-left-sidebar__item--active:hover  {
     background: var(--surface-accent);
     color: var(--accent);
+}
+
+@media (max-width: 599px) {
+    :host {
+        display: none;
+    }
 }
