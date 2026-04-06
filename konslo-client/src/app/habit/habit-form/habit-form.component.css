@@ -33,6 +33,7 @@ header h1 {
 /* MAIN */
 
 .form-group {
+    position: relative;
     margin-bottom: var(--space-6);
 }
 
@@ -147,4 +148,15 @@ header h1 {
 .form-input[type="number"]::-webkit-inner-spin-button,
 .form-input[type="number"]::-webkit-outer-spin-button {
     display: none;
+}
+
+/* ERRORS */
+
+
+.form-error {
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    color: var(--accent);
+    font-size: var(--text-xxs);
 }

@@ -1,8 +1,9 @@
-import {Component, inject} from '@angular/core';
+import {Component, ElementRef, inject, viewChild} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {HabitService} from '../habit.service';
 import {GoalPeriod} from "../habit.model";
 import {Router} from "@angular/router";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'k-new-habit-form',
@@ -15,6 +16,9 @@ export class HabitFormComponent {
     private habitsService = inject(HabitService);
 
     protected isLoading = false;
+    protected nameConflict = false;
+
+    private nameInput = viewChild.required<ElementRef>('nameInput');
 
     form = new FormGroup({
         name: new FormControl('', Validators.required),
@@ -22,6 +26,14 @@ export class HabitFormComponent {
         goal_unit: new FormControl('', Validators.required),
         goal_period: new FormControl('day', Validators.required),
     });
+
+    constructor() {
+        this.form.controls.name.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => {
+                this.nameConflict = false;
+            });
+    }
 
     onSubmit() {
         if (this.isLoading) return;
@@ -34,7 +46,14 @@ export class HabitFormComponent {
             goal_period: this.form.value.goal_period as GoalPeriod,
         }).subscribe(({
             next : () => { this.router.navigate(['/habits']); },
-            error: () => { this.isLoading = false },
+            error: (err) => {
+                console.error(err);
+                this.isLoading = false
+                if (err.status === 409) {
+                    this.nameConflict = true;
+                    this.nameInput().nativeElement.focus();
+                }
+            },
         }));
     }
 

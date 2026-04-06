@@ -34,14 +34,16 @@ export class HabitListComponent {
     }
 
     deleteHabit(id: number) {
-        this.habitsService.deleteHabit(id).subscribe(() => {
-            this.loadHabits(this.selectedDate);
+        this.habitsService.deleteHabit(id).subscribe({
+            next: () => { this.loadHabits(this.selectedDate); },
+            error: (err) => { console.error(err); }
         });
     }
 
     loadHabits(date?: string) {
-        this.habitsService.getHabits(date).subscribe((habits) => {
-            this.habits = habits
+        this.habitsService.getHabits(date).subscribe({
+            next: (habits) => { this.habits = habits; },
+            error: (err) => { console.error(err); }
         });
     }
 

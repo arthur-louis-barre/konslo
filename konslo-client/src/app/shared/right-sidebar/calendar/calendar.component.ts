@@ -115,13 +115,16 @@ export class CalendarComponent {
     loadActivity(from: string, to: string): void {
         this.habitService
             .getActivity(from, to)
-            .subscribe((activity) => {
-                const activitySet = new Set(activity.dates);
+            .subscribe({
+                next: (activity) => {
+                    const activitySet = new Set(activity.dates);
 
-                for (let day of this.calendarDays) {
-                    if (!day.isSelectedMonth) continue;
-                    day.hasActivity = activitySet.has(format(day.date, 'yyyy-MM-dd'));
-                }
+                    for (let day of this.calendarDays) {
+                        if (!day.isSelectedMonth) continue;
+                        day.hasActivity = activitySet.has(format(day.date, 'yyyy-MM-dd'));
+                    }
+                },
+                error: (err) => { console.error(err); }
             })
     }
 
