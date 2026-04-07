@@ -18,7 +18,7 @@ pub trait HabitService: Send + Sync {
     async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn add_check(&self, habit_id: i32, user_id: Uuid, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
     async fn reset_period_checks(&self, habit_id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError>;
-    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
+    async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
 }
 
 #[derive(Clone)]
@@ -106,10 +106,10 @@ impl HabitService for DefaultHabitService {
         Ok(())
     }
 
-    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
+    async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
         validate_date_range(from, to)?;
 
-        let dates = self.check_repo.get_activity_dates(from, to).await?;
+        let dates = self.check_repo.get_activity_dates(user_id, from, to).await?;
 
         Ok(dates)
     }

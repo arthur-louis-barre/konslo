@@ -100,9 +100,10 @@ pub async fn reset_period_checks_handler(
 
 pub async fn get_activity_dates_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Query(params): Query<ActivityQuery>,
 ) -> Result<Json<ActivityResponse>, AppError> {
-    let dates = state.habit_service.get_activity_dates(params.from, params.to).await?;
+    let dates = state.habit_service.get_activity_dates(auth_user.user_id, params.from, params.to).await?;
 
     Ok(Json(dates.into()))
 }

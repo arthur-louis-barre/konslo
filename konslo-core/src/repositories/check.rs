@@ -3,12 +3,13 @@ use crate::models::check::{AddCheck, Check};
 use async_trait::async_trait;
 use sqlx::{PgPool, query_file, query_file_as};
 use time::Date;
+use uuid::Uuid;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait CheckRepository: Send + Sync {
     async fn upsert(&self, add_check: &AddCheck) -> Result<Check, AppError>;
-    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
+    async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
     async fn delete_by_habit_for_period(&self, habit_id: i32, from: Date, to: Date) -> Result<u64, AppError>;
 }
 
@@ -38,8 +39,8 @@ impl CheckRepository for PostgresCheckRepository {
         Ok(check)
     }
 
-    async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
-        let dates = query_file!("queries/select_activity_dates.sql", from, to)
+    async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
+        let dates = query_file!("queries/select_activity_dates.sql", user_id, from, to)
             .fetch_all(&self.pool)
             .await?
             .into_iter()
