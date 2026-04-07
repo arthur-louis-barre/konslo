@@ -7,13 +7,14 @@ use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
 use time::{Date, OffsetDateTime};
+use uuid::Uuid;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
-    async fn delete(&self, id: i32) -> Result<(), AppError>;
+    async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn add_check(&self, habit_id: i32, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
     async fn reset_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<(), AppError>;
@@ -48,8 +49,8 @@ impl HabitService for DefaultHabitService {
         Ok(habit)
     }
 
-    async fn delete(&self, id: i32) -> Result<(), AppError> {
-        let deleted = self.habit_repo.delete(id).await?;
+    async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError> {
+        let deleted = self.habit_repo.delete(id, user_id).await?;
 
         if deleted {
             Ok(())

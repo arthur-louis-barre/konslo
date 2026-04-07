@@ -5,6 +5,7 @@ use async_trait::async_trait;
 use sqlx::{PgPool, query_file, query_file_as};
 use std::collections::HashMap;
 use time::OffsetDateTime;
+use uuid::Uuid;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
@@ -13,7 +14,7 @@ pub trait HabitRepository: Send + Sync {
     async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
     async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn delete(&self, id: i32) -> Result<bool, AppError>;
+    async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError>;
 }
 
 pub struct PostgresHabitRepository {
@@ -127,8 +128,8 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habits_with_checks)
     }
 
-    async fn delete(&self, id: i32) -> Result<bool, AppError> {
-        let result = query_file!("queries/delete_habit.sql", id).execute(&self.pool).await?;
+    async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError> {
+        let result = query_file!("queries/delete_habit.sql", id, user_id).execute(&self.pool).await?;
 
         Ok(result.rows_affected() == 1)
     }
