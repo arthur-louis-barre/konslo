@@ -6,6 +6,8 @@ mod router;
 
 use crate::router::{AppState, get_router};
 use dotenvy::dotenv;
+use konslo_core::db::run_migrations;
+use konslo_core::repositories::{PostgresCheckRepository, PostgresHabitRepository, PostgresUserRepository};
 use konslo_core::services::habit::DefaultHabitService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
@@ -14,21 +16,21 @@ use std::sync::Arc;
 use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use konslo_core::db::run_migrations;
-use konslo_core::repositories::{PostgresCheckRepository, PostgresHabitRepository};
+use konslo_core::services::user::DefaultUserService;
 
 #[tokio::main]
 async fn main() {
-    // 1. Logging setup
+    // instantiate the logger
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .init();
 
     let cors = CorsLayer::new().allow_origin(Any).allow_methods(Any).allow_headers(Any);
 
-    // 1. Load env. variables
+    // load env. variables
     dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("Database must be defined in the .env file");
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL should be defined in the .env file");
+    let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET should be defined in the .env file");
 
     // create the pool
     let pool = PgPoolOptions::new()
@@ -41,13 +43,15 @@ async fn main() {
     // run migrations
     run_migrations(&pool).await.expect("failed to run migration");
 
-    // 3. Instantiate the repository
+    // wire dependencies
+    let user_repo = Arc::new(PostgresUserRepository::new(pool.clone()));
     let habit_repo = Arc::new(PostgresHabitRepository::new(pool.clone()));
     let check_repo = Arc::new(PostgresCheckRepository::new(pool.clone()));
+
+    let user_service = Arc::new(DefaultUserService::new(user_repo.clone()));
     let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone(), check_repo.clone()));
-    let state = AppState {
-        habit_service,
-    };
+
+    let state = AppState { habit_service, user_service, jwt_secret };
 
     // 4. Config routing
     let app = get_router(state).layer(cors);
