@@ -52,7 +52,7 @@ impl HabitRepository for PostgresHabitRepository {
     }
 
     async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habit_with_period_checks.sql", habit_id, timestamp)
+        let rows = query_file!("queries/select_habit_with_period_checks.sql", id, timestamp)
             .fetch_all(&self.pool)
             .await?;
 
