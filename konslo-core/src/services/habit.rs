@@ -1,8 +1,7 @@
 use crate::errors::AppError;
 use crate::models::check::{AddCheck, Check};
 use crate::models::habit::{CreateHabit, Habit, HabitWithCheck};
-use crate::repositories::check::CheckRepository;
-use crate::repositories::habit::HabitRepository;
+use crate::repositories::{CheckRepository, HabitRepository};
 use crate::validation::check::{validate_check_checked_at, validate_check_value, validate_date_range, validate_period_cap};
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
@@ -119,8 +118,7 @@ impl HabitService for DefaultHabitService {
 mod tests {
     use super::*;
     use crate::models::habit::GoalPeriod;
-    use crate::repositories::check::MockCheckRepository;
-    use crate::repositories::habit::MockHabitRepository;
+    use crate::repositories::{MockCheckRepository, MockHabitRepository};
     use time::macros::datetime;
 
     fn make_service(habit_repo: MockHabitRepository, check_repo: MockCheckRepository) -> DefaultHabitService {

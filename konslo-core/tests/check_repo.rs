@@ -3,11 +3,14 @@ mod tests {
     use konslo_core::errors::AppError;
     use konslo_core::models::check::{AddCheck, Check};
     use konslo_core::models::habit::{CreateHabit, GoalPeriod, Habit};
-    use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
-    use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
+    use konslo_core::repositories::{
+        CheckRepository, HabitRepository, PostgresCheckRepository, PostgresHabitRepository,
+    };
     use sqlx::PgPool;
     use std::error::Error;
+    use std::ops::Add;
     use time::{Duration, OffsetDateTime};
+    use time::macros::time;
 
     async fn seed_habit(pool: &PgPool, create_habit: &CreateHabit) -> Result<Habit, Box<dyn Error>> {
         let repo = PostgresHabitRepository::new(pool.clone());
@@ -20,17 +23,20 @@ mod tests {
     }
 
     mod upsert {
-        use std::ops::Add;
-        use time::macros::time;
         use super::*;
 
         #[sqlx::test]
         async fn test_upsert_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &CreateHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
+            let s_habit = seed_habit(&pool, &CreateHabit::new(
+                "Meditate",
+                10,
+                "min",
+                GoalPeriod::Day
+            )).await?;
 
             let yesterday_first = OffsetDateTime::now_utc().add(Duration::days(-1)).replace_time(time!(12:00:00));
-            let yesterday_second = yesterday_first + Duration::hours(4);
+            let yesterday_second = yesterday_first.add(Duration::hours(4));
             let add_check_first = AddCheck::new(s_habit.id, 5, yesterday_first);
             let add_check_second = AddCheck::new(s_habit.id, 3, yesterday_second);
 
@@ -68,7 +74,12 @@ mod tests {
         #[sqlx::test]
         async fn test_delete_by_habit_for_period_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &CreateHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
+            let s_habit = seed_habit(&pool, &CreateHabit::new(
+                "Meditate",
+                10,
+                "min",
+                GoalPeriod::Day
+            )).await?;
 
             let now = OffsetDateTime::now_utc();
             seed_check(&pool, &AddCheck::new(s_habit.id, 1, now)).await?;
