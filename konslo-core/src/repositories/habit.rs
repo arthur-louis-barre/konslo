@@ -11,7 +11,7 @@ use uuid::Uuid;
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError>;
-    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
+    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
     async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError>;
@@ -33,6 +33,7 @@ impl HabitRepository for PostgresHabitRepository {
         let habit = query_file_as!(
             Habit,
             "queries/insert_habit.sql",
+            create_habit.user_id,
             create_habit.name,
             create_habit.goal_value,
             create_habit.goal_unit,
@@ -44,8 +45,8 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
-        let habit = query_file_as!(Habit, "queries/select_habit_by_id.sql", id)
+    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError> {
+        let habit = query_file_as!(Habit, "queries/select_habit_by_id.sql", id, user_id)
             .fetch_optional(&self.pool)
             .await?;
 

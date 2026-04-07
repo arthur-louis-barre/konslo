@@ -13,7 +13,7 @@ use uuid::Uuid;
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
-    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError>;
+    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
     async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError>;
     async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn add_check(&self, habit_id: i32, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
@@ -43,8 +43,8 @@ impl HabitService for DefaultHabitService {
         Ok(habit)
     }
 
-    async fn get_by_id(&self, id: i32) -> Result<Option<Habit>, AppError> {
-        let habit = self.habit_repo.get_by_id(id).await?;
+    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError> {
+        let habit = self.habit_repo.get_by_id(id, user_id).await?;
 
         Ok(habit)
     }

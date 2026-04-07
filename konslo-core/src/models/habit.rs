@@ -1,6 +1,7 @@
 use crate::models::check::Check;
 use sqlx::{FromRow, Type};
 use time::{Date, Duration, OffsetDateTime};
+use uuid::Uuid;
 
 #[derive(Clone, Copy, Debug, PartialEq, Type)]
 #[sqlx(type_name = "goal_period_enum", rename_all = "lowercase")]
@@ -46,6 +47,7 @@ impl GoalPeriod {
 #[derive(Debug, PartialEq, FromRow)]
 pub struct Habit {
     pub id: i32,
+    pub user_id: Uuid,
     pub name: String,
     pub goal_value: i32,
     pub goal_unit: String,
@@ -88,6 +90,7 @@ impl HabitWithCheck {
 
 #[derive(Debug)]
 pub struct CreateHabit {
+    pub user_id: Uuid,
     pub name: String,
     pub goal_value: i32,
     pub goal_unit: String,
@@ -95,8 +98,9 @@ pub struct CreateHabit {
 }
 
 impl CreateHabit {
-    pub fn new(name: &str, goal_value: i32, goal_unit: &str, goal_period: GoalPeriod) -> Self {
+    pub fn new(user_id: Uuid, name: &str, goal_value: i32, goal_unit: &str, goal_period: GoalPeriod) -> Self {
         CreateHabit {
+            user_id,
             name: name.to_string(),
             goal_value,
             goal_unit: goal_unit.to_string(),

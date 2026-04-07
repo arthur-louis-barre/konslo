@@ -11,9 +11,11 @@ use time::OffsetDateTime;
 
 pub async fn create_habit_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Json(request): Json<CreateHabitRequest>,
 ) -> Result<(http::StatusCode, Json<HabitResponse>), AppError> {
     let new_habit = CreateHabit {
+        user_id: auth_user.user_id,
         name: request.name,
         goal_value: request.goal_value,
         goal_unit: request.goal_unit,
@@ -27,9 +29,10 @@ pub async fn create_habit_handler(
 
 pub async fn get_habit_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Path(id): Path<i32>,
 ) -> Result<Json<HabitResponse>, AppError> {
-    let habit = state.habit_service.get_by_id(id).await?;
+    let habit = state.habit_service.get_by_id(id, auth_user.user_id).await?;
 
     match habit {
         Some(habit) => Ok(Json(habit.into())),
@@ -39,8 +42,8 @@ pub async fn get_habit_handler(
 
 pub async fn delete_habit_handler(
     State(state): State<AppState>,
-    Path(id): Path<i32>,
     auth_user: AuthUser,
+    Path(id): Path<i32>,
 ) -> Result<http::StatusCode, AppError> {
     state.habit_service.delete(id, auth_user.user_id).await?;
     Ok(http::StatusCode::NO_CONTENT)
