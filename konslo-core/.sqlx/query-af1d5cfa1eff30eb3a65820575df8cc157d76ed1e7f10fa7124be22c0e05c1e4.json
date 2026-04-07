@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO habits (name, goal_value, goal_unit, goal_period)\r\nVALUES ($1, $2, $3, $4)\r\nRETURNING habit_id as id, name, goal_value, goal_unit, goal_period as \"goal_period: GoalPeriod\", created_at;",
+  "query": "INSERT INTO habits (user_id, name, goal_value, goal_unit, goal_period)\r\nVALUES ($1, $2, $3, $4, $5)\r\nRETURNING\r\n    habit_id as id,\r\n    user_id,\r\n    name,\r\n    goal_value,\r\n    goal_unit,\r\n    goal_period as \"goal_period: GoalPeriod\",\r\n    created_at;",
   "describe": {
     "columns": [
       {
@@ -10,21 +10,26 @@
       },
       {
         "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
         "name": "name",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 2,
+        "ordinal": 3,
         "name": "goal_value",
         "type_info": "Int4"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "goal_unit",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "goal_period: GoalPeriod",
         "type_info": {
           "Custom": {
@@ -40,13 +45,14 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Varchar",
         "Int4",
         "Varchar",
@@ -70,8 +76,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "e105ae2416131fa7f2865f69e465458071ccc8d6f44c5bc3d0b569d7ff529f9e"
+  "hash": "af1d5cfa1eff30eb3a65820575df8cc157d76ed1e7f10fa7124be22c0e05c1e4"
 }

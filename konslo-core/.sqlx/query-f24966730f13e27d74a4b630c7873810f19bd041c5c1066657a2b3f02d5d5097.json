@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO checks (habit_id, value, checked_at)\r\nVALUES ($1, $2, $3)\r\n    ON CONFLICT (habit_id, ((checked_at AT TIME ZONE 'UTC')::date))\r\nDO UPDATE SET value = checks.value + EXCLUDED.value\r\nRETURNING check_id as id, habit_id, value, checked_at;\r\n",
+  "query": "INSERT INTO checks (habit_id, value, checked_at)\r\nVALUES ($1, $2, $3)\r\nON CONFLICT (habit_id, ((checked_at AT TIME ZONE 'UTC')::date))\r\nDO UPDATE SET value = checks.value + EXCLUDED.value\r\nRETURNING\r\n    check_id as id,\r\n    habit_id, value,\r\n    checked_at;",
   "describe": {
     "columns": [
       {
@@ -38,5 +38,5 @@
       false
     ]
   },
-  "hash": "122669665786df1e235254e091dd92924b061888139cef6668ec83e62d62e14c"
+  "hash": "f24966730f13e27d74a4b630c7873810f19bd041c5c1066657a2b3f02d5d5097"
 }

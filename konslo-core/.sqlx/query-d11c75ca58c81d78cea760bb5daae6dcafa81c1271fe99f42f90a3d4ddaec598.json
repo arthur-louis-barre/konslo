@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\r\n    habit_id as id,\r\n    name,\r\n    goal_value,\r\n    goal_unit,\r\n    goal_period as \"goal_period: GoalPeriod\",\r\n    created_at\r\nFROM habits\r\nWHERE habit_id = $1;",
+  "query": "SELECT\r\n    habit_id as id,\r\n    user_id,\r\n    name,\r\n    goal_value,\r\n    goal_unit,\r\n    goal_period as \"goal_period: GoalPeriod\",\r\n    created_at\r\nFROM habits\r\nWHERE habit_id = $1 AND user_id = $2;",
   "describe": {
     "columns": [
       {
@@ -10,21 +10,26 @@
       },
       {
         "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
         "name": "name",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 2,
+        "ordinal": 3,
         "name": "goal_value",
         "type_info": "Int4"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "goal_unit",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "goal_period: GoalPeriod",
         "type_info": {
           "Custom": {
@@ -40,14 +45,15 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "created_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Int4"
+        "Int4",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -56,8 +62,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "607e3b69b33da4c4d9d5d01483797576f7d9c89ac474d296b76830b31eae29be"
+  "hash": "d11c75ca58c81d78cea760bb5daae6dcafa81c1271fe99f42f90a3d4ddaec598"
 }
