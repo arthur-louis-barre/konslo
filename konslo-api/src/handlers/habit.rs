@@ -51,11 +51,12 @@ pub async fn delete_habit_handler(
 
 pub async fn get_all_habits_with_period_checks_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Query(params): Query<HabitsQuery>,
 ) -> Result<Json<Vec<HabitWithCheckResponse>>, AppError> {
     let habits_with_checks = state
         .habit_service
-        .get_all_with_period_checks(params.date.unwrap_or_else(OffsetDateTime::now_utc))
+        .get_all_with_period_checks(auth_user.user_id, params.date.unwrap_or_else(OffsetDateTime::now_utc))
         .await?
         .into_iter()
         .map(|h| h.into())
@@ -66,6 +67,7 @@ pub async fn get_all_habits_with_period_checks_handler(
 
 pub async fn add_check_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Path(habit_id): Path<i32>,
     Json(request): Json<AddCheckRequest>,
 ) -> Result<Json<CheckResponse>, AppError> {
@@ -73,6 +75,7 @@ pub async fn add_check_handler(
         .habit_service
         .add_check(
             habit_id,
+            auth_user.user_id,
             request.value,
             request.checked_at.unwrap_or_else(OffsetDateTime::now_utc),
         )
@@ -83,12 +86,13 @@ pub async fn add_check_handler(
 
 pub async fn reset_period_checks_handler(
     State(state): State<AppState>,
+    auth_user: AuthUser,
     Path(habit_id): Path<i32>,
     Query(params): Query<ResetChecksQuery>,
 ) -> Result<http::StatusCode, AppError> {
     state
         .habit_service
-        .reset_period_checks(habit_id, params.date.unwrap_or_else(OffsetDateTime::now_utc))
+        .reset_period_checks(habit_id, auth_user.user_id, params.date.unwrap_or_else(OffsetDateTime::now_utc))
         .await?;
 
     Ok(http::StatusCode::NO_CONTENT)

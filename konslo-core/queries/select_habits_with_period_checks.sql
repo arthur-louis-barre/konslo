@@ -9,8 +9,9 @@ SELECT
     c.value as "value?",
     c.checked_at as "checked_at?"
 FROM habits h LEFT JOIN checks c ON h.habit_id = c.habit_id AND (
-    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $1::timestamptz) OR
-    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $1::timestamptz) OR
-    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $1::timestamptz)
+    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $2::timestamptz) OR
+    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $2::timestamptz) OR
+    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $2::timestamptz)
 )
+WHERE h.user_id = $1
 ORDER BY id;

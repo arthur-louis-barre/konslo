@@ -12,8 +12,8 @@ use uuid::Uuid;
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
-    async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
-    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn get_with_period_checks(&self, id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
+    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError>;
 }
 
@@ -53,8 +53,8 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_with_period_checks(&self, id: i32, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habit_with_period_checks.sql", id, timestamp)
+    async fn get_with_period_checks(&self, id: i32, user_id: Uuid, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
+        let rows = query_file!("queries/select_habit_with_period_checks.sql", id, user_id, timestamp)
             .fetch_all(&self.pool)
             .await?;
 
@@ -90,8 +90,8 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(Some(habit_with_checks))
     }
 
-    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habits_with_period_checks.sql", timestamp)
+    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
+        let rows = query_file!("queries/select_habits_with_period_checks.sql", user_id, timestamp)
             .fetch_all(&self.pool)
             .await?;
 

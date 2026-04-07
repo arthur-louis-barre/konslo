@@ -15,9 +15,9 @@ pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
     async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError>;
-    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn add_check(&self, habit_id: i32, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
-    async fn reset_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<(), AppError>;
+    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn add_check(&self, habit_id: i32, user_id: Uuid, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
+    async fn reset_period_checks(&self, habit_id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError>;
     async fn get_activity_dates(&self, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
 }
 
@@ -59,19 +59,19 @@ impl HabitService for DefaultHabitService {
         }
     }
 
-    async fn get_all_with_period_checks(&self, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let habits_with_checks = self.habit_repo.get_all_with_period_checks(timestamp).await?;
+    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
+        let habits_with_checks = self.habit_repo.get_all_with_period_checks(user_id, timestamp).await?;
 
         Ok(habits_with_checks)
     }
 
-    async fn add_check(&self, habit_id: i32, value: i32, checked_at: OffsetDateTime) -> Result<Check, AppError> {
+    async fn add_check(&self, habit_id: i32, user_id: Uuid, value: i32, checked_at: OffsetDateTime) -> Result<Check, AppError> {
         validate_check_value(value)?;
         validate_check_checked_at(&checked_at)?;
 
         let habit_wc = self
             .habit_repo
-            .get_with_period_checks(habit_id, checked_at)
+            .get_with_period_checks(habit_id, user_id, checked_at)
             .await?
             .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
 
@@ -89,10 +89,10 @@ impl HabitService for DefaultHabitService {
         Ok(check)
     }
 
-    async fn reset_period_checks(&self, habit_id: i32, timestamp: OffsetDateTime) -> Result<(), AppError> {
+    async fn reset_period_checks(&self, habit_id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError> {
         let habit_with_check = self
             .habit_repo
-            .get_with_period_checks(habit_id, timestamp)
+            .get_with_period_checks(habit_id, user_id, timestamp)
             .await?
             .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
 
