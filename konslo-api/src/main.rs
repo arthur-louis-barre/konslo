@@ -6,8 +6,6 @@ mod router;
 
 use crate::router::{AppState, get_router};
 use dotenvy::dotenv;
-use konslo_core::repositories::check::PostgresCheckRepository;
-use konslo_core::repositories::habit::PostgresHabitRepository;
 use konslo_core::services::habit::DefaultHabitService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
@@ -17,6 +15,7 @@ use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use konslo_core::db::run_migrations;
+use konslo_core::repositories::{PostgresCheckRepository, PostgresHabitRepository};
 
 #[tokio::main]
 async fn main() {
