@@ -1,0 +1,2 @@
+ALTER TABLE habits
+    ADD COLUMN user_id UUID NOT NULL REFERENCES users (id);
