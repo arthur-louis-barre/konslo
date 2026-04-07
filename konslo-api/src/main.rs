@@ -4,6 +4,7 @@ mod requests;
 mod responses;
 mod router;
 mod jwt;
+mod extractor;
 
 use crate::router::{AppState, get_router};
 use dotenvy::dotenv;

@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
-    user_id: Uuid,
+    pub user_id: Uuid,
     exp: u64,
 }
 
