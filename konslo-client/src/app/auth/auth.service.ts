@@ -23,4 +23,8 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true })
     }
 
+    me() {
+        return this.http.get(`${this.apiUrl}/auth/me`, { withCredentials: true })
+    }
+
 }
