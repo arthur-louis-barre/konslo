@@ -21,6 +21,7 @@ services:
     container_name: konslo_backend
     environment:
       - DATABASE_URL=postgres://postgres:admin@postgres:5432/konslo_dev
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "3000:3000"
     depends_on:
