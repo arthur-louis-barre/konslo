@@ -2,7 +2,7 @@ use crate::handlers::habit::{
     add_check_handler, create_habit_handler, delete_habit_handler, get_activity_dates_handler,
     get_all_habits_with_period_checks_handler, get_habit_handler, reset_period_checks_handler,
 };
-use crate::handlers::user::{login_handler, logout_handler, register_handler};
+use crate::handlers::user::{login_handler, logout_handler, me_handler, register_handler};
 use axum::Router;
 use axum::routing::{get, post};
 use konslo_core::services::habit::HabitService;
@@ -21,6 +21,7 @@ pub fn get_router(state: AppState) -> Router {
         .route("/auth/register", post(register_handler))
         .route("/auth/login", post(login_handler))
         .route("/auth/logout", post(logout_handler))
+        .route("/auth/me", get(me_handler))
         .route(
             "/habits",
             post(create_habit_handler).get(get_all_habits_with_period_checks_handler),

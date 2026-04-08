@@ -7,6 +7,8 @@ use axum::body::Body;
 use axum::extract::State;
 use axum::http::{HeaderValue, Response, StatusCode, header};
 use axum::response::IntoResponse;
+use serde_json::json;
+use crate::extractor::AuthUser;
 
 pub async fn register_handler(
     State(state): State<AppState>,
@@ -48,4 +50,10 @@ pub async fn logout_handler() -> Result<impl IntoResponse, AppError> {
         .header(header::SET_COOKIE, HeaderValue::from_str(&cookie).unwrap())
         .body(Body::empty())
         .map_err(|_| AppError::InternalServerError)
+}
+
+pub async fn me_handler(
+    auth_user: AuthUser,
+) -> Result<impl IntoResponse, AppError> {
+    Ok(Json(json!({ "user_id": auth_user.user_id })))
 }
