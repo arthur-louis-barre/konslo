@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Konslo — Auth Mockup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-hover: #1c2330;
+      --surface-accent: #ff6b6b14;
+      --border: #21262d;
+      --border-light: #2d3748;
+      --accent: #ff6b6b;
+      --accent-teal: #6bffff;
+      --text: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #4a5568;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+      padding: 60px 40px;
+    }
+
+    /* noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* AUTH CARD */
+    .auth-card {
+      width: 380px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+    }
+
+    .auth-wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      display: inline-block;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 1px;
+      margin-bottom: 28px;
+    }
+
+    .auth-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    /* FORM */
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      letter-spacing: 0.02em;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-input:focus {
+      background: var(--surface-hover);
+      border-color: var(--border-light);
+    }
+
+    .form-input.error {
+      border-color: var(--accent);
+    }
+
+    .form-error {
+      position: absolute;
+      bottom: -17px;
+      left: 0;
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-primary:disabled {
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* FOOTER LINK */
+    .auth-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .auth-footer a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1px;
+    }
+
+    .auth-footer a:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* CREDENTIALS ERROR BANNER */
+    .auth-error-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      background: var(--surface-accent);
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .auth-error-banner svg { flex-shrink: 0; }
+
+    /* LAYOUT: side by side screens */
+    .screens {
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .screen {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <div class="section-label">Auth pages</div>
+    <div class="screens">
+
+      <!-- LOGIN -->
+      <div class="screen">
+        <div class="section-label">Login</div>
+        <div class="auth-card">
+          <div class="auth-wordmark">konslo</div>
+          <div class="auth-title">Welcome back</div>
+          <div class="auth-subtitle">Sign in to continue tracking your habits.</div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" placeholder="you@example.com" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" placeholder="••••••••" />
+          </div>
+
+          <button class="btn-primary">Sign in</button>
+
+          <div class="auth-footer">
+            No account? <a href="#">Create one</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGIN — wrong credentials state -->
+      <div class="screen">
+        <div class="section-label">Login — wrong credentials</div>
+        <div class="auth-card">
+          <div class="auth-wordmark">konslo</div>
+          <div class="auth-title">Welcome back</div>
+          <div class="auth-subtitle">Sign in to continue tracking your habits.</div>
+
+          <div class="auth-error-banner">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Incorrect email or password.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input error" type="email" value="wrong@example.com" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label">Password</label>
+            <input class="form-input error" type="password" value="wrongpass" />
+          </div>
+
+          <button class="btn-primary">Sign in</button>
+
+          <div class="auth-footer">
+            No account? <a href="#">Create one</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="screen">
+        <div class="section-label">Register</div>
+        <div class="auth-card">
+          <div class="auth-wordmark">konslo</div>
+          <div class="auth-title">Create an account</div>
+          <div class="auth-subtitle">Start building better habits today.</div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" placeholder="you@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" placeholder="••••••••" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label">Confirm password</label>
+            <input class="form-input" type="password" placeholder="••••••••" />
+          </div>
+
+          <button class="btn-primary">Create account</button>
+
+          <div class="auth-footer">
+            Already have an account? <a href="#">Sign in</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTER — email taken -->
+      <div class="screen">
+        <div class="section-label">Register — email taken</div>
+        <div class="auth-card">
+          <div class="auth-wordmark">konslo</div>
+          <div class="auth-title">Create an account</div>
+          <div class="auth-subtitle">Start building better habits today.</div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input error" type="email" value="taken@example.com" />
+            <div class="form-error">This email is already registered.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" placeholder="••••••••" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label">Confirm password</label>
+            <input class="form-input" type="password" placeholder="••••••••" />
+          </div>
+
+          <button class="btn-primary">Create account</button>
+
+          <div class="auth-footer">
+            Already have an account? <a href="#">Sign in</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<div class="login__card">
+    <header class="login__title">
+        Sign in
+    </header>
+
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="login__form-group">
+            <label class="login__form-label" for="username">username</label>
+            <input class="login__form-input"
+                   id="username"
+                   formControlName="email"
+                   type="text"
+                   autocomplete="off"
+                   spellcheck="false"
+            >
+        </div>
+
+        <div class="login__form-group">
+            <label class="login__form-label" for="password">password</label>
+            <input class="login__form-input"
+                   id="password"
+                   formControlName="password"
+                   type="password"
+                   autocomplete="off"
+                   spellcheck="false"
+            >
+        </div>
+        <div class="auth__form-error">
+            @if (areCredentialsWrong) {
+                <span class="auth__form-error">Incorrect email or password</span>
+            }
+        </div>
+
+        <div class="auth__form-actions">
+            <button class="btn submit" type="submit">Sign in</button>
+        </div>
+
+        <div class="auth__form-footer">No account? <a routerLink="/register">Sign up</a></div>
+
+    </form>
+</div>
