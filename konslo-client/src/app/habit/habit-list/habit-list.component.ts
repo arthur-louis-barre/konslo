@@ -21,7 +21,7 @@ export class HabitListComponent {
 
     protected selectedDate: string | undefined;
     protected habits: HabitWithCheck[] = [];
-    protected openDropdownId: number | null = null;
+    protected openDropdownId: string | null = null;
 
     constructor() {
         this.route.queryParamMap
@@ -33,7 +33,7 @@ export class HabitListComponent {
             });
     }
 
-    deleteHabit(id: number) {
+    deleteHabit(id: string) {
         this.habitsService.deleteHabit(id).subscribe({
             next: () => { this.loadHabits(this.selectedDate); },
             error: (err) => { console.error(err); }
@@ -47,7 +47,7 @@ export class HabitListComponent {
         });
     }
 
-    toggleDropdown(id: number) {
+    toggleDropdown(id: string) {
         this.openDropdownId = this.openDropdownId === id ? null : id;
     }
 

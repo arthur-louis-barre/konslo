@@ -19,18 +19,18 @@ export class HabitService {
         return this.http.get<HabitWithCheck[]>(`${this.apiUrl}/habits`, options);
     }
 
-    deleteHabit(id: number) {
+    deleteHabit(id: string) {
         return this.http.delete<void>(`${this.apiUrl}/habits/${id}`);
     }
 
-    addCheck(habitId: number, value: number, checked_at?: string) {
+    addCheck(habitId: string, value: number, checked_at?: string) {
         const body = checked_at
             ? { value, checked_at: new Date(checked_at).toISOString() }
             : { value };
         return this.http.post<Check>(`${this.apiUrl}/habits/${habitId}/checks`, body);
     }
 
-    resetCheck(habitId: number, date?: string) {
+    resetCheck(habitId: string, date?: string) {
         const options = date
             ? { params: { date: new Date(date).toISOString() }}
             : {};

@@ -1,7 +1,7 @@
 export type GoalPeriod = 'day' | 'week' | 'month';
 
 export interface Habit {
-    id: number;
+    id: string;
     name: string;
     goal_value: number;
     goal_unit: string;
@@ -21,8 +21,8 @@ export interface CreateHabitRequest {
 }
 
 export interface Check {
-    id: number;
-    habit_id: number;
+    id: string;
+    habit_id: string;
     value: number;
     checked_at: string;
 }

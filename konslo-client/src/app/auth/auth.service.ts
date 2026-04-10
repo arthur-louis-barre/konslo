@@ -9,13 +9,13 @@ export class AuthService {
     private readonly apiUrl = environment.apiUrl;
     private http = inject(HttpClient);
 
-    register(email: string, password: string) {
-        const body = { email, password };
+    register(username: string, password: string) {
+        const body = { username, password };
         return this.http.post(`${this.apiUrl}/auth/register`, body);
     }
 
-    login(email: string, password: string) {
-        const body = { email, password };
+    login(username: string, password: string) {
+        const body = { username, password };
         return this.http.post(`${this.apiUrl}/auth/login`, body);
     }
 

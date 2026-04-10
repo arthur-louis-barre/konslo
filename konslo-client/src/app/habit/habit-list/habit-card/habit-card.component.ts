@@ -17,8 +17,8 @@ export class HabitCardComponent {
     isDropdownOpen = input<boolean>(false);
 
     habitUpdated = output<void>();
-    habitDeleted = output<number>();
-    dropdownToggled = output<number>();
+    habitDeleted = output<string>();
+    dropdownToggled = output<string>();
 
     // CLICK-HANDLERS
 
