@@ -1,2 +1,0 @@
--- This migration adds a unique index to the checks table to ensure that there can only be one check per habit per date
-CREATE UNIQUE INDEX uq_idx_checks_habit_date ON checks (habit_id, ((checked_at AT TIME ZONE 'UTC')::date));

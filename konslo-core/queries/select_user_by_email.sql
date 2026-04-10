@@ -1,3 +1,3 @@
-SELECT id, email, password_hash, created_at
+SELECT user_id as id, username, password_hash, created_at
 FROM users
-WHERE email = $1;
+WHERE username = $1;
