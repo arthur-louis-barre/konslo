@@ -11,20 +11,20 @@ export class AuthService {
 
     register(email: string, password: string) {
         const body = { email, password };
-        return this.http.post(`${this.apiUrl}/auth/register`, body, { withCredentials: true });
+        return this.http.post(`${this.apiUrl}/auth/register`, body);
     }
 
     login(email: string, password: string) {
         const body = { email, password };
-        return this.http.post(`${this.apiUrl}/auth/login`, body, { withCredentials: true });
+        return this.http.post(`${this.apiUrl}/auth/login`, body);
     }
 
     logout() {
-        return this.http.post(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true })
+        return this.http.post(`${this.apiUrl}/auth/logout`, {})
     }
 
     me() {
-        return this.http.get(`${this.apiUrl}/auth/me`, { withCredentials: true })
+        return this.http.get(`${this.apiUrl}/auth/me`)
     }
 
 }
