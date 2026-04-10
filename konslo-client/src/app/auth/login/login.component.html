@@ -1,7 +1,8 @@
 <div class="login__card">
-    <header class="login__title">
-        Sign in
-    </header>
+    <div class="login__header">
+        <div class="login__wordmark">Konslo</div>
+        <h2 class="login__title">Sign in</h2>
+    </div>
 
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -10,7 +11,7 @@
             <label class="login__form-label" for="username">username</label>
             <input class="login__form-input"
                    id="username"
-                   formControlName="email"
+                   formControlName="username"
                    type="text"
                    autocomplete="off"
                    spellcheck="false"
@@ -27,17 +28,18 @@
                    spellcheck="false"
             >
         </div>
-        <div class="auth__form-error">
+
+        <div class="login__form-error-slot">
             @if (areCredentialsWrong) {
-                <span class="auth__form-error">Incorrect email or password</span>
+                <div class="login__form-error">Incorrect username or password</div>
             }
         </div>
 
-        <div class="auth__form-actions">
-            <button class="btn submit" type="submit">Sign in</button>
+        <div class="login__form-actions">
+            <button class="btn" type="submit">Sign in</button>
         </div>
 
-        <div class="auth__form-footer">No account? <a routerLink="/register">Sign up</a></div>
+        <div class="login__form-footer">No account? <a routerLink="/register">Create one</a></div>
 
     </form>
 </div>
