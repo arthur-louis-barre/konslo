@@ -1,24 +1,25 @@
 mod error;
+mod extractor;
 mod handlers;
+mod jwt;
 mod requests;
 mod responses;
 mod router;
-mod jwt;
-mod extractor;
 
 use crate::router::{AppState, get_router};
+use axum::http::{header, HeaderValue, Method};
 use dotenvy::dotenv;
 use konslo_core::db::run_migrations;
 use konslo_core::repositories::{PostgresCheckRepository, PostgresHabitRepository, PostgresUserRepository};
 use konslo_core::services::habit::DefaultHabitService;
+use konslo_core::services::user::DefaultUserService;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use konslo_core::services::user::DefaultUserService;
 
 #[tokio::main]
 async fn main() {
@@ -27,7 +28,11 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let cors = CorsLayer::new().allow_origin(Any).allow_methods(Any).allow_headers(Any);
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:4200".parse::<HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::DELETE])
+        .allow_headers([header::CONTENT_TYPE])
+        .allow_credentials(true);
 
     // load env. variables
     dotenv().ok();
@@ -53,7 +58,11 @@ async fn main() {
     let user_service = Arc::new(DefaultUserService::new(user_repo.clone()));
     let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone(), check_repo.clone()));
 
-    let state = AppState { habit_service, user_service, jwt_secret };
+    let state = AppState {
+        habit_service,
+        user_service,
+        jwt_secret,
+    };
 
     // 4. Config routing
     let app = get_router(state).layer(cors);
