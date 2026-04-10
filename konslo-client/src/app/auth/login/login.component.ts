@@ -24,13 +24,13 @@ export class LoginComponent {
     protected areCredentialsWrong = false;
 
     form = this.fb.group({
-        email: ['', Validators.required],
+        username: ['', Validators.required],
         password: ['', Validators.required]
     });
 
     constructor() {
         merge(
-            this.form.controls.email.valueChanges,
+            this.form.controls.username.valueChanges,
             this.form.controls.password.valueChanges
         )
             .pipe(takeUntilDestroyed())
@@ -44,7 +44,7 @@ export class LoginComponent {
         this.isLoading = true;
 
         this.authService
-            .login(this.form.value.email!, this.form.value.password!)
+            .login(this.form.value.username!, this.form.value.password!)
             .subscribe({
                 next: () => {
                     this.isLoading = false;
