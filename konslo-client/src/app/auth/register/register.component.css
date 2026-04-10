@@ -1,0 +1,117 @@
+.register__card {
+    width: 380px;
+    padding: 35px 30px;
+    border: 1px double var(--border);
+    border-radius: 10px;
+    background-color: var(--surface);
+}
+
+.register__header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.register__wordmark {
+    margin-right: auto;
+    padding-bottom: 2px;
+    border-bottom: 2px solid var(--accent);
+    font-size: var(--text-lg);
+    font-family: 'Instrument Serif', serif;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.register__title {
+    margin-right: auto;
+    font-size: var(--text-xl);
+    letter-spacing: -0.0125em;
+    padding-bottom: 2px;
+}
+
+.register__form-group {
+    margin-bottom: 20px;
+}
+
+.register__form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+}
+
+.register__form-input {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    background: var(--bg);
+    font-size: var(--text-sm);
+    color: var(--text);
+}
+
+.register__form-input:focus {
+    background: var(--surface-hover);
+    border-color: var(--border-light);
+}
+
+.register__form-error-slot {
+    position: relative;
+    height: 30px;
+}
+
+.register__form-error {
+    position: absolute;
+    left: 5px;
+    font-size: var(--text-xs);
+    color: var(--accent);
+}
+
+.register__form-actions .btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.register__form-actions .btn:enabled:hover {
+    opacity: 0.8;
+}
+
+.register__form-actions .btn:enabled:active {
+    opacity: 0.7;
+}
+
+.register__form-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.register__form-footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 1px;
+}
+
+.register__form-footer a:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+.register__form-footer a:active {
+    opacity: 0.7;
+}

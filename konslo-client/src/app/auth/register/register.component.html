@@ -1,1 +1,57 @@
-<p>register works!</p>
+<div class="register__card">
+    <div class="register__header">
+        <div class="register__wordmark">Konslo</div>
+        <h2 class="register__title">Create account</h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="register__form-group">
+            <label class="register__form-label" for="username">username</label>
+            <input class="register__form-input"
+                   id="username"
+                   formControlName="username"
+                   type="text"
+                   autocomplete="off"
+                   spellcheck="false"
+            >
+        </div>
+
+        <div class="register__form-group">
+            <label class="register__form-label" for="password">password</label>
+            <input class="register__form-input"
+                   id="password"
+                   formControlName="password"
+                   type="password"
+                   autocomplete="off"
+                   spellcheck="false"
+            >
+        </div>
+
+        <div class="register__form-group">
+            <label class="register__form-label" for="confirm-password">confirm password</label>
+            <input class="register__form-input"
+                   id="confirm-password"
+                   formControlName="confirmPassword"
+                   type="password"
+                   autocomplete="off"
+                   spellcheck="false"
+            >
+        </div>
+
+        <div class="register__form-error-slot">
+            @if (isPasswordMismatch) {
+                <div class="register__form-error">Passwords don't match</div>
+            } @else if (isConflict) {
+                <div class="register__form-error">Username already taken</div>
+            }
+        </div>
+
+        <div class="register__form-actions">
+            <button class="btn" type="submit">Create account</button>
+        </div>
+
+        <div class="register__form-footer">Already have an account? <a routerLink="/login">Sign in</a></div>
+
+    </form>
+</div>
