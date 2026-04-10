@@ -14,7 +14,7 @@ pub async fn register_handler(
     State(state): State<AppState>,
     Json(request): Json<RegisterRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let user = state.user_service.register(&request.email, &request.password).await?;
+    let user = state.user_service.register(&request.username, &request.password).await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
     let cookie = format!("token={}; HttpOnly; Path=/; Max-Age=3600", token);
@@ -30,7 +30,7 @@ pub async fn login_handler(
     State(state): State<AppState>,
     Json(request): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let user = state.user_service.login(&request.email, &request.password).await?;
+    let user = state.user_service.login(&request.username, &request.password).await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
     let cookie = format!("token={}; HttpOnly; Path=/; Max-Age=3600", token);

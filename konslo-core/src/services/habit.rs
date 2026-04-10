@@ -13,11 +13,11 @@ use uuid::Uuid;
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
-    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
-    async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError>;
+    async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError>;
+    async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), AppError>;
     async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn add_check(&self, habit_id: i32, user_id: Uuid, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
-    async fn reset_period_checks(&self, habit_id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError>;
+    async fn add_check(&self, habit_id: Uuid, user_id: Uuid, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
+    async fn reset_period_checks(&self, habit_id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError>;
     async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
 }
 
@@ -43,13 +43,13 @@ impl HabitService for DefaultHabitService {
         Ok(habit)
     }
 
-    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError> {
+    async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError> {
         let habit = self.habit_repo.get_by_id(id, user_id).await?;
 
         Ok(habit)
     }
 
-    async fn delete(&self, id: i32, user_id: Uuid) -> Result<(), AppError> {
+    async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
         let deleted = self.habit_repo.delete(id, user_id).await?;
 
         if deleted {
@@ -65,7 +65,7 @@ impl HabitService for DefaultHabitService {
         Ok(habits_with_checks)
     }
 
-    async fn add_check(&self, habit_id: i32, user_id: Uuid, value: i32, checked_at: OffsetDateTime) -> Result<Check, AppError> {
+    async fn add_check(&self, habit_id: Uuid, user_id: Uuid, value: i32, checked_at: OffsetDateTime) -> Result<Check, AppError> {
         validate_check_value(value)?;
         validate_check_checked_at(&checked_at)?;
 
@@ -89,7 +89,7 @@ impl HabitService for DefaultHabitService {
         Ok(check)
     }
 
-    async fn reset_period_checks(&self, habit_id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError> {
+    async fn reset_period_checks(&self, habit_id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError> {
         let habit_with_check = self
             .habit_repo
             .get_with_period_checks(habit_id, user_id, timestamp)
@@ -127,7 +127,7 @@ mod tests {
     }
 
     // make a HabitWithCheck with hardcoded created_at 10 feb. 2026
-    fn make_habit_with_checks(id: i32, goal_value: i32, checks: Vec<Check>) -> HabitWithCheck {
+    fn make_habit_with_checks(id: Uuid, goal_value: i32, checks: Vec<Check>) -> HabitWithCheck {
         HabitWithCheck {
             id,
             name: "Cardio".to_string(),

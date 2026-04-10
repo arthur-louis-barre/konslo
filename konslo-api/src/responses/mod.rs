@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 use time::{Date, OffsetDateTime};
+use uuid::Uuid;
 use konslo_core::models::check::Check;
 use konslo_core::models::habit::{GoalPeriod, Habit, HabitWithCheck};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct CheckResponse {
-    pub id: i32,
-    pub habit_id: i32,
+    pub id: Uuid,
+    pub habit_id: Uuid,
     pub value: i32,
     pub checked_at: OffsetDateTime,
 }
@@ -24,7 +25,7 @@ impl From<Check> for CheckResponse {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct HabitResponse {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
     pub goal_value: i32,
     pub goal_unit: String,
@@ -47,7 +48,7 @@ impl From<Habit> for HabitResponse {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct HabitWithCheckResponse {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
     pub goal_value: i32,
     pub goal_unit: String,

@@ -8,6 +8,7 @@ use axum::extract::{Path, Query, State};
 use axum::http;
 use konslo_core::models::habit::CreateHabit;
 use time::OffsetDateTime;
+use uuid::Uuid;
 
 pub async fn create_habit_handler(
     State(state): State<AppState>,
@@ -30,7 +31,7 @@ pub async fn create_habit_handler(
 pub async fn get_habit_handler(
     State(state): State<AppState>,
     auth_user: AuthUser,
-    Path(id): Path<i32>,
+    Path(id): Path<Uuid>,
 ) -> Result<Json<HabitResponse>, AppError> {
     let habit = state.habit_service.get_by_id(id, auth_user.user_id).await?;
 
@@ -43,7 +44,7 @@ pub async fn get_habit_handler(
 pub async fn delete_habit_handler(
     State(state): State<AppState>,
     auth_user: AuthUser,
-    Path(id): Path<i32>,
+    Path(id): Path<Uuid>,
 ) -> Result<http::StatusCode, AppError> {
     state.habit_service.delete(id, auth_user.user_id).await?;
     Ok(http::StatusCode::NO_CONTENT)
@@ -68,7 +69,7 @@ pub async fn get_all_habits_with_period_checks_handler(
 pub async fn add_check_handler(
     State(state): State<AppState>,
     auth_user: AuthUser,
-    Path(habit_id): Path<i32>,
+    Path(habit_id): Path<Uuid>,
     Json(request): Json<AddCheckRequest>,
 ) -> Result<Json<CheckResponse>, AppError> {
     let check = state
@@ -87,7 +88,7 @@ pub async fn add_check_handler(
 pub async fn reset_period_checks_handler(
     State(state): State<AppState>,
     auth_user: AuthUser,
-    Path(habit_id): Path<i32>,
+    Path(habit_id): Path<Uuid>,
     Query(params): Query<ResetChecksQuery>,
 ) -> Result<http::StatusCode, AppError> {
     state

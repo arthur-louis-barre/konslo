@@ -11,10 +11,10 @@ use uuid::Uuid;
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitRepository: Send + Sync {
     async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError>;
-    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError>;
-    async fn get_with_period_checks(&self, id: i32, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
+    async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError>;
+    async fn get_with_period_checks(&self, id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
     async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError>;
+    async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<bool, AppError>;
 }
 
 pub struct PostgresHabitRepository {
@@ -45,7 +45,7 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_by_id(&self, id: i32, user_id: Uuid) -> Result<Option<Habit>, AppError> {
+    async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError> {
         let habit = query_file_as!(Habit, "queries/select_habit_by_id.sql", id, user_id)
             .fetch_optional(&self.pool)
             .await?;
@@ -53,7 +53,7 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_with_period_checks(&self, id: i32, user_id: Uuid, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
+    async fn get_with_period_checks(&self, id: Uuid, user_id: Uuid, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
         let rows = query_file!("queries/select_habit_with_period_checks.sql", id, user_id, timestamp)
             .fetch_all(&self.pool)
             .await?;
@@ -95,7 +95,7 @@ impl HabitRepository for PostgresHabitRepository {
             .fetch_all(&self.pool)
             .await?;
 
-        let mut map: HashMap<i32, HabitWithCheck> = HashMap::new();
+        let mut map: HashMap<Uuid, HabitWithCheck> = HashMap::new();
 
         for row in rows {
             let id = row.id;
@@ -129,7 +129,7 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habits_with_checks)
     }
 
-    async fn delete(&self, id: i32, user_id: Uuid) -> Result<bool, AppError> {
+    async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<bool, AppError> {
         let result = query_file!("queries/delete_habit.sql", id, user_id).execute(&self.pool).await?;
 
         Ok(result.rows_affected() == 1)

@@ -46,7 +46,7 @@ impl GoalPeriod {
 
 #[derive(Debug, PartialEq, FromRow)]
 pub struct Habit {
-    pub id: i32,
+    pub id: Uuid,
     pub user_id: Uuid,
     pub name: String,
     pub goal_value: i32,
@@ -57,7 +57,7 @@ pub struct Habit {
 
 #[derive(Debug, PartialEq)]
 pub struct HabitWithCheck {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
     pub goal_value: i32,
     pub goal_unit: String,
@@ -68,7 +68,7 @@ pub struct HabitWithCheck {
 
 impl HabitWithCheck {
     pub fn new(
-        id: i32,
+        id: Uuid,
         name: &str,
         goal_value: i32,
         goal_unit: &str,

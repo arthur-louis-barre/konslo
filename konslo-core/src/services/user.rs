@@ -10,8 +10,8 @@ use std::sync::Arc;
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait UserService: Send + Sync {
-    async fn register(&self, email: &str, password: &str) -> Result<User, AppError>;
-    async fn login(&self, email: &str, password: &str) -> Result<User, AppError>;
+    async fn register(&self, username: &str, password: &str) -> Result<User, AppError>;
+    async fn login(&self, username: &str, password: &str) -> Result<User, AppError>;
 }
 
 #[derive(Clone)]
@@ -27,7 +27,7 @@ impl DefaultUserService {
 
 #[async_trait]
 impl UserService for DefaultUserService {
-    async fn register(&self, email: &str, password: &str) -> Result<User, AppError> {
+    async fn register(&self, username: &str, password: &str) -> Result<User, AppError> {
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
         let password_hash = argon2
@@ -35,7 +35,7 @@ impl UserService for DefaultUserService {
             .map_err(|e| AppError::Internal(e.to_string()))?;
 
         let new_user = CreateUser {
-            email: email.to_string(),
+            username: username.to_string(),
             password_hash: password_hash.to_string(),
         };
 
@@ -44,12 +44,12 @@ impl UserService for DefaultUserService {
         Ok(user)
     }
 
-    async fn login(&self, email: &str, password: &str) -> Result<User, AppError> {
+    async fn login(&self, username: &str, password: &str) -> Result<User, AppError> {
         let user = self
             .user_repo
-            .get_by_email(email)
+            .get_by_username(username)
             .await?
-            .ok_or_else(|| AppError::NotFound(format!("user with email {} not found", email)))?;
+            .ok_or_else(|| AppError::NotFound(format!("user with username {} not found", username)))?;
 
         let password = password.as_bytes();
         let stored_password_hash =

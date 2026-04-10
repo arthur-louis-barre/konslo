@@ -10,7 +10,7 @@ use uuid::Uuid;
 pub trait CheckRepository: Send + Sync {
     async fn upsert(&self, add_check: &AddCheck) -> Result<Check, AppError>;
     async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
-    async fn delete_by_habit_for_period(&self, habit_id: i32, from: Date, to: Date) -> Result<u64, AppError>;
+    async fn delete_by_habit_for_period(&self, habit_id: Uuid, from: Date, to: Date) -> Result<u64, AppError>;
 }
 
 pub struct PostgresCheckRepository {
@@ -50,7 +50,7 @@ impl CheckRepository for PostgresCheckRepository {
         Ok(dates)
     }
 
-    async fn delete_by_habit_for_period(&self, habit_id: i32, from: Date, to: Date) -> Result<u64, AppError> {
+    async fn delete_by_habit_for_period(&self, habit_id: Uuid, from: Date, to: Date) -> Result<u64, AppError> {
         let result = query_file!("queries/delete_check_by_habit_in_period.sql", habit_id, from, to)
             .execute(&self.pool)
             .await?;
