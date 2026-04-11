@@ -53,7 +53,7 @@ impl UserService for DefaultUserService {
             .user_repo
             .get_by_username(username)
             .await?
-            .ok_or_else(|| AppError::NotFound(format!("user with username {} not found", username)))?;
+            .ok_or(AppError::Unauthorized)?;
 
         let password = password.as_bytes();
         let stored_password_hash =
@@ -62,6 +62,6 @@ impl UserService for DefaultUserService {
         Argon2::default()
             .verify_password(password, &stored_password_hash)
             .map(|_| user)
-            .map_err(|_| AppError::Validation("invalid password".to_string()))
+            .map_err(|_| AppError::Unauthorized)
     }
 }

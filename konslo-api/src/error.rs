@@ -38,6 +38,7 @@ impl From<CoreError> for AppError {
                 InternalServerError
             }
             CoreError::NotFound(msg) => NotFound(msg),
+            CoreError::Unauthorized => Unauthorized,
             CoreError::Validation(msg) => BadRequest(msg),
         }
     }

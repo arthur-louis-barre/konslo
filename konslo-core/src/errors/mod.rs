@@ -11,6 +11,7 @@ pub enum AppError {
     Database(SqlxError),
     Internal(String),
     NotFound(String),
+    Unauthorized,
     Validation(String),
 }
 
@@ -21,6 +22,7 @@ impl std::fmt::Display for AppError {
             AppError::Database(e) => write!(f, "Database: {e}"),
             AppError::Internal(msg) => write!(f, "Internal: {msg}"),
             AppError::NotFound(msg) => write!(f, "Not found: {msg}"),
+            AppError::Unauthorized => write!(f, "Unauthorized"),
             AppError::Validation(msg) => write!(f, "Validation: {msg}"),
         }
     }
