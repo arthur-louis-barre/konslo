@@ -2,12 +2,11 @@ use crate::errors::AppError;
 
 pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
     let name = name.trim();
-    if name.is_empty() {
-        Err(AppError::Validation("habit name is empty".into()))
-    } else if name.chars().count() > 255 {
-        Err(AppError::Validation("habit name is too long".into()))
-    } else {
-        Ok(())
+
+    match name.len() {
+        0 => Err(AppError::Validation("habit name must not be empty".into())),
+        101.. => Err(AppError::Validation("habit name must be at most 100 characters".into())),
+        _ => Ok(()),
     }
 }
 
@@ -17,32 +16,21 @@ mod tests {
 
     #[test]
     fn test_validate_habit_name_ok() {
-        let result = validate_habit_name("Meditate");
-
-        assert!(result.is_ok());
+        assert!(validate_habit_name("Meditate").is_ok());
     }
 
     #[test]
     fn test_validate_habit_name_empty_returns_validation_error() {
-        let result = validate_habit_name("");
-
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+        assert!(matches!(validate_habit_name("").unwrap_err(), AppError::Validation(_)));
     }
 
     #[test]
     fn test_validate_habit_name_whitespace_only_returns_validation_error() {
-        let result = validate_habit_name("      ");
-
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+        assert!(matches!(validate_habit_name("      ").unwrap_err(), AppError::Validation(_)));
     }
 
     #[test]
-    fn test_validate_habit_name_256_chars_returns_validation_error() {
-        let result = validate_habit_name(&"x".repeat(256));
-
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), AppError::Validation(_)));
+    fn test_validate_habit_name_101_chars_returns_validation_error() {
+        assert!(matches!(validate_habit_name(&"x".repeat(101)).unwrap_err(), AppError::Validation(_)));
     }
 }

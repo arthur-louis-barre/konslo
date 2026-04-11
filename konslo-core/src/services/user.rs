@@ -1,12 +1,12 @@
 use crate::errors::AppError;
 use crate::models::user::{NewUser, User};
 use crate::repositories::user::UserRepository;
+use crate::validation::user::{validate_password, validate_username};
 use argon2::password_hash::SaltString;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::validation::user::{validate_password, validate_username};
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]

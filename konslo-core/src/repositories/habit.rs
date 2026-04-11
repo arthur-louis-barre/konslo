@@ -68,14 +68,9 @@ impl HabitRepository for PostgresHabitRepository {
         user_id: Uuid,
         timestamp: OffsetDateTime,
     ) -> Result<Option<HabitWithCheck>, AppError> {
-        let rows = query_file!(
-            "queries/select_habit_with_period_checks.sql",
-            id,
-            user_id,
-            timestamp
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let rows = query_file!("queries/select_habit_with_period_checks.sql", id, user_id, timestamp)
+            .fetch_all(&self.pool)
+            .await?;
 
         if rows.is_empty() {
             return Ok(None);
@@ -120,13 +115,9 @@ impl HabitRepository for PostgresHabitRepository {
         user_id: Uuid,
         timestamp: OffsetDateTime,
     ) -> Result<Vec<HabitWithCheck>, AppError> {
-        let rows = query_file!(
-            "queries/select_habits_with_period_checks.sql",
-            user_id,
-            timestamp
-        )
-        .fetch_all(&self.pool)
-        .await?;
+        let rows = query_file!("queries/select_habits_with_period_checks.sql", user_id, timestamp)
+            .fetch_all(&self.pool)
+            .await?;
 
         let mut map: HashMap<Uuid, HabitWithCheck> = HashMap::new();
 

@@ -2,10 +2,9 @@ use crate::errors::AppError;
 use time::{Date, Duration, OffsetDateTime};
 
 pub fn validate_check_value(value: i32) -> Result<(), AppError> {
-    if value > 0 {
-        Ok(())
-    } else {
-        Err(AppError::Validation("value must be strictly positive".into()))
+    match value {
+        1.. => Ok(()),
+        _ => Err(AppError::Validation("value must be strictly positive".into())),
     }
 }
 
@@ -13,7 +12,7 @@ pub fn validate_check_checked_at(checked_at: &OffsetDateTime) -> Result<(), AppE
     if checked_at <= &(OffsetDateTime::now_utc() + Duration::seconds(30)) {
         Ok(())
     } else {
-        Err(AppError::Validation("checked_at must not be in the future".into()))
+        Err(AppError::Validation("checked date must not be in the future".into()))
     }
 }
 
@@ -21,7 +20,7 @@ pub fn validate_date_range(from: Date, to: Date) -> Result<(), AppError> {
     if from <= to {
         Ok(())
     } else {
-        Err(AppError::Validation("'from' must not be after 'to'".into()))
+        Err(AppError::Validation("date range is invalid".into()))
     }
 }
 
@@ -29,11 +28,7 @@ pub fn validate_period_cap(check_val: i32, period_total: i32, goal_value: i32) -
     if check_val + period_total <= goal_value {
         Ok(())
     } else {
-        Err(AppError::Validation(format!(
-            "period total must not exceed goal ({} / {})",
-            period_total + check_val,
-            goal_value
-        )))
+        Err(AppError::Validation(format!("period total must not exceed goal ({} / {})", period_total + check_val, goal_value)))
     }
 }
 
@@ -74,6 +69,7 @@ mod tests {
     #[test]
     fn test_validate_check_checked_at_past_grace_window_returns_validation_error() {
         let result = validate_check_checked_at(&(OffsetDateTime::now_utc() + Duration::seconds(31)));
+
         assert!(matches!(result, Err(AppError::Validation(_))));
     }
 
@@ -81,12 +77,14 @@ mod tests {
     fn test_validate_date_range_from_before_to_returns_ok() {
         let from = Date::from_calendar_date(2026, time::Month::January, 1).unwrap();
         let to = Date::from_calendar_date(2026, time::Month::January, 31).unwrap();
+
         assert!(validate_date_range(from, to).is_ok());
     }
 
     #[test]
     fn test_validate_date_range_from_equals_to_returns_ok() {
         let date = Date::from_calendar_date(2026, time::Month::January, 1).unwrap();
+
         assert!(validate_date_range(date, date).is_ok());
     }
 
@@ -94,6 +92,7 @@ mod tests {
     fn test_validate_date_range_from_after_to_returns_validation_error() {
         let from = Date::from_calendar_date(2026, time::Month::January, 31).unwrap();
         let to = Date::from_calendar_date(2026, time::Month::January, 1).unwrap();
+
         assert!(matches!(validate_date_range(from, to), Err(AppError::Validation(_))));
     }
 

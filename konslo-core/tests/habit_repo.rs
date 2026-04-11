@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use konslo_core::errors::AppError;
-    use konslo_core::models::check::{NewCheck, Check};
-    use konslo_core::models::habit::{NewHabit, GoalPeriod, Habit, HabitWithCheck};
+    use konslo_core::models::check::{Check, NewCheck};
+    use konslo_core::models::habit::{GoalPeriod, Habit, HabitWithCheck, NewHabit};
     use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
     use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
     use sqlx::PgPool;

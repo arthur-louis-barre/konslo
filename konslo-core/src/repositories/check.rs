@@ -1,5 +1,5 @@
 use crate::errors::AppError;
-use crate::models::check::{NewCheck, Check};
+use crate::models::check::{Check, NewCheck};
 use async_trait::async_trait;
 use sqlx::{PgPool, query_file, query_file_as};
 use time::Date;

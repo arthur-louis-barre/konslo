@@ -1,16 +1,16 @@
 #[cfg(test)]
 mod tests {
     use konslo_core::errors::AppError;
-    use konslo_core::models::check::{NewCheck, Check};
-    use konslo_core::models::habit::{NewHabit, GoalPeriod, Habit};
+    use konslo_core::models::check::{Check, NewCheck};
+    use konslo_core::models::habit::{GoalPeriod, Habit, NewHabit};
     use konslo_core::repositories::{
         CheckRepository, HabitRepository, PostgresCheckRepository, PostgresHabitRepository,
     };
     use sqlx::PgPool;
     use std::error::Error;
     use std::ops::Add;
-    use time::{Duration, OffsetDateTime};
     use time::macros::time;
+    use time::{Duration, OffsetDateTime};
 
     async fn seed_habit(pool: &PgPool, create_habit: &NewHabit) -> Result<Habit, Box<dyn Error>> {
         let repo = PostgresHabitRepository::new(pool.clone());
@@ -28,14 +28,11 @@ mod tests {
         #[sqlx::test]
         async fn test_upsert_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &NewHabit::new(
-                "Meditate",
-                10,
-                "min",
-                GoalPeriod::Day
-            )).await?;
+            let s_habit = seed_habit(&pool, &NewHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
 
-            let yesterday_first = OffsetDateTime::now_utc().add(Duration::days(-1)).replace_time(time!(12:00:00));
+            let yesterday_first = OffsetDateTime::now_utc()
+                .add(Duration::days(-1))
+                .replace_time(time!(12:00:00));
             let yesterday_second = yesterday_first.add(Duration::hours(4));
             let add_check_first = NewCheck::new(s_habit.id, 5, yesterday_first);
             let add_check_second = NewCheck::new(s_habit.id, 3, yesterday_second);
@@ -46,7 +43,10 @@ mod tests {
             assert!(created_first.id > 0);
             assert_eq!(created_first.habit_id, add_check_first.habit_id);
             assert_eq!(created_first.value, add_check_first.value);
-            assert_eq!(created_first.checked_at, add_check_first.checked_at.truncate_to_microsecond());
+            assert_eq!(
+                created_first.checked_at,
+                add_check_first.checked_at.truncate_to_microsecond()
+            );
             assert_eq!(created_second.id, created_first.id);
             assert_eq!(created_second.habit_id, created_first.habit_id);
             assert_eq!(created_second.value, created_first.value + add_check_second.value);
@@ -74,12 +74,7 @@ mod tests {
         #[sqlx::test]
         async fn test_delete_by_habit_for_period_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &NewHabit::new(
-                "Meditate",
-                10,
-                "min",
-                GoalPeriod::Day
-            )).await?;
+            let s_habit = seed_habit(&pool, &NewHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
 
             let now = OffsetDateTime::now_utc();
             seed_check(&pool, &NewCheck::new(s_habit.id, 1, now)).await?;

@@ -1,15 +1,16 @@
 use crate::errors::AppError;
-use crate::models::check::{NewCheck, Check};
-use crate::models::habit::{NewHabit, Habit, HabitWithCheck};
-
-use crate::validation::check::{validate_check_checked_at, validate_check_value, validate_date_range, validate_period_cap};
+use crate::models::check::{Check, NewCheck};
+use crate::models::habit::{Habit, HabitWithCheck, NewHabit};
+use crate::repositories::check::CheckRepository;
+use crate::repositories::habit::HabitRepository;
+use crate::validation::check::{
+    validate_check_checked_at, validate_check_value, validate_date_range, validate_period_cap,
+};
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
 use time::{Date, OffsetDateTime};
 use uuid::Uuid;
-use crate::repositories::check::CheckRepository;
-use crate::repositories::habit::HabitRepository;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
@@ -17,9 +18,24 @@ pub trait HabitService: Send + Sync {
     async fn create(&self, new_habit: NewHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError>;
     async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), AppError>;
-    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
-    async fn add_check(&self, habit_id: Uuid, user_id: Uuid, value: i32, timestamp: OffsetDateTime) -> Result<Check, AppError>;
-    async fn reset_period_checks(&self, habit_id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError>;
+    async fn get_all_with_period_checks(
+        &self,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn add_check(
+        &self,
+        habit_id: Uuid,
+        user_id: Uuid,
+        value: i32,
+        timestamp: OffsetDateTime,
+    ) -> Result<Check, AppError>;
+    async fn reset_period_checks(
+        &self,
+        habit_id: Uuid,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<(), AppError>;
     async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError>;
 }
 
@@ -40,15 +56,11 @@ impl HabitService for DefaultHabitService {
     async fn create(&self, new_habit: NewHabit) -> Result<Habit, AppError> {
         validate_habit_name(&new_habit.name)?;
 
-        let habit = self.habit_repo.create(&new_habit).await?;
-
-        Ok(habit)
+        self.habit_repo.create(&new_habit).await
     }
 
     async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError> {
-        let habit = self.habit_repo.get_by_id(id, user_id).await?;
-
-        Ok(habit)
+        self.habit_repo.get_by_id(id, user_id).await
     }
 
     async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), AppError> {
@@ -57,17 +69,25 @@ impl HabitService for DefaultHabitService {
         if deleted {
             Ok(())
         } else {
-            Err(AppError::NotFound(format!("habit with id {} not found", id)))
+            Err(AppError::NotFound(format!("habit with id {id} not found")))
         }
     }
 
-    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let habits_with_checks = self.habit_repo.get_all_with_period_checks(user_id, timestamp).await?;
-
-        Ok(habits_with_checks)
+    async fn get_all_with_period_checks(
+        &self,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Vec<HabitWithCheck>, AppError> {
+        self.habit_repo.get_all_with_period_checks(user_id, timestamp).await
     }
 
-    async fn add_check(&self, habit_id: Uuid, user_id: Uuid, value: i32, checked_at: OffsetDateTime) -> Result<Check, AppError> {
+    async fn add_check(
+        &self,
+        habit_id: Uuid,
+        user_id: Uuid,
+        value: i32,
+        checked_at: OffsetDateTime,
+    ) -> Result<Check, AppError> {
         validate_check_value(value)?;
         validate_check_checked_at(&checked_at)?;
 
@@ -75,7 +95,7 @@ impl HabitService for DefaultHabitService {
             .habit_repo
             .get_with_period_checks(habit_id, user_id, checked_at)
             .await?
-            .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
+            .ok_or_else(|| AppError::NotFound(format!("habit with id {habit_id} not found")))?;
 
         validate_period_cap(
             value,
@@ -85,18 +105,27 @@ impl HabitService for DefaultHabitService {
 
         let check = self
             .check_repo
-            .upsert(&NewCheck { habit_id, value, checked_at })
+            .upsert(&NewCheck {
+                habit_id,
+                value,
+                checked_at,
+            })
             .await?;
 
         Ok(check)
     }
 
-    async fn reset_period_checks(&self, habit_id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<(), AppError> {
+    async fn reset_period_checks(
+        &self,
+        habit_id: Uuid,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<(), AppError> {
         let habit_with_check = self
             .habit_repo
             .get_with_period_checks(habit_id, user_id, timestamp)
             .await?
-            .ok_or_else(|| AppError::NotFound(format!("habit with id {} not found", habit_id)))?;
+            .ok_or_else(|| AppError::NotFound(format!("habit with id {habit_id} not found")))?;
 
         let period_start = habit_with_check.goal_period.get_period_start(timestamp);
         let period_end = habit_with_check.goal_period.get_period_end(timestamp);
@@ -111,9 +140,7 @@ impl HabitService for DefaultHabitService {
     async fn get_activity_dates(&self, user_id: Uuid, from: Date, to: Date) -> Result<Vec<Date>, AppError> {
         validate_date_range(from, to)?;
 
-        let dates = self.check_repo.get_activity_dates(user_id, from, to).await?;
-
-        Ok(dates)
+        self.check_repo.get_activity_dates(user_id, from, to).await
     }
 }
 
@@ -172,20 +199,15 @@ mod tests {
         let day3 = datetime!(2026-03-04 10:00 UTC); // Wednesday
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo
-            .expect_get_with_period_checks()
-            .return_once(move |id, _| {
-                Box::pin(async move {
-                    Ok(Some(make_habit_with_checks(
-                        id,
-                        180,
-                        vec![
-                            Check::new(1, id, 60, day1),
-                            Check::new(2, id, 90, day2)
-                        ]
-                    )))
-                })
-            });
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+            Box::pin(async move {
+                Ok(Some(make_habit_with_checks(
+                    id,
+                    180,
+                    vec![Check::new(1, id, 60, day1), Check::new(2, id, 90, day2)],
+                )))
+            })
+        });
 
         let mut check_repo = MockCheckRepository::new();
         check_repo.expect_upsert().return_once(|add_check| {
@@ -227,17 +249,15 @@ mod tests {
         let checked_at = datetime!(2026-03-03 10:00 UTC);
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo
-            .expect_get_with_period_checks()
-            .return_once(move |id, _| {
-                Box::pin(async move {
-                    Ok(Some(make_habit_with_checks(
-                        id,
-                        180,
-                        vec![Check::new(1, id, 170, day1)]
-                    )))
-                })
-            });
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+            Box::pin(async move {
+                Ok(Some(make_habit_with_checks(
+                    id,
+                    180,
+                    vec![Check::new(1, id, 170, day1)],
+                )))
+            })
+        });
 
         let service = make_service(habit_repo, MockCheckRepository::new());
         let result = service.add_check(1, 20, checked_at).await;
@@ -266,20 +286,15 @@ mod tests {
         let now = datetime!(2026-03-04 10:00 UTC);
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo
-            .expect_get_with_period_checks()
-            .return_once(move |id, _| {
-                Box::pin(async move {
-                    Ok(Some(make_habit_with_checks(
-                        id,
-                        180,
-                        vec![
-                            Check::new(1, id, 60, day1),
-                            Check::new(2, id, 90, day2)
-                        ]
-                    )))
-                })
-            });
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+            Box::pin(async move {
+                Ok(Some(make_habit_with_checks(
+                    id,
+                    180,
+                    vec![Check::new(1, id, 60, day1), Check::new(2, id, 90, day2)],
+                )))
+            })
+        });
 
         let mut check_repo = MockCheckRepository::new();
         check_repo
