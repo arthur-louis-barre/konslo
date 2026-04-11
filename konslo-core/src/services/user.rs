@@ -1,6 +1,6 @@
 use crate::errors::AppError;
-use crate::models::user::{CreateUser, User};
-use crate::repositories::UserRepository;
+use crate::models::user::{NewUser, User};
+use crate::repositories::user::UserRepository;
 use argon2::password_hash::SaltString;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -38,7 +38,7 @@ impl UserService for DefaultUserService {
             .hash_password(password.as_bytes(), &salt)
             .map_err(|e| AppError::Internal(e.to_string()))?;
 
-        let new_user = CreateUser {
+        let new_user = NewUser {
             username: username.to_string(),
             password_hash: password_hash.to_string(),
         };

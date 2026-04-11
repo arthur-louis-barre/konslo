@@ -1,12 +1,12 @@
 use crate::errors::AppError;
-use crate::models::user::{CreateUser, User};
+use crate::models::user::{NewUser, User};
 use async_trait::async_trait;
 use sqlx::{PgPool, query_file_as};
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait UserRepository: Send + Sync {
-    async fn create(&self, new_user: &CreateUser) -> Result<User, AppError>;
+    async fn create(&self, new_user: &NewUser) -> Result<User, AppError>;
     async fn get_by_username(&self, username: &str) -> Result<Option<User>, AppError>;
 }
 
@@ -22,7 +22,7 @@ impl PostgresUserRepository {
 
 #[async_trait]
 impl UserRepository for PostgresUserRepository {
-    async fn create(&self, new_user: &CreateUser) -> Result<User, AppError> {
+    async fn create(&self, new_user: &NewUser) -> Result<User, AppError> {
         let user = query_file_as!(
             User,
             "queries/insert_user.sql",

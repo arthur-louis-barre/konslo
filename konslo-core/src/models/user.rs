@@ -11,7 +11,7 @@ pub struct User {
 }
 
 #[derive(Debug)]
-pub struct CreateUser {
+pub struct NewUser {
     pub username: String,
     pub password_hash: String,
 }

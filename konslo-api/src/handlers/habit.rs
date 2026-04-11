@@ -6,7 +6,7 @@ use crate::router::AppState;
 use axum::Json;
 use axum::extract::{Path, Query, State};
 use axum::http;
-use konslo_core::models::habit::CreateHabit;
+use konslo_core::models::habit::NewHabit;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
@@ -15,7 +15,7 @@ pub async fn create_habit_handler(
     auth_user: AuthUser,
     Json(request): Json<CreateHabitRequest>,
 ) -> Result<(http::StatusCode, Json<HabitResponse>), AppError> {
-    let new_habit = CreateHabit {
+    let new_habit = NewHabit {
         user_id: auth_user.user_id,
         name: request.name,
         goal_value: request.goal_value,

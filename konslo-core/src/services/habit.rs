@@ -1,18 +1,20 @@
 use crate::errors::AppError;
-use crate::models::check::{AddCheck, Check};
-use crate::models::habit::{CreateHabit, Habit, HabitWithCheck};
-use crate::repositories::{CheckRepository, HabitRepository};
+use crate::models::check::{NewCheck, Check};
+use crate::models::habit::{NewHabit, Habit, HabitWithCheck};
+
 use crate::validation::check::{validate_check_checked_at, validate_check_value, validate_date_range, validate_period_cap};
 use crate::validation::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
 use time::{Date, OffsetDateTime};
 use uuid::Uuid;
+use crate::repositories::check::CheckRepository;
+use crate::repositories::habit::HabitRepository;
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitService: Send + Sync {
-    async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError>;
+    async fn create(&self, new_habit: NewHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError>;
     async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), AppError>;
     async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
@@ -35,7 +37,7 @@ impl DefaultHabitService {
 
 #[async_trait]
 impl HabitService for DefaultHabitService {
-    async fn create(&self, new_habit: CreateHabit) -> Result<Habit, AppError> {
+    async fn create(&self, new_habit: NewHabit) -> Result<Habit, AppError> {
         validate_habit_name(&new_habit.name)?;
 
         let habit = self.habit_repo.create(&new_habit).await?;
@@ -83,7 +85,7 @@ impl HabitService for DefaultHabitService {
 
         let check = self
             .check_repo
-            .upsert(&AddCheck::new(habit_id, value, checked_at))
+            .upsert(&NewCheck { habit_id, value, checked_at })
             .await?;
 
         Ok(check)

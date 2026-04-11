@@ -1,6 +1,6 @@
 use crate::errors::AppError;
 use crate::models::check::Check;
-use crate::models::habit::{CreateHabit, GoalPeriod, Habit, HabitWithCheck};
+use crate::models::habit::{GoalPeriod, Habit, HabitWithCheck, NewHabit};
 use async_trait::async_trait;
 use sqlx::{PgPool, query_file, query_file_as};
 use std::collections::HashMap;
@@ -10,10 +10,19 @@ use uuid::Uuid;
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
 pub trait HabitRepository: Send + Sync {
-    async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError>;
+    async fn create(&self, new_habit: &NewHabit) -> Result<Habit, AppError>;
     async fn get_by_id(&self, id: Uuid, user_id: Uuid) -> Result<Option<Habit>, AppError>;
-    async fn get_with_period_checks(&self, id: Uuid, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Option<HabitWithCheck>, AppError>;
-    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError>;
+    async fn get_with_period_checks(
+        &self,
+        id: Uuid,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Option<HabitWithCheck>, AppError>;
+    async fn get_all_with_period_checks(
+        &self,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Vec<HabitWithCheck>, AppError>;
     async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<bool, AppError>;
 }
 
@@ -29,15 +38,15 @@ impl PostgresHabitRepository {
 
 #[async_trait]
 impl HabitRepository for PostgresHabitRepository {
-    async fn create(&self, create_habit: &CreateHabit) -> Result<Habit, AppError> {
+    async fn create(&self, new_habit: &NewHabit) -> Result<Habit, AppError> {
         let habit = query_file_as!(
             Habit,
             "queries/insert_habit.sql",
-            create_habit.user_id,
-            create_habit.name,
-            create_habit.goal_value,
-            create_habit.goal_unit,
-            create_habit.goal_period as GoalPeriod,
+            new_habit.user_id,
+            new_habit.name,
+            new_habit.goal_value,
+            new_habit.goal_unit,
+            new_habit.goal_period as GoalPeriod,
         )
         .fetch_one(&self.pool)
         .await?;
@@ -53,10 +62,20 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(habit)
     }
 
-    async fn get_with_period_checks(&self, id: Uuid, user_id: Uuid, timestamp: OffsetDateTime, ) -> Result<Option<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habit_with_period_checks.sql", id, user_id, timestamp)
-            .fetch_all(&self.pool)
-            .await?;
+    async fn get_with_period_checks(
+        &self,
+        id: Uuid,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Option<HabitWithCheck>, AppError> {
+        let rows = query_file!(
+            "queries/select_habit_with_period_checks.sql",
+            id,
+            user_id,
+            timestamp
+        )
+        .fetch_all(&self.pool)
+        .await?;
 
         if rows.is_empty() {
             return Ok(None);
@@ -78,11 +97,17 @@ impl HabitRepository for PostgresHabitRepository {
         for row in rows {
             let check_id = row.check_id;
             if let Some(check_id) = check_id {
+                let value = row
+                    .value
+                    .ok_or_else(|| AppError::Internal("check value was null".to_string()))?;
+                let checked_at = row
+                    .checked_at
+                    .ok_or_else(|| AppError::Internal("check checked_at was null".to_string()))?;
                 habit_with_checks.checks.push(Check {
                     id: check_id,
                     habit_id: id,
-                    value: row.value.ok_or_else(|| AppError::Internal("check value was null".to_string()))?,
-                    checked_at: row.checked_at.ok_or_else(|| AppError::Internal("check checked_at was null".to_string()))?,
+                    value,
+                    checked_at,
                 });
             }
         }
@@ -90,10 +115,18 @@ impl HabitRepository for PostgresHabitRepository {
         Ok(Some(habit_with_checks))
     }
 
-    async fn get_all_with_period_checks(&self, user_id: Uuid, timestamp: OffsetDateTime) -> Result<Vec<HabitWithCheck>, AppError> {
-        let rows = query_file!("queries/select_habits_with_period_checks.sql", user_id, timestamp)
-            .fetch_all(&self.pool)
-            .await?;
+    async fn get_all_with_period_checks(
+        &self,
+        user_id: Uuid,
+        timestamp: OffsetDateTime,
+    ) -> Result<Vec<HabitWithCheck>, AppError> {
+        let rows = query_file!(
+            "queries/select_habits_with_period_checks.sql",
+            user_id,
+            timestamp
+        )
+        .fetch_all(&self.pool)
+        .await?;
 
         let mut map: HashMap<Uuid, HabitWithCheck> = HashMap::new();
 
@@ -112,12 +145,18 @@ impl HabitRepository for PostgresHabitRepository {
             });
 
             if let Some(check_id) = check_id {
+                let value = row
+                    .value
+                    .ok_or_else(|| AppError::Internal("check value was null".to_string()))?;
+                let checked_at = row
+                    .checked_at
+                    .ok_or_else(|| AppError::Internal("check checked_at was null".to_string()))?;
                 map.entry(id).and_modify(|h| {
                     h.checks.push(Check {
                         id: check_id,
                         habit_id: id,
-                        value: row.value.unwrap(),
-                        checked_at: row.checked_at.unwrap(),
+                        value,
+                        checked_at,
                     })
                 });
             }
@@ -130,7 +169,9 @@ impl HabitRepository for PostgresHabitRepository {
     }
 
     async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<bool, AppError> {
-        let result = query_file!("queries/delete_habit.sql", id, user_id).execute(&self.pool).await?;
+        let result = query_file!("queries/delete_habit.sql", id, user_id)
+            .execute(&self.pool)
+            .await?;
 
         Ok(result.rows_affected() == 1)
     }
