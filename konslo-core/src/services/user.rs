@@ -6,6 +6,7 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::validation::user::{validate_password, validate_username};
 
 #[async_trait]
 #[cfg_attr(any(test, feature = "mockable"), mockall::automock)]
@@ -28,6 +29,9 @@ impl DefaultUserService {
 #[async_trait]
 impl UserService for DefaultUserService {
     async fn register(&self, username: &str, password: &str) -> Result<User, AppError> {
+        validate_username(username)?;
+        validate_password(password)?;
+
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
         let password_hash = argon2
