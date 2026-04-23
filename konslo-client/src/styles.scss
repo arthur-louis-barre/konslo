@@ -1,5 +1,4 @@
 :root {
-  // colors
   --bg: #0d1117;
   --surface: #161b22;
   --surface-hover: #1c2330;
@@ -12,23 +11,20 @@
   --text-secondary: #8b949e;
   --text-muted: #4a5568;
 
-  // sizes
-  --text-xxs: 0.625rem; // label 10px
-  --text-xs: 0.75rem; // body extra-small 12px
-  --text-sm: 0.875rem; // body small 14px
-  --text-md: 1rem; // body 16px
-  --text-lg: 1.375rem; // title 22px
-  --text-xl: 1.75rem; // headline small 28px
-  --text-xxl: 2rem; // headline 32px
-  --text-xxxl: 2.8125rem; // display 45px
+  --text-xxs: 0.625rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-xxl: 2rem;
+  --text-xxxl: 2.8125rem;
 
-  // weights
   --weight-light: 300;
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semi: 600;
 
-  // space
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -46,9 +42,9 @@
 }
 
 html, body {
-  background: var(--bg);
-  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
   color: var(--text);
+  font-family: 'Inter', sans-serif;
 }
 
 /* add texture to the background */

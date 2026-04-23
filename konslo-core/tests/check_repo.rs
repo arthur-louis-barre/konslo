@@ -1,55 +1,60 @@
 #[cfg(test)]
 mod tests {
-    use konslo_core::errors::AppError;
-    use konslo_core::models::check::{Check, NewCheck};
+    use konslo_core::error::AppError;
+    use konslo_core::models::check::{NewCheck};
     use konslo_core::models::habit::{GoalPeriod, Habit, NewHabit};
-    use konslo_core::repositories::{
-        CheckRepository, HabitRepository, PostgresCheckRepository, PostgresHabitRepository,
-    };
+    use konslo_core::models::user::{NewUser, User};
+    use konslo_core::repositories::check::{CheckRepository, PostgresCheckRepository};
+    use konslo_core::repositories::habit::{HabitRepository, PostgresHabitRepository};
+    use konslo_core::repositories::user::{PostgresUserRepository, UserRepository};
     use sqlx::PgPool;
     use std::error::Error;
-    use std::ops::Add;
     use time::macros::time;
     use time::{Duration, OffsetDateTime};
+    use uuid::Uuid;
 
-    async fn seed_habit(pool: &PgPool, create_habit: &NewHabit) -> Result<Habit, Box<dyn Error>> {
-        let repo = PostgresHabitRepository::new(pool.clone());
-        Ok(repo.create(create_habit).await?)
+    async fn seed_user(pool: &PgPool) -> Result<User, Box<dyn Error>> {
+        let repo = PostgresUserRepository::new(pool.clone());
+        Ok(repo
+            .create(&NewUser {
+                username: "test_user".to_string(),
+                password_hash: "test_password_hash".to_string(),
+            })
+            .await?)
     }
 
-    async fn seed_check(pool: &PgPool, add_check: &NewCheck) -> Result<Check, Box<dyn Error>> {
-        let repo = PostgresCheckRepository::new(pool.clone());
-        Ok(repo.upsert(add_check).await?)
+    async fn seed_habit(pool: &PgPool, new_habit: &NewHabit) -> Result<Habit, Box<dyn Error>> {
+        let repo = PostgresHabitRepository::new(pool.clone());
+        Ok(repo.create(new_habit).await?)
     }
 
     mod upsert {
         use super::*;
 
         #[sqlx::test]
-        async fn test_upsert_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        async fn test_upsert_ok_returns_check(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &NewHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
+            let s_user = seed_user(&pool).await?;
+            let s_habit = seed_habit(&pool, &NewHabit {
+                user_id: s_user.id,
+                name: "Meditate".to_string(),
+                goal_value: 10,
+                goal_unit: "min".to_string(),
+                goal_period: GoalPeriod::Day,
+            }).await?;
 
-            let yesterday_first = OffsetDateTime::now_utc()
-                .add(Duration::days(-1))
-                .replace_time(time!(12:00:00));
-            let yesterday_second = yesterday_first.add(Duration::hours(4));
-            let add_check_first = NewCheck::new(s_habit.id, 5, yesterday_first);
-            let add_check_second = NewCheck::new(s_habit.id, 3, yesterday_second);
+            let yesterday = OffsetDateTime::now_utc() - Duration::days(1);
+            let new_first = NewCheck { habit_id: s_habit.id, value: 5, checked_at: yesterday.replace_time(time!(12:00:00)) };
+            let new_second = NewCheck { habit_id: s_habit.id, value: 3, checked_at: yesterday.replace_time(time!(16:00:00)) };
 
-            let created_first = repo.upsert(&add_check_first).await?;
-            let created_second = repo.upsert(&add_check_second).await?;
+            let created_first = repo.upsert(&new_first).await?;
+            let created_second = repo.upsert(&new_second).await?;
 
-            assert!(created_first.id > 0);
-            assert_eq!(created_first.habit_id, add_check_first.habit_id);
-            assert_eq!(created_first.value, add_check_first.value);
-            assert_eq!(
-                created_first.checked_at,
-                add_check_first.checked_at.truncate_to_microsecond()
-            );
+            assert_eq!(created_first.habit_id, new_first.habit_id);
+            assert_eq!(created_first.value, new_first.value);
             assert_eq!(created_second.id, created_first.id);
             assert_eq!(created_second.habit_id, created_first.habit_id);
-            assert_eq!(created_second.value, created_first.value + add_check_second.value);
+            assert_eq!(created_second.value, new_first.value + new_second.value);
             assert_eq!(created_second.checked_at, created_first.checked_at);
 
             Ok(())
@@ -59,9 +64,12 @@ mod tests {
         async fn test_upsert_habit_not_found_returns_not_found_err(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool);
 
-            let result = repo.upsert(&NewCheck::new(999, 5, OffsetDateTime::now_utc())).await;
+            let result = repo.upsert(&NewCheck {
+                habit_id: Uuid::new_v4(),
+                value: 5,
+                checked_at: OffsetDateTime::now_utc(),
+            }).await;
 
-            assert!(result.is_err());
             assert!(matches!(result.unwrap_err(), AppError::NotFound(_)));
 
             Ok(())
@@ -72,14 +80,21 @@ mod tests {
         use super::*;
 
         #[sqlx::test]
-        async fn test_delete_by_habit_for_period_ok(pool: PgPool) -> Result<(), Box<dyn Error>> {
+        async fn test_delete_by_habit_for_period_ok_returns_count(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &NewHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
+            let s_user = seed_user(&pool).await?;
+            let s_habit = seed_habit(&pool, &NewHabit {
+                user_id: s_user.id,
+                name: "Meditate".to_string(),
+                goal_value: 10,
+                goal_unit: "min".to_string(),
+                goal_period: GoalPeriod::Day,
+            }).await?;
 
             let now = OffsetDateTime::now_utc();
-            seed_check(&pool, &NewCheck::new(s_habit.id, 1, now)).await?;
-            seed_check(&pool, &NewCheck::new(s_habit.id, 1, now - Duration::days(1))).await?;
-            seed_check(&pool, &NewCheck::new(s_habit.id, 1, now - Duration::days(2))).await?;
+            repo.upsert(&NewCheck { habit_id: s_habit.id, value: 1, checked_at: now }).await?;
+            repo.upsert(&NewCheck { habit_id: s_habit.id, value: 1, checked_at: now - Duration::days(1) }).await?;
+            repo.upsert(&NewCheck { habit_id: s_habit.id, value: 1, checked_at: now - Duration::days(2) }).await?;
 
             let from = (now - Duration::days(3)).date();
             let to = (now - Duration::days(1)).date();
@@ -94,7 +109,14 @@ mod tests {
         #[sqlx::test]
         async fn test_delete_by_habit_for_period_no_checks_returns_zero(pool: PgPool) -> Result<(), Box<dyn Error>> {
             let repo = PostgresCheckRepository::new(pool.clone());
-            let s_habit = seed_habit(&pool, &NewHabit::new("Meditate", 10, "min", GoalPeriod::Day)).await?;
+            let s_user = seed_user(&pool).await?;
+            let s_habit = seed_habit(&pool, &NewHabit {
+                user_id: s_user.id,
+                name: "Meditate".to_string(),
+                goal_value: 10,
+                goal_unit: "min".to_string(),
+                goal_period: GoalPeriod::Day,
+            }).await?;
 
             let now = OffsetDateTime::now_utc();
             let from = (now - Duration::days(3)).date();

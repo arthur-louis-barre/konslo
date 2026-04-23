@@ -93,7 +93,11 @@ pub async fn reset_period_checks_handler(
 ) -> Result<http::StatusCode, AppError> {
     state
         .habit_service
-        .reset_period_checks(habit_id, auth_user.user_id, params.date.unwrap_or_else(OffsetDateTime::now_utc))
+        .reset_period_checks(
+            habit_id,
+            auth_user.user_id,
+            params.date.unwrap_or_else(OffsetDateTime::now_utc),
+        )
         .await?;
 
     Ok(http::StatusCode::NO_CONTENT)
@@ -104,7 +108,10 @@ pub async fn get_activity_dates_handler(
     auth_user: AuthUser,
     Query(params): Query<ActivityQuery>,
 ) -> Result<Json<ActivityResponse>, AppError> {
-    let dates = state.habit_service.get_activity_dates(auth_user.user_id, params.from, params.to).await?;
+    let dates = state
+        .habit_service
+        .get_activity_dates(auth_user.user_id, params.from, params.to)
+        .await?;
 
     Ok(Json(dates.into()))
 }

@@ -1,4 +1,4 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 use crate::models::check::{Check, NewCheck};
 use async_trait::async_trait;
 use sqlx::{PgPool, query_file, query_file_as};

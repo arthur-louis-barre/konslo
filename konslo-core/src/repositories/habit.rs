@@ -1,4 +1,4 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 use crate::models::check::Check;
 use crate::models::habit::{GoalPeriod, Habit, HabitWithCheck, NewHabit};
 use async_trait::async_trait;
@@ -154,7 +154,7 @@ impl HabitRepository for PostgresHabitRepository {
         }
 
         let mut habits_with_checks = map.into_values().collect::<Vec<HabitWithCheck>>();
-        habits_with_checks.sort_by_key(|h| h.id);
+        habits_with_checks.sort_by_key(|h| h.created_at);
 
         Ok(habits_with_checks)
     }

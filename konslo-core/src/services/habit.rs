@@ -1,12 +1,12 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 use crate::models::check::{Check, NewCheck};
 use crate::models::habit::{Habit, HabitWithCheck, NewHabit};
 use crate::repositories::check::CheckRepository;
 use crate::repositories::habit::HabitRepository;
-use crate::validation::check::{
+use crate::validations::check::{
     validate_check_checked_at, validate_check_value, validate_date_range, validate_period_cap,
 };
-use crate::validation::habit::validate_habit_name;
+use crate::validations::habit::validate_habit_name;
 use async_trait::async_trait;
 use std::sync::Arc;
 use time::{Date, OffsetDateTime};
@@ -148,8 +148,9 @@ impl HabitService for DefaultHabitService {
 mod tests {
     use super::*;
     use crate::models::habit::GoalPeriod;
-    use crate::repositories::{MockCheckRepository, MockHabitRepository};
     use time::macros::datetime;
+    use crate::repositories::check::MockCheckRepository;
+    use crate::repositories::habit::MockHabitRepository;
 
     fn make_service(habit_repo: MockHabitRepository, check_repo: MockCheckRepository) -> DefaultHabitService {
         DefaultHabitService::new(Arc::new(habit_repo), Arc::new(check_repo))
@@ -173,11 +174,11 @@ mod tests {
         let mut habit_repo = MockHabitRepository::new();
         habit_repo
             .expect_delete()
-            .return_once(|_| Box::pin(async move { Ok(true) }));
+            .return_once(|_, _| Box::pin(async move { Ok(true) }));
 
         let service = make_service(habit_repo, MockCheckRepository::new());
 
-        assert!(service.delete(1).await.is_ok());
+        assert!(service.delete(Uuid::new_v4(), Uuid::new_v4()).await.is_ok());
     }
 
     #[tokio::test]
@@ -185,11 +186,14 @@ mod tests {
         let mut habit_repo = MockHabitRepository::new();
         habit_repo
             .expect_delete()
-            .return_once(|_| Box::pin(async move { Ok(false) }));
+            .return_once(|_, _| Box::pin(async move { Ok(false) }));
 
         let service = make_service(habit_repo, MockCheckRepository::new());
 
-        assert!(matches!(service.delete(1).await, Err(AppError::NotFound(_))));
+        assert!(matches!(
+            service.delete(Uuid::new_v4(), Uuid::new_v4()).await,
+            Err(AppError::NotFound(_))
+        ));
     }
 
     #[tokio::test]
@@ -199,34 +203,34 @@ mod tests {
         let day3 = datetime!(2026-03-04 10:00 UTC); // Wednesday
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _, _| {
             Box::pin(async move {
                 Ok(Some(make_habit_with_checks(
                     id,
                     180,
-                    vec![Check::new(1, id, 60, day1), Check::new(2, id, 90, day2)],
+                    vec![
+                        Check { id: Uuid::new_v4(), habit_id: id, value: 60, checked_at: day1 },
+                        Check { id: Uuid::new_v4(), habit_id: id, value: 90, checked_at: day2 },
+                    ],
                 )))
             })
         });
 
         let mut check_repo = MockCheckRepository::new();
-        check_repo.expect_upsert().return_once(|add_check| {
-            let habit_id = add_check.habit_id;
-            let value = add_check.value;
-            let checked_at = add_check.checked_at;
-            Box::pin(async move { Ok(Check::new(3, habit_id, value, checked_at)) })
+        check_repo.expect_upsert().return_once(|new_check| {
+            let habit_id = new_check.habit_id;
+            let value = new_check.value;
+            let checked_at = new_check.checked_at;
+            Box::pin(async move { Ok(Check { id: Uuid::new_v4(), habit_id, value, checked_at }) })
         });
 
         let service = make_service(habit_repo, check_repo);
-        let result = service.add_check(1, 20, day3).await;
+        let result = service.add_check(Uuid::new_v4(), Uuid::new_v4(), 20, day3).await;
 
-        let expected = Check {
-            id: 3,
-            habit_id: 1,
-            value: 20,
-            checked_at: day3,
-        };
-        assert_eq!(result.unwrap(), expected);
+        assert!(result.is_ok());
+        let check = result.unwrap();
+        assert_eq!(check.value, 20);
+        assert_eq!(check.checked_at, day3);
     }
 
     #[tokio::test]
@@ -234,11 +238,11 @@ mod tests {
         let mut habit_repo = MockHabitRepository::new();
         habit_repo
             .expect_get_with_period_checks()
-            .return_once(move |_, _| Box::pin(async move { Ok(None) }));
+            .return_once(|_, _, _| Box::pin(async move { Ok(None) }));
 
         let service = make_service(habit_repo, MockCheckRepository::new());
 
-        let result = service.add_check(10, 888, OffsetDateTime::UNIX_EPOCH).await;
+        let result = service.add_check(Uuid::new_v4(), Uuid::new_v4(), 888, OffsetDateTime::UNIX_EPOCH).await;
 
         assert!(matches!(result, Err(AppError::NotFound(_))));
     }
@@ -249,18 +253,18 @@ mod tests {
         let checked_at = datetime!(2026-03-03 10:00 UTC);
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _, _| {
             Box::pin(async move {
                 Ok(Some(make_habit_with_checks(
                     id,
                     180,
-                    vec![Check::new(1, id, 170, day1)],
+                    vec![Check { id: Uuid::new_v4(), habit_id: id, value: 170, checked_at: day1 }],
                 )))
             })
         });
 
         let service = make_service(habit_repo, MockCheckRepository::new());
-        let result = service.add_check(1, 20, checked_at).await;
+        let result = service.add_check(Uuid::new_v4(), Uuid::new_v4(), 20, checked_at).await;
 
         assert!(matches!(result, Err(AppError::Validation(_))));
     }
@@ -270,11 +274,13 @@ mod tests {
         let mut habit_repo = MockHabitRepository::new();
         habit_repo
             .expect_get_with_period_checks()
-            .return_once(|_, _| Box::pin(async move { Ok(None) }));
+            .return_once(|_, _, _| Box::pin(async move { Ok(None) }));
 
         let service = make_service(habit_repo, MockCheckRepository::new());
 
-        let result = service.reset_period_checks(1, datetime!(2026-03-03 10:00 UTC)).await;
+        let result = service
+            .reset_period_checks(Uuid::new_v4(), Uuid::new_v4(), datetime!(2026-03-03 10:00 UTC))
+            .await;
 
         assert!(matches!(result, Err(AppError::NotFound(_))));
     }
@@ -286,12 +292,15 @@ mod tests {
         let now = datetime!(2026-03-04 10:00 UTC);
 
         let mut habit_repo = MockHabitRepository::new();
-        habit_repo.expect_get_with_period_checks().return_once(move |id, _| {
+        habit_repo.expect_get_with_period_checks().return_once(move |id, _, _| {
             Box::pin(async move {
                 Ok(Some(make_habit_with_checks(
                     id,
                     180,
-                    vec![Check::new(1, id, 60, day1), Check::new(2, id, 90, day2)],
+                    vec![
+                        Check { id: Uuid::new_v4(), habit_id: id, value: 60, checked_at: day1 },
+                        Check { id: Uuid::new_v4(), habit_id: id, value: 90, checked_at: day2 },
+                    ],
                 )))
             })
         });
@@ -303,6 +312,6 @@ mod tests {
 
         let service = make_service(habit_repo, check_repo);
 
-        assert!(service.reset_period_checks(1, now).await.is_ok());
+        assert!(service.reset_period_checks(Uuid::new_v4(), Uuid::new_v4(), now).await.is_ok());
     }
 }

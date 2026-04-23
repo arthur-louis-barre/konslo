@@ -1,4 +1,4 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 
 pub fn validate_habit_name(name: &str) -> Result<(), AppError> {
     let name = name.trim();

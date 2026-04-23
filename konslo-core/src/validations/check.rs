@@ -1,4 +1,4 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 use time::{Date, Duration, OffsetDateTime};
 
 pub fn validate_check_value(value: i32) -> Result<(), AppError> {

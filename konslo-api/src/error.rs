@@ -1,12 +1,12 @@
-use crate::error::AppError::{BadRequest, Conflict, InternalServerError, NotFound, Unauthorized};
+use crate::error::AppError::{BadRequest, Conflict, ServerError, NotFound, Unauthorized};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use konslo_core::errors::AppError as CoreError;
+use konslo_core::error::AppError as CoreError;
 
 pub enum AppError {
     BadRequest(String),
     Conflict(String),
-    InternalServerError,
+    ServerError,
     NotFound(String),
     Unauthorized,
 }
@@ -16,7 +16,7 @@ impl IntoResponse for AppError {
         let (status, message) = match self {
             Conflict(msg) => (StatusCode::CONFLICT, format!("Conflict: {msg}")),
             BadRequest(msg) => (StatusCode::BAD_REQUEST, format!("BadRequest: {msg}")),
-            InternalServerError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".into()),
+            ServerError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".into()),
             NotFound(msg) => (StatusCode::NOT_FOUND, format!("Not found: {msg}")),
             Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
         };
@@ -31,11 +31,11 @@ impl From<CoreError> for AppError {
             CoreError::Conflict(msg) => Conflict(msg),
             CoreError::Database(msg) => {
                 tracing::error!("{}", msg);
-                InternalServerError
+                ServerError
             }
             CoreError::Internal(msg) => {
                 tracing::error!("{}", msg);
-                InternalServerError
+                ServerError
             }
             CoreError::NotFound(msg) => NotFound(msg),
             CoreError::Unauthorized => Unauthorized,

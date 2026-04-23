@@ -3,9 +3,7 @@ CREATE TYPE goal_period_enum AS ENUM ('day', 'week', 'month');
 ALTER TABLE habits ADD COLUMN goal_value INT NOT NULL;
 ALTER TABLE habits ADD COLUMN goal_unit TEXT NOT NULL;
 ALTER TABLE habits ADD COLUMN goal_period goal_period_enum NOT NULL;
-
-ALTER TABLE habits
-ADD CONSTRAINT habits_goal_value_positive CHECK (goal_value > 0);
+ALTER TABLE habits ADD CONSTRAINT habits_goal_value_positive CHECK (goal_value > 0);
 
 CREATE TABLE checks (
     check_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

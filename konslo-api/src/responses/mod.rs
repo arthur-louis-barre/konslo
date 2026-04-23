@@ -1,8 +1,8 @@
+use konslo_core::models::check::Check;
+use konslo_core::models::habit::{GoalPeriod, Habit, HabitWithCheck};
 use serde::{Deserialize, Serialize};
 use time::{Date, OffsetDateTime};
 use uuid::Uuid;
-use konslo_core::models::check::Check;
-use konslo_core::models::habit::{GoalPeriod, Habit, HabitWithCheck};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct CheckResponse {

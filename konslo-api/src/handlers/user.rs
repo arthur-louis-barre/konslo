@@ -26,20 +26,17 @@ pub async fn register_handler(
         .status(StatusCode::CREATED)
         .header(
             header::SET_COOKIE,
-            HeaderValue::from_str(&cookie).map_err(|_| AppError::InternalServerError)?,
+            HeaderValue::from_str(&cookie).map_err(|_| AppError::ServerError)?,
         )
         .body(Body::empty())
-        .map_err(|_| AppError::InternalServerError)
+        .map_err(|_| AppError::ServerError)
 }
 
 pub async fn login_handler(
     State(state): State<AppState>,
     Json(request): Json<LoginRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let user = state
-        .user_service
-        .login(&request.username, &request.password)
-        .await?;
+    let user = state.user_service.login(&request.username, &request.password).await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
     let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age=3600", token);
@@ -48,10 +45,10 @@ pub async fn login_handler(
         .status(StatusCode::OK)
         .header(
             header::SET_COOKIE,
-            HeaderValue::from_str(&cookie).map_err(|_| AppError::InternalServerError)?,
+            HeaderValue::from_str(&cookie).map_err(|_| AppError::ServerError)?,
         )
         .body(Body::empty())
-        .map_err(|_| AppError::InternalServerError)
+        .map_err(|_| AppError::ServerError)
 }
 
 pub async fn logout_handler() -> Result<impl IntoResponse, AppError> {
@@ -61,10 +58,10 @@ pub async fn logout_handler() -> Result<impl IntoResponse, AppError> {
         .status(StatusCode::OK)
         .header(
             header::SET_COOKIE,
-            HeaderValue::from_str(&cookie).map_err(|_| AppError::InternalServerError)?,
+            HeaderValue::from_str(&cookie).map_err(|_| AppError::ServerError)?,
         )
         .body(Body::empty())
-        .map_err(|_| AppError::InternalServerError)
+        .map_err(|_| AppError::ServerError)
 }
 
 pub async fn me_handler(auth_user: AuthUser) -> Result<impl IntoResponse, AppError> {

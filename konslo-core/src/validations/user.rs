@@ -1,4 +1,4 @@
-use crate::errors::AppError;
+use crate::error::AppError;
 
 pub fn validate_username(username: &str) -> Result<(), AppError> {
     let username = username.trim();
