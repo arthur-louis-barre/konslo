@@ -14,6 +14,7 @@ COPY konslo-core/src konslo-core/src
 COPY konslo-api/src konslo-api/src
 RUN touch konslo-core/src/lib.rs
 RUN touch konslo-api/src/main.rs
+RUN ls -la /app/konslo-core/.sqlx/
 RUN cargo build --release
 
 FROM debian:bookworm-slim as runtime
