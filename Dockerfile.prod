@@ -9,14 +9,15 @@ COPY konslo-core/queries ./konslo-core/queries
 COPY konslo-core/migrations ./konslo-core/migrations
 RUN mkdir konslo-core/src && echo "" > konslo-core/src/lib.rs
 RUN mkdir konslo-api/src && echo "fn main() {}" > konslo-api/src/main.rs
-RUN cargo build
+RUN cargo build --release
 COPY konslo-core/src konslo-core/src
 COPY konslo-api/src konslo-api/src
 RUN touch konslo-core/src/lib.rs
 RUN touch konslo-api/src/main.rs
-RUN cargo build
+RUN cargo build --release
 
 FROM debian:bookworm-slim as runtime
 WORKDIR /app
-COPY --from=builder /app/target/debug/konslo-api .
+RUN apt-get update && apt-get install -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/konslo-api .
 CMD ["/app/konslo-api"]
