@@ -1,10 +1,9 @@
 FROM rust:1.94 AS builder
 WORKDIR /app
-ENV SQLX_OFFLINE=true
+ARG DATABASE_URL
 COPY Cargo.toml Cargo.lock ./
 COPY konslo-core/Cargo.toml ./konslo-core/
 COPY konslo-api/Cargo.toml ./konslo-api/
-COPY konslo-core/.sqlx ./konslo-core/.sqlx
 COPY konslo-core/queries ./konslo-core/queries
 COPY konslo-core/migrations ./konslo-core/migrations
 RUN mkdir konslo-core/src && echo "" > konslo-core/src/lib.rs
@@ -14,7 +13,6 @@ COPY konslo-core/src konslo-core/src
 COPY konslo-api/src konslo-api/src
 RUN touch konslo-core/src/lib.rs
 RUN touch konslo-api/src/main.rs
-RUN ls -la /app/konslo-core/.sqlx/
 RUN cargo build --release
 
 FROM debian:bookworm-slim as runtime
