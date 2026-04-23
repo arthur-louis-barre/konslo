@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::jwt::{Claims, verify_token};
+use crate::auth::jwt::{Claims, verify_token};
 use crate::router::AppState;
 use axum::extract::FromRequestParts;
 use axum::http::header;

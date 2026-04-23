@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::extractor::AuthUser;
+use crate::auth::extractor::AuthUser;
 use crate::requests::{ActivityQuery, AddCheckRequest, CreateHabitRequest, HabitsQuery, ResetChecksQuery};
 use crate::responses::{ActivityResponse, CheckResponse, HabitResponse, HabitWithCheckResponse};
 use crate::router::AppState;

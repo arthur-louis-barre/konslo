@@ -1,6 +1,6 @@
 use crate::error::AppError;
-use crate::extractor::AuthUser;
-use crate::jwt::generate_token;
+use crate::auth::extractor::AuthUser;
+use crate::auth::jwt::generate_token;
 use crate::requests::{LoginRequest, RegisterRequest};
 use crate::router::AppState;
 use axum::Json;

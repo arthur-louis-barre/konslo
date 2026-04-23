@@ -1,13 +1,12 @@
 mod error;
-mod extractor;
 mod handlers;
-mod jwt;
 mod requests;
 mod responses;
 mod router;
+pub mod auth;
 
-use crate::router::{AppState, get_router};
-use axum::http::{HeaderValue, Method, header};
+use crate::router::{get_router, AppState};
+use axum::http::{header, HeaderValue, Method};
 use dotenvy::dotenv;
 use konslo_core::db::run_migrations;
 use konslo_core::repositories::check::PostgresCheckRepository;
@@ -36,7 +35,7 @@ async fn main() {
         .allow_headers([header::CONTENT_TYPE])
         .allow_credentials(true);
 
-    // load env. variables
+    // load environment variables
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL should be defined in the .env file");
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET should be defined in the .env file");
@@ -66,14 +65,12 @@ async fn main() {
         jwt_secret,
     };
 
-    // 4. Config routing
+    // config routing
     let app = get_router(state).layer(cors);
 
-    // 3. Définition de l'adresse (localhost:3000)
+    // run server
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     tracing::info!("listening on {}", addr);
-
-    // 4. Lancement du serveur
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
