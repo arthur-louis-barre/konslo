@@ -29,16 +29,17 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    // load environment variables
+    dotenv().ok();
+    let allowed_origin = env::var("ALLOWED_ORIGIN").expect("ALLOWED_ORIGIN must be set");
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:4200".parse::<HeaderValue>().unwrap())
+        .allow_origin(allowed_origin.parse::<HeaderValue>().expect("ALLOWED_ORIGIN is not a valid header value"))
         .allow_methods([Method::GET, Method::POST, Method::DELETE])
         .allow_headers([header::CONTENT_TYPE])
         .allow_credentials(true);
-
-    // load environment variables
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL should be defined in the .env file");
-    let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET should be defined in the .env file");
 
     // create the pool
     let pool = PgPoolOptions::new()
