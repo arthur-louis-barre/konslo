@@ -1,3 +1,3 @@
 export const environment = {
-    apiUrl: 'https://backend-url'
+    apiUrl: 'https://konslo-production.up.railway.app'
 }
