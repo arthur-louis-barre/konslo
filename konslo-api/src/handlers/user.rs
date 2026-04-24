@@ -20,7 +20,7 @@ pub async fn register_handler(
         .await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
-    let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age=3600", token);
+    let cookie = format!("token={}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=3600", token);
 
     Response::builder()
         .status(StatusCode::CREATED)
@@ -39,7 +39,7 @@ pub async fn login_handler(
     let user = state.user_service.login(&request.username, &request.password).await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
-    let cookie = format!("token={}; HttpOnly; SameSite=Strict; Path=/; Max-Age=3600", token);
+    let cookie = format!("token={}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=3600", token);
 
     Response::builder()
         .status(StatusCode::OK)
@@ -52,7 +52,7 @@ pub async fn login_handler(
 }
 
 pub async fn logout_handler() -> Result<impl IntoResponse, AppError> {
-    let cookie = "token=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0".to_string();
+    let cookie = "token=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0".to_string();
 
     Response::builder()
         .status(StatusCode::OK)
