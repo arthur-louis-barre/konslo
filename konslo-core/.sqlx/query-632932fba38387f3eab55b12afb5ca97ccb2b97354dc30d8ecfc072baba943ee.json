@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT checked_at::date AS date\nFROM checks c JOIN habits h ON c.habit_id = h.habit_id\nWHERE h.user_id = $1\n  AND c.checked_at::date >= $2\n  AND c.checked_at::date <= $3\nORDER BY date;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "date",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "632932fba38387f3eab55b12afb5ca97ccb2b97354dc30d8ecfc072baba943ee"
+}

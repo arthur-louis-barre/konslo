@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE\nFROM checks\nWHERE habit_id = $1\n  AND checked_at::date >= $2::date\n  AND checked_at::date <= $3::date;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ac7e922a2bb716efac32389eae438940bfe3cbaf63eeab5224f016cc54d923d8"
+}
