@@ -7,4 +7,4 @@ RETURNING
     goal_value,
     goal_unit,
     goal_period as "goal_period: GoalPeriod",
-    created_at;
+    created_at

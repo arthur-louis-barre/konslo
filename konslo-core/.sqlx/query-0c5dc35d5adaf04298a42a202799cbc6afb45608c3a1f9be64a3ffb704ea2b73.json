@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO habits (user_id, name, goal_value, goal_unit, goal_period)\nVALUES ($1, $2, $3, $4, $5)\nRETURNING\n    habit_id as id,\n    user_id,\n    name,\n    goal_value,\n    goal_unit,\n    goal_period as \"goal_period: GoalPeriod\",\n    created_at;",
+  "query": "SELECT\n    habit_id as id,\n    user_id,\n    name,\n    goal_value,\n    goal_unit,\n    goal_period as \"goal_period: GoalPeriod\",\n    created_at\nFROM habits\nWHERE habit_id = $1 AND user_id = $2",
   "describe": {
     "columns": [
       {
@@ -53,21 +53,7 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Text",
-        "Int4",
-        "Text",
-        {
-          "Custom": {
-            "name": "goal_period_enum",
-            "kind": {
-              "Enum": [
-                "day",
-                "week",
-                "month"
-              ]
-            }
-          }
-        }
+        "Uuid"
       ]
     },
     "nullable": [
@@ -80,5 +66,5 @@
       false
     ]
   },
-  "hash": "7e5f1f9a3f4db7b2c26686d2ccf4a0565dc39350de2e6c20e525300d3b4945c2"
+  "hash": "0c5dc35d5adaf04298a42a202799cbc6afb45608c3a1f9be64a3ffb704ea2b73"
 }

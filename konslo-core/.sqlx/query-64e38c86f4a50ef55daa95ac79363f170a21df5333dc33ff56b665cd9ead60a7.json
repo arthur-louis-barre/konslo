@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT DISTINCT checked_at::date AS date\nFROM checks c JOIN habits h ON c.habit_id = h.habit_id\nWHERE h.user_id = $1\n  AND c.checked_at::date >= $2\n  AND c.checked_at::date <= $3\nORDER BY date;",
+  "query": "SELECT DISTINCT checked_at::date AS date\nFROM checks c JOIN habits h ON c.habit_id = h.habit_id\nWHERE h.user_id = $1\n  AND c.checked_at::date >= $2\n  AND c.checked_at::date <= $3\nORDER BY date",
   "describe": {
     "columns": [
       {
@@ -20,5 +20,5 @@
       null
     ]
   },
-  "hash": "632932fba38387f3eab55b12afb5ca97ccb2b97354dc30d8ecfc072baba943ee"
+  "hash": "64e38c86f4a50ef55daa95ac79363f170a21df5333dc33ff56b665cd9ead60a7"
 }

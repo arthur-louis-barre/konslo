@@ -7,4 +7,4 @@ SELECT
     goal_period as "goal_period: GoalPeriod",
     created_at
 FROM habits
-WHERE habit_id = $1 AND user_id = $2;
+WHERE habit_id = $1 AND user_id = $2

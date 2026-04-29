@@ -4,4 +4,4 @@ RETURNING
     user_id as id,
     username,
     password_hash,
-    created_at;
+    created_at

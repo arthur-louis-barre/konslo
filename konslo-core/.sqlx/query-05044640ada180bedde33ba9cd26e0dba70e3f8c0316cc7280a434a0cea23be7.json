@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "DELETE FROM habits\nWHERE habit_id = $1 AND user_id = $2;",
+  "query": "DELETE\nFROM habits\nWHERE habit_id = $1 AND user_id = $2;",
   "describe": {
     "columns": [],
     "parameters": {
@@ -11,5 +11,5 @@
     },
     "nullable": []
   },
-  "hash": "49c511c7ed559b50aeeff927313da91413c2148898b1b6ec6a039c346785a581"
+  "hash": "05044640ada180bedde33ba9cd26e0dba70e3f8c0316cc7280a434a0cea23be7"
 }

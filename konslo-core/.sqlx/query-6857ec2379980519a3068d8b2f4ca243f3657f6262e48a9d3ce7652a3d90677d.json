@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n    h.habit_id as id,\n    h.name,\n    h.goal_value,\n    h.goal_unit,\n    h.goal_period as \"goal_period: GoalPeriod\",\n    h.created_at,\n    c.check_id as \"check_id?\",\n    c.value as \"value?\",\n    c.checked_at as \"checked_at?\"\nFROM habits h LEFT JOIN checks c ON h.habit_id = c.habit_id AND (\n    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $3::timestamptz) OR\n    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $3::timestamptz) OR\n    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $3::timestamptz)\n)\nWHERE h.habit_id = $1 AND h.user_id = $2;\n",
+  "query": "SELECT\n    h.habit_id as id,\n    h.name,\n    h.goal_value,\n    h.goal_unit,\n    h.goal_period as \"goal_period: GoalPeriod\",\n    h.created_at,\n    c.check_id as \"check_id?\",\n    c.value as \"value?\",\n    c.checked_at as \"checked_at?\"\nFROM habits h LEFT JOIN checks c ON h.habit_id = c.habit_id AND (\n    h.goal_period = 'day' AND date_trunc('day', c.checked_at) = date_trunc('day', $3::timestamptz) OR\n    h.goal_period = 'week' AND date_trunc('week', c.checked_at) = date_trunc('week', $3::timestamptz) OR\n    h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $3::timestamptz)\n)\nWHERE h.habit_id = $1 AND h.user_id = $2\n",
   "describe": {
     "columns": [
       {
@@ -79,5 +79,5 @@
       false
     ]
   },
-  "hash": "31e5ddb04834814a6feb3d6c7edf980db7541d8aa5c38ec69f61208a90b4c922"
+  "hash": "6857ec2379980519a3068d8b2f4ca243f3657f6262e48a9d3ce7652a3d90677d"
 }

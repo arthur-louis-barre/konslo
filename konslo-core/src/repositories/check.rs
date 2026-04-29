@@ -51,7 +51,7 @@ impl CheckRepository for PostgresCheckRepository {
     }
 
     async fn delete_by_habit_for_period(&self, habit_id: Uuid, from: Date, to: Date) -> Result<u64, AppError> {
-        let result = query_file!("queries/delete_check_by_habit_in_period.sql", habit_id, from, to)
+        let result = query_file!("queries/delete_checks_by_habit_and_period.sql", habit_id, from, to)
             .execute(&self.pool)
             .await?;
 

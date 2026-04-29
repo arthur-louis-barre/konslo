@@ -14,4 +14,4 @@ FROM habits h LEFT JOIN checks c ON h.habit_id = c.habit_id AND (
     h.goal_period = 'month' AND date_trunc('month', c.checked_at) = date_trunc('month', $2::timestamptz)
 )
 WHERE h.user_id = $1
-ORDER BY h.created_at;
+ORDER BY h.created_at

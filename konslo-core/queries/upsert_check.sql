@@ -5,4 +5,4 @@ DO UPDATE SET value = checks.value + EXCLUDED.value
 RETURNING
     check_id as id,
     habit_id, value,
-    checked_at;
+    checked_at

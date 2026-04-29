@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT user_id as id, username, password_hash, created_at\nFROM users\nWHERE username = $1;",
+  "query": "INSERT INTO users (username, password_hash)\nVALUES ($1, $2)\nRETURNING\n    user_id as id,\n    username,\n    password_hash,\n    created_at\n",
   "describe": {
     "columns": [
       {
@@ -26,6 +26,7 @@
     ],
     "parameters": {
       "Left": [
+        "Text",
         "Text"
       ]
     },
@@ -36,5 +37,5 @@
       false
     ]
   },
-  "hash": "5f1335cc2a491fc96f14da6b358d6611f88d9f736ae51352f93aa383447574e2"
+  "hash": "df9dc065bc0db0d64ac418a940d5d56bece790fc568cf208c1d66b505727588c"
 }
