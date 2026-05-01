@@ -1,17 +1,19 @@
+mod auth;
 mod error;
 mod handlers;
 mod requests;
 mod responses;
 mod router;
-pub mod auth;
 
-use crate::router::{get_router, AppState};
-use axum::http::{header, HeaderValue, Method};
+use crate::router::{AppState, get_router};
+use axum::http::{HeaderValue, Method, header};
 use dotenvy::dotenv;
 use konslo_core::db::run_migrations;
 use konslo_core::repositories::check::PostgresCheckRepository;
+use konslo_core::repositories::demo_users::PostgresDemoUserRepository;
 use konslo_core::repositories::habit::PostgresHabitRepository;
 use konslo_core::repositories::user::PostgresUserRepository;
+use konslo_core::services::demo_user::DefaultDemoUserService;
 use konslo_core::services::habit::DefaultHabitService;
 use konslo_core::services::user::DefaultUserService;
 use sqlx::postgres::PgPoolOptions;
@@ -36,7 +38,11 @@ async fn main() {
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
     let cors = CorsLayer::new()
-        .allow_origin(allowed_origin.parse::<HeaderValue>().expect("ALLOWED_ORIGIN is not a valid header value"))
+        .allow_origin(
+            allowed_origin
+                .parse::<HeaderValue>()
+                .expect("ALLOWED_ORIGIN is not a valid header value"),
+        )
         .allow_methods([Method::GET, Method::POST, Method::DELETE])
         .allow_headers([header::CONTENT_TYPE])
         .allow_credentials(true);
@@ -50,19 +56,32 @@ async fn main() {
         .expect("failed to connect to database");
 
     // run migrations
-    run_migrations(&pool).await.expect("failed to run migration");
+    run_migrations(&pool)
+        .await
+        .expect("failed to run migration");
 
     // wire dependencies
+    let demo_user_repo = Arc::new(PostgresDemoUserRepository::new(pool.clone()));
     let user_repo = Arc::new(PostgresUserRepository::new(pool.clone()));
     let habit_repo = Arc::new(PostgresHabitRepository::new(pool.clone()));
     let check_repo = Arc::new(PostgresCheckRepository::new(pool.clone()));
 
+    let demo_user_service = Arc::new(DefaultDemoUserService::new(
+        demo_user_repo.clone(),
+        user_repo.clone(),
+        habit_repo.clone(),
+        check_repo.clone(),
+    ));
     let user_service = Arc::new(DefaultUserService::new(user_repo.clone()));
-    let habit_service = Arc::new(DefaultHabitService::new(habit_repo.clone(), check_repo.clone()));
+    let habit_service = Arc::new(DefaultHabitService::new(
+        habit_repo.clone(),
+        check_repo.clone(),
+    ));
 
     let state = AppState {
-        habit_service,
+        demo_user_service,
         user_service,
+        habit_service,
         jwt_secret,
     };
 
