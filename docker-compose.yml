@@ -20,6 +20,7 @@ services:
     build: .
     container_name: konslo_backend
     environment:
+      - ALLOWED_ORIGIN=http://localhost:4200
       - DATABASE_URL=postgres://postgres:admin@postgres:5432/konslo_dev
       - JWT_SECRET=${JWT_SECRET}
     ports:
