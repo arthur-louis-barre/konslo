@@ -1,3 +1,3 @@
 DELETE
-FROM demo_users d USING users u
-WHERE d.user_id = u.user_id AND u.created_at < $1;
+FROM users u USING demo_users d
+WHERE u.user_id = d.user_id AND u.created_at < $1;

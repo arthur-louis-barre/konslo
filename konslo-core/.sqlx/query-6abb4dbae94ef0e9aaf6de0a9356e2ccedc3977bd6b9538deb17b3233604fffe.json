@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE\nFROM users u USING demo_users d\nWHERE u.user_id = d.user_id AND u.created_at < $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6abb4dbae94ef0e9aaf6de0a9356e2ccedc3977bd6b9538deb17b3233604fffe"
+}

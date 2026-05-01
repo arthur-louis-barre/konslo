@@ -5,10 +5,15 @@ use axum::body::Body;
 use axum::extract::State;
 use axum::http::{HeaderValue, Response, StatusCode, header};
 use axum::response::IntoResponse;
+use time::{Duration, OffsetDateTime};
 
 pub async fn register_demo_user_handler(
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, AppError> {
+    state
+        .demo_user_service
+        .delete_all_older_than(OffsetDateTime::now_utc() - Duration::days(1))
+        .await?;
     let user = state.demo_user_service.create().await?;
 
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
