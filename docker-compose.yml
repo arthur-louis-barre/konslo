@@ -1,7 +1,7 @@
 services:
+
   postgres:
     image: postgres:16-alpine
-    container_name: konslo_db_container
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
@@ -16,17 +16,32 @@ services:
       timeout: 5s
       retries: 5
 
-  rust-app:
-    build: .
-    container_name: konslo_backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_CONFIG: debug
     environment:
-      - ALLOWED_ORIGIN=http://localhost:4200
+      - ALLOWED_ORIGIN=http://localhost
       - DATABASE_URL=postgres://postgres:admin@postgres:5432/konslo_dev
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=local_dev_secret
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
+
+  frontend:
+    build:
+      context: konslo-client
+      dockerfile: Dockerfile
+      args:
+        BUILD_CONFIG: development
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:

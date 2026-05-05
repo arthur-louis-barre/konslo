@@ -1,8 +1,9 @@
 ﻿.env
 .idea/
-target/
-todo.md
 konslo-client/.angular/
 konslo-client/dist/
 konslo-client/node_modules/
 konslo-client/desktop.ini
+requests.http
+target/
+todo.md
