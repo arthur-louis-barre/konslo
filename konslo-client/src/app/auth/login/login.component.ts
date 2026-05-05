@@ -52,8 +52,26 @@ export class LoginComponent {
                 },
                 error: (err) => {
                     console.error(err);
-                    this.isLoading = false
+                    this.isLoading = false;
                     this.areCredentialsWrong = true;
+                }
+            })
+    }
+
+    onDemoLogin() {
+        if (this.isLoading) return;
+        this.isLoading = true;
+
+        this.authService
+            .loginAsDemo()
+            .subscribe({
+                next: () => {
+                    this.isLoading = false;
+                    this.router.navigate(['/habits']);
+                },
+                error: (err) => {
+                    console.error(err);
+                    this.isLoading = false;
                 }
             })
     }

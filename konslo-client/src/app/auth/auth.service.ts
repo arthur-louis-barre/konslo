@@ -19,6 +19,10 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/auth/login`, body);
     }
 
+    loginAsDemo() {
+        return this.http.post(`${this.apiUrl}/auth/demo`, {});
+    }
+
     logout() {
         return this.http.post(`${this.apiUrl}/auth/logout`, {})
     }
@@ -26,5 +30,4 @@ export class AuthService {
     me() {
         return this.http.get(`${this.apiUrl}/auth/me`)
     }
-
 }

@@ -73,7 +73,36 @@
     color: var(--accent);
 }
 
-.login__form-actions .btn {
+.button-demo {
+    display: block;
+    width: 50%;
+    margin: 25px auto;
+    padding: 10px 14px;
+    font-variant: small-caps;
+    letter-spacing: 2px;
+    background-color: var(--bg);
+    border: 0.5px solid var(--accent-teal);
+    box-shadow: 0 0 8px rgba(107, 255, 255, 0.15);
+
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    animation:buttonGlow 2s ease-in-out infinite;
+}
+
+.button-demo:disabled {
+    opacity: 0.4;
+    animation-play-state: paused;
+}
+
+.button-demo:enabled:active {
+    opacity: 0.7;
+}
+
+.login__form-actions-sign-in {
     width: 100%;
     padding: 10px;
     background: var(--accent);
@@ -87,11 +116,11 @@
     margin-top: 8px;
 }
 
-.login__form-actions .btn:enabled:hover {
+.login__form-actions-sign-in:enabled:hover {
     opacity: 0.8;
 }
 
-.login__form-actions .btn:enabled:active {
+.login__form-actions-sign-in:enabled:active {
     opacity: 0.7;
 }
 
@@ -116,4 +145,22 @@
 
 .login__form-footer a:active {
     opacity: 0.7;
+}
+
+@keyframes buttonGlow {
+    0%   {
+        border-color: var(--accent-teal);
+        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
+        color: var(--accent-teal);
+    }
+    50%  {
+        border-color: rgba(107, 255, 255, 0.4);
+        text-shadow: 0 0 8px rgba(107, 255, 255, 0.4);
+        color: rgba(107, 255, 255, 0.6);
+    }
+    100% {
+        border-color: var(--accent-teal);
+        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
+        color: var(--accent-teal);
+    }
 }

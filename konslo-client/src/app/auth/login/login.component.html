@@ -36,10 +36,12 @@
         </div>
 
         <div class="login__form-actions">
-            <button class="btn" type="submit">Sign in</button>
+            <button class="login__form-actions-sign-in" type="submit" [disabled]="isLoading">Sign in</button>
         </div>
 
         <div class="login__form-footer">No account? <a routerLink="/register">Create one</a></div>
 
     </form>
 </div>
+
+<button class="button-demo" (click)="onDemoLogin()" type="button" [disabled]="isLoading">>> DEMO <<</button>
