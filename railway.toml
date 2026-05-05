@@ -1,3 +1,0 @@
-[build]
-dockerfilePath = "Dockerfile.prod"
-buildArgs = { DATABASE_URL = "${{DATABASE_URL}}" }

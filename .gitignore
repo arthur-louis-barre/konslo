@@ -2,6 +2,7 @@
 .idea/
 target/
 todo.md
-konslo-client/node_modules/
 konslo-client/.angular/
+konslo-client/dist/
+konslo-client/node_modules/
 konslo-client/desktop.ini
