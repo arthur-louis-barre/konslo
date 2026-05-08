@@ -11,6 +11,7 @@ import {
     startOfMonth,
     subMonths
 } from "date-fns";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface CalendarDay {
     date: Date;
@@ -37,6 +38,15 @@ export class CalendarComponent {
     protected calendarDays: CalendarDay[] = [];
 
     // LIFE-CYCLE
+
+    constructor() {
+        this.habitService.checksChanged
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.loadActivity(
+                format(startOfMonth(this.selectedDate), 'yyyy-MM-dd'),
+                format(endOfMonth(this.selectedDate), 'yyyy-MM-dd')
+            ));
+    }
 
     ngOnInit(): void {
         this.route.queryParamMap.subscribe((params) => {
@@ -124,7 +134,9 @@ export class CalendarComponent {
                         day.hasActivity = activitySet.has(format(day.date, 'yyyy-MM-dd'));
                     }
                 },
-                error: (err) => { console.error(err); }
+                error: (err) => {
+                    console.error(err);
+                }
             })
     }
 

@@ -31,6 +31,7 @@ export class HabitCardComponent {
             .subscribe({
                 next: () => {
                     this.habitUpdated.emit();
+                    this.habitsService.checksChanged.next();
                     this.isLoading = false
                 },
                 error: (err) => {
@@ -44,8 +45,13 @@ export class HabitCardComponent {
         this.habitsService
             .resetCheck(this.habit().id, this.selectedDate())
             .subscribe({
-                next: () => { this.habitUpdated.emit(); },
-                error: (err) => { console.error(err); }
+                next: () => {
+                    this.habitUpdated.emit();
+                    this.habitsService.checksChanged.next();
+                },
+                error: (err) => {
+                    console.error(err);
+                }
             })
     }
 
