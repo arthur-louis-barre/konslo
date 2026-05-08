@@ -19,6 +19,7 @@ export class HabitListComponent {
     private route = inject(ActivatedRoute);
     private habitsService = inject(HabitService);
 
+    protected isLoading = true;
     protected selectedDate: string | undefined;
     protected habits: HabitWithCheck[] = [];
     protected openDropdownId: string | null = null;
@@ -35,15 +36,27 @@ export class HabitListComponent {
 
     deleteHabit(id: string) {
         this.habitsService.deleteHabit(id).subscribe({
-            next: () => { this.loadHabits(this.selectedDate); },
-            error: (err) => { console.error(err); }
+            next: () => {
+                this.loadHabits(this.selectedDate);
+            },
+            error: (err) => {
+                console.error(err);
+            }
         });
     }
 
     loadHabits(date?: string) {
+        this.isLoading = true;
+
         this.habitsService.getHabits(date).subscribe({
-            next: (habits) => { this.habits = habits; },
-            error: (err) => { console.error(err); }
+            next: (habits) => {
+                this.habits = habits;
+                this.isLoading = false;
+            },
+            error: (err) => {
+                console.error(err);
+                this.isLoading = false;
+            }
         });
     }
 
