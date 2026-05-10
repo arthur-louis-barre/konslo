@@ -1,6 +1,7 @@
 :host {
     grid-area: topbar;
     border-bottom: 0.5px solid var(--border);
+    box-shadow: var(--shadow-bottom);
 }
 
 .k-topbar {

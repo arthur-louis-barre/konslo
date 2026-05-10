@@ -2,6 +2,7 @@
     grid-area: right;
     border-left: 0.5px solid var(--border);
     padding: 20px 12px;
+    box-shadow: var(--shadow-left);
 }
 
 @media (max-width: 899px) {

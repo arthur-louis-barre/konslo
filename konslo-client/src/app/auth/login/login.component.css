@@ -1,5 +1,4 @@
 
-
 .login__card {
     width: 380px;
     padding: 35px 30px;
@@ -70,27 +69,30 @@
     position: absolute;
     left: 5px;
     font-size: var(--text-xs);
-    color: var(--accent);
+    color: var(--danger);
 }
 
 .button-demo {
     display: block;
+    color: var(--accent-second);
     width: 50%;
     margin: 25px auto;
     padding: 10px 14px;
     font-variant: small-caps;
     letter-spacing: 2px;
     background-color: var(--bg);
-    border: 0.5px solid var(--accent-teal);
-    box-shadow: 0 0 8px rgba(107, 255, 255, 0.15);
-
+    border: 2px double var(--accent-second);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-second) 15%, transparent);
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 700;
     cursor: pointer;
+    animation: buttonGlow 2s ease-in-out infinite;
+}
 
-    animation:buttonGlow 2s ease-in-out infinite;
+.button-demo:hover {
+    opacity: 0.8;
 }
 
 .button-demo:disabled {
@@ -147,20 +149,33 @@
     opacity: 0.7;
 }
 
-@keyframes buttonGlow {
-    0%   {
-        border-color: var(--accent-teal);
-        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
-        color: var(--accent-teal);
-    }
-    50%  {
-        border-color: rgba(107, 255, 255, 0.4);
-        text-shadow: 0 0 8px rgba(107, 255, 255, 0.4);
-        color: rgba(107, 255, 255, 0.6);
-    }
-    100% {
-        border-color: var(--accent-teal);
-        text-shadow: 0 0 6px rgba(107, 255, 255, 0.3);
-        color: var(--accent-teal);
-    }
+.button-demo {
+    animation: buttonBorder 2s ease-in-out infinite;
+    box-shadow: none;
 }
+
+
+/*@keyframes buttonBorder {*/
+/*    0%   { border-color: var(--accent-second); color: var(--accent-second); }*/
+/*    50%  { border-color: var(--accent);        color: var(--accent); }*/
+/*    100% { border-color: var(--accent-second); color: var(--accent-second); }*/
+/*}*/
+
+
+/*@keyframes buttonGlow {*/
+/*    0%   {*/
+/*        border-color: var(--accent-second);*/
+/*        text-shadow: 0 0 6px color-mix(in srgb, var(--accent-second) 30%, transparent);*/
+/*        color: var(--accent-second);*/
+/*    }*/
+/*    50%  {*/
+/*        border-color: color-mix(in srgb, var(--accent-second) 40%, transparent);*/
+/*        text-shadow: 0 0 8px color-mix(in srgb, var(--accent-second) 40%, transparent);*/
+/*        color: color-mix(in srgb, var(--accent-second) 60%, transparent);*/
+/*    }*/
+/*    100% {*/
+/*        border-color: var(--accent-second);*/
+/*        text-shadow: 0 0 6px color-mix(in srgb, var(--accent-second) 30%, transparent);*/
+/*        color: var(--accent-second);*/
+/*    }*/
+/*}*/

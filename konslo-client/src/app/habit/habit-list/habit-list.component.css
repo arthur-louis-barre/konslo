@@ -89,7 +89,7 @@
 }
 
 .h-list__empty a {
-    color: var(--accent-teal);
+    color: var(--accent-second);
     font-size: var(--text-md);
     letter-spacing: -0.0125em;
     text-decoration: none;
