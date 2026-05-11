@@ -16,6 +16,8 @@ pub async fn register_demo_user_handler(
         .await?;
     let user = state.demo_user_service.create().await?;
 
+    tracing::info!("demo login");
+
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
     let cookie = format!(
         "token={}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=3600",

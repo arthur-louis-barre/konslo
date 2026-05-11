@@ -19,6 +19,8 @@ pub async fn register_handler(
         .register(&request.username, &request.password)
         .await?;
 
+    tracing::info!("user registered");
+
     let token = generate_token(user.id, state.jwt_secret.as_bytes())?;
     let cookie = format!("token={}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=3600", token);
 
@@ -30,6 +32,8 @@ pub async fn register_handler(
         )
         .body(Body::empty())
         .map_err(|_| AppError::ServerError)
+
+
 }
 
 pub async fn login_handler(
